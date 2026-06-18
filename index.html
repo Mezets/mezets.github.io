@@ -14,7 +14,7 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:'Rajdhani','Segoe UI',sans-serif;
+    font-family:'Rajdhani',sans-serif;
 }
 
 body{
@@ -26,25 +26,23 @@ body{
     background:#050000;
 }
 
-/* 🌌 STAR CANVAS */
+/* 🌌 stars */
 canvas{
     position:fixed;
     inset:0;
     z-index:0;
 }
 
-/* 🔴 NEBULA BACKGROUND */
+/* 🔴 nebula */
 .nebula{
     position:fixed;
     inset:0;
     z-index:1;
     pointer-events:none;
-
     background:
         radial-gradient(circle at 30% 40%, rgba(255,0,0,0.25), transparent 50%),
         radial-gradient(circle at 70% 60%, rgba(180,0,0,0.12), transparent 55%),
         radial-gradient(circle at 50% 50%, rgba(255,0,0,0.08), transparent 65%);
-
     filter: blur(90px);
 }
 
@@ -53,7 +51,7 @@ canvas{
     display:flex;
     gap:40px;
     z-index:2;
-    transition: transform 0.08s linear;
+    transition: transform 0.1s linear;
 }
 
 /* card */
@@ -61,14 +59,10 @@ canvas{
     width:340px;
     padding:28px;
     border-radius:20px;
-
     background:rgba(255,0,0,0.05);
     border:1px solid rgba(255,0,0,0.3);
     backdrop-filter:blur(25px);
-
     box-shadow:0 0 35px rgba(255,0,0,0.2);
-
-    transition: transform 0.08s linear;
 }
 
 /* avatar */
@@ -91,7 +85,7 @@ canvas{
     margin-bottom:18px;
 }
 
-/* buttons */
+/* 🔘 BUTTONS (вернул эффект) */
 .btn{
     display:block;
     padding:12px;
@@ -99,47 +93,77 @@ canvas{
     text-align:center;
     text-decoration:none;
     color:#ff3b3b;
-    border:1px solid rgba(255,0,0,0.25);
     border-radius:12px;
     background:rgba(255,0,0,0.06);
+    border:1px solid rgba(255,0,0,0.25);
+    position:relative;
+    overflow:hidden;
     transition:0.2s;
 }
 
+.btn::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-120%;
+    width:120%;
+    height:100%;
+    background:linear-gradient(120deg,transparent,rgba(255,0,0,0.35),transparent);
+    transition:0.5s;
+}
+
+.btn:hover::before{
+    left:120%;
+}
+
 .btn:hover{
-    transform:scale(1.05);
-    background:rgba(255,0,0,0.15);
+    transform:scale(1.06);
+    box-shadow:0 0 25px rgba(255,0,0,0.4);
 }
 
 /* stats */
 .stats-card{
-    text-align:left;
+    text-align:center;
 }
 
-.stat-block{
-    margin-bottom:22px;
+/* discord icon */
+.discord-icon{
+    width:55px;
+    height:55px;
+    margin:0 auto 10px;
+    display:block;
+    filter:drop-shadow(0 0 10px rgba(255,0,0,0.4));
 }
 
+/* big stats */
+.big-value{
+    font-size:26px;
+    font-weight:700;
+    color:white;
+    margin-bottom:6px;
+}
+
+/* label */
 .stat-label{
     font-size:12px;
-    color:rgba(255,120,120,0.9);
-    margin-bottom:6px;
-    font-weight:600;
-}
-
-.stat-value{
-    font-size:15px;
-    color:#fff;
+    color:rgba(255,150,150,0.9);
+    margin-bottom:10px;
 }
 
 /* ⭐ stars */
 .stars{
     display:flex;
+    justify-content:center;
     gap:6px;
-    margin-bottom:6px;
 }
 
 .star{
-    font-size:22px;
+    font-size:24px;
+    color:rgba(255,255,255,0.15);
+    position:relative;
+}
+
+.star.full{
     color:#ff2a2a;
     text-shadow:0 0 10px rgba(255,0,0,0.5);
 }
@@ -154,7 +178,7 @@ canvas{
 <div class="main-container" id="container">
 
 <!-- PROFILE -->
-<div class="card" id="card1">
+<div class="card">
     <img src="avatar.png" class="avatar">
     <div class="name">Mezets</div>
 
@@ -165,39 +189,42 @@ canvas{
 </div>
 
 <!-- STATS -->
-<div class="card" id="card2">
+<div class="card stats-card">
+
+    <!-- ICON ABOVE DISCORD -->
+    <img src="discord.png" class="discord-icon">
 
     <div class="name" style="font-size:22px;">Discord Server</div>
 
-    <div class="stat-block">
-        <div class="stat-label">📦 Заказы</div>
-        <div class="stat-value">71 шт.</div>
-    </div>
+    <!-- ORDERS -->
+    <div class="big-value">71 шт.</div>
+    <div class="stat-label">📦 Заказы</div>
 
-    <div class="stat-block">
-        <div class="stat-label">⭐ Рейтинг</div>
-        <div class="stars" id="stars"></div>
-        <div class="stat-value">5.0 / 5.0</div>
-    </div>
+    <br>
 
-    <div class="stat-block">
-        <div class="stat-label">📅 Период</div>
-        <div class="stat-value">С 2023 года по 2026-05-24 23:41:00</div>
-    </div>
+    <!-- RATING -->
+    <div class="stat-label">⭐ Рейтинг</div>
+    <div class="stars" id="stars"></div>
+
+    <br>
+
+    <!-- PERIOD -->
+    <div class="big-value">С 2023 года по 2026-05-24 23:41:00</div>
+    <div class="stat-label">📅 Период</div>
 
 </div>
 
 </div>
 
 <script>
-/* 🌠 STAR BACKGROUND */
-const canvas = document.getElementById("stars");
-const ctx = canvas.getContext("2d");
+/* 🌌 background stars */
+const canvas=document.getElementById("stars");
+const ctx=canvas.getContext("2d");
 
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+canvas.width=innerWidth;
+canvas.height=innerHeight;
 
-let stars = [];
+let stars=[];
 
 for(let i=0;i<140;i++){
     stars.push({
@@ -237,10 +264,10 @@ function animate(){
         if(s.y>canvas.height) s.y=0;
     }
 
-    document.getElementById("container").style.transform =
+    document.getElementById("container").style.transform=
         `perspective(900px) rotateY(${cx*0.4}deg) rotateX(${-cy*0.3}deg)`;
 
-    document.getElementById("nebula").style.transform =
+    document.getElementById("nebula").style.transform=
         `translate(${cx*0.3}px,${cy*0.3}px)`;
 
     requestAnimationFrame(animate);
@@ -248,11 +275,18 @@ function animate(){
 
 animate();
 
-/* ⭐ stars */
+/* ⭐ rating with fill */
+const rating=5.0;
 const starsContainer=document.getElementById("stars");
-for(let i=0;i<5;i++){
+
+for(let i=1;i<=5;i++){
     let star=document.createElement("div");
     star.classList.add("star");
+
+    if(rating>=i){
+        star.classList.add("full");
+    }
+
     star.textContent="★";
     starsContainer.appendChild(star);
 }
