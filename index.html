@@ -7,15 +7,15 @@
 
 <link rel="icon" href="favicon.png">
 
-<!-- 🧠 Русский-friendly шрифт -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- 🔤 Orbitron-замена с кириллицей -->
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:'Inter','Segoe UI',sans-serif;
+    font-family:'Exo 2','Segoe UI',sans-serif;
 }
 
 body{
@@ -27,7 +27,7 @@ body{
     background:#050000;
 }
 
-/* 🌌 canvas stars */
+/* 🌌 stars */
 canvas{
     position:fixed;
     inset:0;
@@ -68,7 +68,6 @@ canvas{
     width:340px;
     padding:28px;
     border-radius:20px;
-    text-align:center;
 
     background:rgba(255,0,0,0.05);
     border:1px solid rgba(255,0,0,0.3);
@@ -141,24 +140,24 @@ canvas{
     color:#fff;
 }
 
-/* ⭐ rating bar */
-.rating-bar{
-    width:100%;
-    height:8px;
-    background:rgba(255,255,255,0.08);
-    border-radius:20px;
-    overflow:hidden;
-    margin-bottom:6px;
+/* ⭐ stars rating */
+.stars{
+    display:flex;
+    gap:6px;
+    margin-bottom:8px;
 }
 
-.rating-fill{
-    height:100%;
-    width:0%;
-    background:linear-gradient(90deg,#ff2a2a,#ff6b6b,#ff2a2a);
-    transition:1s ease;
+.star{
+    font-size:22px;
+    color:rgba(255,255,255,0.15);
 }
 
-/* animation */
+.star.full{
+    color:#ff2a2a;
+    text-shadow:0 0 10px rgba(255,0,0,0.5);
+}
+
+/* breath animation */
 @keyframes breath{
     0%,100%{box-shadow:0 0 25px rgba(255,0,0,0.15);}
     50%{box-shadow:0 0 45px rgba(255,0,0,0.3);}
@@ -173,9 +172,11 @@ canvas{
 
 <div class="main-container" id="mainContainer">
 
-    <!-- profile -->
+    <!-- PROFILE -->
     <div class="card">
-        <img src="avatar.png" class="avatar">
+        <img src="avatar_server.png" class="avatar"
+             onerror="this.src='avatar.png'">
+
         <div class="name">Mezets</div>
 
         <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank">Steam</a>
@@ -184,25 +185,27 @@ canvas{
         <a class="btn" href="https://www.roblox.com/users/817592228/profile" target="_blank">Roblox</a>
     </div>
 
-    <!-- stats -->
+    <!-- STATS -->
     <div class="card stats-card">
 
         <div class="name" style="font-size:22px;">Discord Server</div>
-        <div class="stat-label">🟢 LIVE DATA</div>
 
+        <!-- ORDERS -->
         <div class="stat-block">
             <div class="stat-label">📦 Заказы</div>
             <div class="stat-value" id="totalOrders">LOADING...</div>
         </div>
 
+        <!-- RATING -->
         <div class="stat-block">
             <div class="stat-label">⭐ Рейтинг</div>
-            <div class="rating-bar">
-                <div class="rating-fill" id="ratingFill"></div>
-            </div>
+
+            <div class="stars" id="stars"></div>
+
             <div class="stat-value" id="avgRating">LOADING...</div>
         </div>
 
+        <!-- PERIOD -->
         <div class="stat-block">
             <div class="stat-label">📅 Период</div>
             <div class="stat-value" id="period">LOADING...</div>
@@ -213,6 +216,7 @@ canvas{
 </div>
 
 <script>
+/* 🌌 stars background */
 const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
 
@@ -282,13 +286,28 @@ function fetchStats(){
     .then(data=>{
 
         let rating=parseFloat(data.average_rating);
-        let percent=(rating/5)*100;
 
         document.getElementById("totalOrders").textContent=data.total_orders;
         document.getElementById("avgRating").textContent=rating.toFixed(1)+"/5.0";
         document.getElementById("period").textContent=data.period;
 
-        document.getElementById("ratingFill").style.width=percent+"%";
+        /* ⭐ stars render */
+        const starsContainer=document.getElementById("stars");
+        starsContainer.innerHTML="";
+
+        for(let i=1;i<=5;i++){
+            let star=document.createElement("div");
+            star.classList.add("star");
+
+            if(rating>=i){
+                star.classList.add("full");
+                star.textContent="★";
+            }else{
+                star.textContent="★";
+            }
+
+            starsContainer.appendChild(star);
+        }
     })
     .catch(()=>{
         document.getElementById("totalOrders").textContent="ERROR";
