@@ -222,7 +222,7 @@ window.addEventListener("resize", ()=>{
 
 </script>
 
-<audio id="hoverSound" src="click.mp3"></audio>
+<audio id="clickSound" src="click.mp3" preload="auto"></audio>
 
 <script>
 const sound = document.getElementById("hoverSound");
@@ -239,5 +239,27 @@ document.querySelectorAll(".btn").forEach(btn=>{
 });
 </script>
 
+<script>
+const sound = document.getElementById("clickSound");
+
+/* разблокировка звука */
+document.addEventListener("click", () => {
+    sound.play().then(() => {
+        sound.pause();
+        sound.currentTime = 0;
+    }).catch(()=>{});
+}, { once:true });
+
+/* hover звук */
+document.querySelectorAll(".btn").forEach(btn=>{
+    btn.addEventListener("mouseenter", () => {
+        sound.currentTime = 0;
+        sound.play().catch(err=>{
+            console.log("sound blocked:", err);
+        });
+    });
+});
+</script>
+    
 </body>
 </html>
