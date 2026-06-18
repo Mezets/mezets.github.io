@@ -437,6 +437,19 @@
     const stripEl = document.getElementById('strip');
 
     /* =========================
+       АДМИН/ТЕСТОВЫЙ РЕЖИМ
+       Если в URL сайта есть ?test_key=..., рулетка работает
+       без логина и без ограничения "один спин". Ключ нигде
+       не сохраняется (не localStorage), только на время текущей
+       вкладки, и не виден обычным пользователям сайта.
+    ========================= */
+    function getTestKeyFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('test_key');
+    }
+    const TEST_KEY = getTestKeyFromUrl();
+
+    /* =========================
        СЕССИЯ DISCORD
        Сохраняем session_token из URL (после редиректа от бэкенда)
        в localStorage, чтобы не терять при перезагрузке страницы.
@@ -486,10 +499,23 @@
        ПРОВЕРКА СТАТУСА (логин / можно крутить)
     ========================= */
     async function checkCanSpin() {
-      const session = currentSession();
       const loginBlock = document.getElementById('loginBlock');
       const spinBlock   = document.getElementById('spinBlock');
       const btn = document.getElementById('spinBtn');
+
+      // тестовый режим — сразу показываем кнопку крутить, без логина и ограничений
+      if (TEST_KEY) {
+        loginBlock.style.display = 'none';
+        spinBlock.style.display  = 'block';
+        document.getElementById('loggedAs').textContent = 'Тестовый режим';
+        btn.textContent = 'Крутить';
+        btn.style.opacity = '1';
+        btn.style.cursor  = 'pointer';
+        btn.onclick = spin;
+        return;
+      }
+
+      const session = currentSession();
 
       if (!session) {
         loginBlock.style.display = 'block';
@@ -571,10 +597,19 @@
 
           spinning = false;
           const btn = document.getElementById('spinBtn');
-          btn.textContent = 'Уже крутил';
-          btn.style.opacity = '0.4';
-          btn.style.cursor  = 'not-allowed';
-          btn.onclick = null;
+
+          if (TEST_KEY) {
+            // тестовый режим — можно крутить дальше без ограничений
+            btn.textContent = 'Крутить ещё';
+            btn.style.opacity = '1';
+            btn.style.cursor  = 'pointer';
+            btn.onclick = spin;
+          } else {
+            btn.textContent = 'Уже крутил';
+            btn.style.opacity = '0.4';
+            btn.style.cursor  = 'not-allowed';
+            btn.onclick = null;
+          }
         }, 3500);
       }));
     }
@@ -584,8 +619,15 @@
 
     async function spin() {
       if (spinning) return;
-      const session = currentSession();
-      if (!session) { checkCanSpin(); return; }
+
+      let url;
+      if (TEST_KEY) {
+        url = `${API}/spin?test_key=${encodeURIComponent(TEST_KEY)}`;
+      } else {
+        const session = currentSession();
+        if (!session) { checkCanSpin(); return; }
+        url = `${API}/spin?session=${encodeURIComponent(session)}`;
+      }
 
       spinning = true;
 
@@ -598,7 +640,7 @@
       document.getElementById('copiedMsg').classList.remove('show');
 
       try {
-        const res  = await fetch(`${API}/spin?session=${encodeURIComponent(session)}`, { mode: 'cors' });
+        const res  = await fetch(url, { mode: 'cors' });
         const data = await res.json();
 
         if (data.error === 'already_spun') {
