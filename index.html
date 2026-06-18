@@ -6,6 +6,7 @@
 <title>Mezets</title>
 
 <link rel="icon" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 *{
@@ -17,134 +18,201 @@
 body{
     height:100vh;
     overflow:hidden;
-    font-family:Segoe UI, sans-serif;
-    background:#05060c;
     display:flex;
     justify-content:center;
     align-items:center;
+    background:#050000;
+    font-family:'Orbitron', sans-serif;
 }
 
-/* 🌌 cosmic smoke */
-.smoke{
+/* 🌌 stars */
+canvas{
     position:fixed;
     inset:0;
-    background:
-        radial-gradient(circle at 20% 30%, rgba(255,59,59,0.12), transparent 45%),
-        radial-gradient(circle at 80% 70%, rgba(140,0,255,0.08), transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(0,255,200,0.05), transparent 60%);
-    filter: blur(45px);
-    animation:smokeflow 12s ease-in-out infinite;
     z-index:0;
+}
+
+/* 🔴 slow red nebula */
+.nebula{
+    position:fixed;
+    inset:0;
+    z-index:1;
     pointer-events:none;
+
+    background:
+        radial-gradient(circle at 30% 40%, rgba(255,0,0,0.22), transparent 50%),
+        radial-gradient(circle at 70% 60%, rgba(180,0,0,0.12), transparent 55%),
+        radial-gradient(circle at 50% 50%, rgba(255,0,0,0.08), transparent 65%);
+
+    filter: blur(85px);
+    animation:redDrift 25s ease-in-out infinite;
 }
 
-@keyframes smokeflow{
-    0%,100%{transform:scale(1) translate(0,0);}
-    50%{transform:scale(1.15) translate(-25px,15px);}
+@keyframes redDrift{
+    0%,100%{transform:translate(0,0) scale(1);}
+    25%{transform:translate(20px,-10px) scale(1.05);}
+    50%{transform:translate(-15px,15px) scale(1.08);}
+    75%{transform:translate(10px,20px) scale(1.03);}
 }
 
-/* 🌌 particles */
-canvas{
-    position:absolute;
-    top:0;
-    left:0;
-    z-index:0;
-}
-
-/* 💠 card */
+/* 💠 CARD (POWERED 3D) */
 .card{
     position:relative;
     z-index:2;
-    width:360px;
-    padding:35px;
+
+    width:340px;
+    padding:28px;
+
     text-align:center;
-    border-radius:25px;
-    background:rgba(255,255,255,0.06);
-    backdrop-filter:blur(18px);
-    border:1px solid rgba(255,59,59,0.25);
-    animation:float 4s ease-in-out infinite;
-    box-shadow:0 0 40px rgba(255,59,59,0.12);
+
+    border-radius:20px;
+
+    background:rgba(255,0,0,0.05);
+    border:1px solid rgba(255,0,0,0.3);
+    backdrop-filter:blur(25px);
+
+    transform-style:preserve-3d;
+
+    transition:transform 0.08s linear;
+
+    animation:cardBreath 6s ease-in-out infinite;
+
+    box-shadow:
+        0 0 25px rgba(255,0,0,0.2),
+        0 0 60px rgba(255,0,0,0.08);
 }
 
-@keyframes float{
-    0%,100%{transform:translateY(0);}
-    50%{transform:translateY(-10px);}
+/* 🌬️ breathing card */
+@keyframes cardBreath{
+    0%,100%{
+        box-shadow:
+            0 0 25px rgba(255,0,0,0.15),
+            0 0 60px rgba(255,0,0,0.05);
+    }
+    50%{
+        box-shadow:
+            0 0 45px rgba(255,0,0,0.3),
+            0 0 100px rgba(255,0,0,0.1);
+    }
 }
 
+/* avatar */
 .avatar{
-    width:120px;
-    height:120px;
+    width:115px;
+    height:115px;
     border-radius:50%;
     object-fit:cover;
-    border:3px solid rgba(255,59,59,0.4);
-    box-shadow:0 0 25px rgba(255,59,59,0.25);
-    margin-bottom:18px;
+
+    border:2px solid rgba(255,0,0,0.4);
+    margin-bottom:12px;
+
+    box-shadow:0 0 18px rgba(255,0,0,0.25);
 }
 
+/* ✨ NAME (NEON CORE BREATH) */
 .name{
-    color:#fff;
-    font-size:32px;
-    text-shadow:0 0 18px rgba(255,59,59,0.6);
+    font-size:30px;
+    font-weight:700;
+    margin-bottom:18px;
+
+    color:#ff2a2a;
+    letter-spacing:2px;
+
+    text-shadow:
+        0 0 8px rgba(255,0,0,0.6),
+        0 0 20px rgba(255,0,0,0.3),
+        0 0 2px rgba(255,255,255,0.4);
+
+    animation:breath 4s ease-in-out infinite;
 }
 
-.subtitle{
-    color:#9ca3af;
-    margin:10px 0 25px;
+@keyframes breath{
+    0%,100%{
+        transform:scale(1);
+        text-shadow:
+            0 0 6px rgba(255,0,0,0.4),
+            0 0 18px rgba(255,0,0,0.2);
+    }
+    50%{
+        transform:scale(1.05);
+        text-shadow:
+            0 0 14px rgba(255,0,0,0.8),
+            0 0 30px rgba(255,0,0,0.4),
+            0 0 2px rgba(255,255,255,0.5);
+    }
 }
 
-/* ⚡ buttons */
+/* 🔘 BUTTONS (POWER UI) */
 .btn{
     display:block;
     text-decoration:none;
+
     color:#ff3b3b;
-    padding:14px;
-    margin:10px 0;
+    padding:12px;
+    margin:8px 0;
+
     border-radius:12px;
-    background:rgba(255,59,59,0.05);
-    border:1px solid rgba(255,59,59,0.25);
-    transition:0.25s;
+
+    background:rgba(255,0,0,0.06);
+    border:1px solid rgba(255,0,0,0.25);
+
     position:relative;
     overflow:hidden;
+
+    transition:0.2s ease;
 }
 
-/* glow sweep */
+/* light sweep */
 .btn::before{
     content:"";
     position:absolute;
     top:0;
-    left:-100%;
-    width:100%;
+    left:-120%;
+    width:120%;
     height:100%;
-    background:linear-gradient(120deg, transparent, rgba(255,59,59,0.25), transparent);
-    transition:0.6s;
+
+    background:linear-gradient(120deg, transparent, rgba(255,0,0,0.35), transparent);
+
+    transition:0.5s;
 }
 
 .btn:hover::before{
-    left:100%;
+    left:120%;
 }
 
 .btn:hover{
-    transform:scale(1.06);
-    box-shadow:0 0 25px rgba(255,59,59,0.4);
-    background:rgba(255,59,59,0.12);
+    transform:scale(1.06) translateY(-2px);
+
+    box-shadow:
+        0 0 20px rgba(255,0,0,0.35),
+        0 0 45px rgba(255,0,0,0.15);
+
+    background:rgba(255,0,0,0.14);
+}
+
+.btn:active{
+    transform:scale(0.98);
+}
+
+/* 🌌 stars */
+canvas{
+    position:fixed;
+    inset:0;
+    z-index:0;
 }
 </style>
 </head>
 
 <body>
 
-<!-- 🌌 smoke -->
-<div class="smoke"></div>
+<canvas id="stars"></canvas>
+<div class="nebula" id="nebula"></div>
 
-<!-- 🌌 particles -->
-<canvas id="bg"></canvas>
+<div class="card" id="card">
 
-<div class="card">
-
-    <img src="avatar.png" class="avatar" alt="avatar">
+    <img src="avatar.png" class="avatar">
 
     <div class="name">Mezets</div>
-    <div class="subtitle">42</div>
 
     <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank">Steam</a>
     <a class="btn" href="https://www.faceit.com/ru/players/Mezets1337" target="_blank">FACEIT</a>
@@ -153,113 +221,84 @@ canvas{
 
 </div>
 
-<!-- 🔊 sound -->
-<audio id="hoverSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" preload="auto"></audio>
-
 <script>
 
-/* 🌌 particles */
-const canvas = document.getElementById("bg");
+/* 🌌 STARS */
+const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
-let particles = [];
+let stars = [];
 
-for(let i=0;i<75;i++){
-    particles.push({
+for(let i=0;i<120;i++){
+    stars.push({
         x:Math.random()*canvas.width,
         y:Math.random()*canvas.height,
-        r:Math.random()*2,
-        dx:(Math.random()-0.5)*0.5,
-        dy:(Math.random()-0.5)*0.5
+        r:Math.random()*1.3,
+        dx:(Math.random()-0.5)*0.15,
+        dy:(Math.random()-0.5)*0.15
     });
 }
+
+/* 🧠 smooth motion */
+let mx = 0, my = 0;
+let cx = 0, cy = 0;
+
+const card = document.getElementById("card");
+const nebula = document.getElementById("nebula");
+
+document.addEventListener("mousemove",(e)=>{
+    mx = (e.clientX / innerWidth - 0.5) * 35;
+    my = (e.clientY / innerHeight - 0.5) * 25;
+});
 
 function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    for(let p of particles){
+    cx += (mx - cx) * 0.02;
+    cy += (my - cy) * 0.02;
+
+    for(let s of stars){
         ctx.beginPath();
-        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-        ctx.fillStyle="rgba(255,59,59,0.6)";
+        ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+        ctx.fillStyle="rgba(255,0,0,0.6)";
         ctx.fill();
 
-        p.x += p.dx;
-        p.y += p.dy;
+        s.x += s.dx + cx*0.03;
+        s.y += s.dy + cy*0.03;
 
-        if(p.x<0||p.x>canvas.width) p.dx*=-1;
-        if(p.y<0||p.y>canvas.height) p.dy*=-1;
+        if(s.x<0) s.x=canvas.width;
+        if(s.x>canvas.width) s.x=0;
+        if(s.y<0) s.y=canvas.height;
+        if(s.y>canvas.height) s.y=0;
     }
+
+    /* 🌫️ nebula drift */
+    nebula.style.transform = `
+        translate(${cx*0.5}px, ${cy*0.5}px) scale(1.05)
+    `;
+
+    /* 🎮 3D CARD POWER TILT */
+    card.style.transform = `
+        perspective(900px)
+        rotateY(${cx * 0.6}deg)
+        rotateX(${-cy * 0.6}deg)
+        translateZ(20px)
+    `;
 
     requestAnimationFrame(animate);
 }
+
 animate();
 
-/* 🔊 sound fix */
-const sound = document.getElementById("hoverSound");
-
-function playSound(){
-    sound.currentTime = 0;
-    sound.play().catch(()=>{});
-}
-
-/* unlock audio */
-document.body.addEventListener("click", playSound, { once:true });
-
-document.querySelectorAll(".btn").forEach(btn=>{
-    btn.addEventListener("mouseenter", ()=>{
-        playSound();
-    });
-});
-
-/* resize */
 window.addEventListener("resize", ()=>{
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
 });
 
 </script>
 
-<audio id="clickSound" src="click.mp3" preload="auto"></audio>
-
-<script>
-const sound = document.getElementById("hoverSound");
-
-document.body.addEventListener("click", ()=>{
-    sound.play().catch(()=>{});
-}, { once:true });
-
-document.querySelectorAll(".btn").forEach(btn=>{
-    btn.addEventListener("mouseenter", ()=>{
-        sound.currentTime = 0;
-        sound.play().catch(()=>{});
-    });
-});
-</script>
-
-<script>
-const sound = document.getElementById("clickSound");
-
-/* разблокировка звука */
-document.addEventListener("click", () => {
-    sound.play().then(() => {
-        sound.pause();
-        sound.currentTime = 0;
-    }).catch(()=>{});
-}, { once:true });
-
-/* hover звук */
-document.querySelectorAll(".btn").forEach(btn=>{
-    btn.addEventListener("mouseenter", () => {
-        sound.currentTime = 0;
-        sound.play().catch(err=>{
-            console.log("sound blocked:", err);
-        });
-    });
-});
-</script>
-    
 </body>
 </html>
