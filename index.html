@@ -245,8 +245,8 @@
     }
     .chance-item { font-size: 7px; color: rgba(255,200,200,0.45); line-height: 1.8; }
 
-    .roulette-result { min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 10px 0; }
-    .result-pct  { font-size: 20px; color: #ff2a2a; line-height: 1.4; opacity: 0; transition: opacity .4s; }
+    .roulette-result { min-height: 68px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 10px 0; }
+    .result-pct  { font-size: 20px; color: #ff2a2a; line-height: 1.6; opacity: 0; transition: opacity .4s; }
     .result-code {
       font-size: 10px; color: rgba(255,200,200,0.8); margin-top: 7px;
       letter-spacing: 2px; opacity: 0; transition: opacity .4s .15s;
@@ -371,11 +371,11 @@
       <!-- Шансы -->
       <div class="chances">
         <span class="chance-item">скидка — шанс</span>
-        <span class="chance-item">10% — 55%</span>
-        <span class="chance-item">25% — 27%</span>
-        <span class="chance-item">50% — 12%</span>
-        <span class="chance-item">75% — 5%</span>
-        <span class="chance-item">100% — 1%</span>
+        <span class="chance-item">10% — 65%</span>
+        <span class="chance-item">25% — 23%</span>
+        <span class="chance-item">50% — 9%</span>
+        <span class="chance-item">75% — 2.5%</span>
+        <span class="chance-item">100% — 0.5%</span>
       </div>
 
       <!-- Результат -->
@@ -420,6 +420,15 @@
       100: { pct: '100%', cls: 'si-100' },
     };
     const VISUAL_LIST = [10, 25, 50, 75, 100];
+
+    // подписи к результату под каждый процент
+    const RESULT_PHRASE = {
+      10:  'больше только в фильмах',
+      25:  'ну нармальна',
+      50:  'жэст',
+      75:  'ну пачти',
+      100: 'везунчик епта :3',
+    };
 
     const ITEM_W  = 90;
     const TOTAL   = 44;
@@ -554,7 +563,8 @@
 
         setTimeout(() => {
           lastCode = code;
-          document.getElementById('resultPct').textContent = `Скидка ${VISUAL[winnerDiscount].pct}!`;
+          document.getElementById('resultPct').innerHTML =
+            `Скидка ${VISUAL[winnerDiscount].pct}!<br><span style="font-size:10px;color:rgba(255,200,200,0.7)">${RESULT_PHRASE[winnerDiscount]}</span>`;
           document.getElementById('resultPct').classList.add('show');
           document.getElementById('resultCode').textContent = code;
           document.getElementById('resultCode').classList.add('show');
