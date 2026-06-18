@@ -6,7 +6,6 @@
 <title>Mezets</title>
 
 <link rel="icon" href="favicon.png">
-
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -26,14 +25,14 @@ body{
     background:#050000;
 }
 
-/* 🌌 stars */
+/* canvas */
 canvas{
     position:fixed;
     inset:0;
     z-index:0;
 }
 
-/* 🔴 nebula */
+/* nebula */
 .nebula{
     position:fixed;
     inset:0;
@@ -41,20 +40,18 @@ canvas{
     pointer-events:none;
     background:
         radial-gradient(circle at 30% 40%, rgba(255,0,0,0.25), transparent 50%),
-        radial-gradient(circle at 70% 60%, rgba(180,0,0,0.12), transparent 55%),
-        radial-gradient(circle at 50% 50%, rgba(255,0,0,0.08), transparent 65%);
-    filter: blur(90px);
+        radial-gradient(circle at 70% 60%, rgba(180,0,0,0.12), transparent 55%);
+    filter:blur(90px);
 }
 
-/* layout */
+/* layout FIXED */
 .main-container{
     display:flex;
     gap:40px;
     z-index:2;
-    transition: transform 0.1s linear;
 }
 
-/* card */
+/* cards */
 .card{
     width:340px;
     padding:28px;
@@ -65,18 +62,18 @@ canvas{
     box-shadow:0 0 35px rgba(255,0,0,0.2);
 }
 
-/* avatar */
+/* avatar FIX */
 .avatar{
     width:115px;
     height:115px;
     border-radius:50%;
     object-fit:cover;
-    margin:0 auto 12px;
     display:block;
+    margin:0 auto 12px;
     border:2px solid rgba(255,0,0,0.4);
 }
 
-/* name */
+/* text */
 .name{
     text-align:center;
     font-size:28px;
@@ -85,7 +82,7 @@ canvas{
     margin-bottom:18px;
 }
 
-/* 🔘 BUTTONS (вернул эффект) */
+/* buttons restored effect */
 .btn{
     display:block;
     padding:12px;
@@ -112,60 +109,55 @@ canvas{
     transition:0.5s;
 }
 
-.btn:hover::before{
-    left:120%;
-}
+.btn:hover::before{ left:120%; }
 
 .btn:hover{
     transform:scale(1.06);
-    box-shadow:0 0 25px rgba(255,0,0,0.4);
 }
 
-/* stats */
+/* stats center FIX */
 .stats-card{
     text-align:center;
+}
+
+/* big values centered */
+.big{
+    font-size:26px;
+    font-weight:700;
+    color:white;
+}
+
+/* labels */
+.label{
+    font-size:12px;
+    color:rgba(255,150,150,0.9);
+    margin-bottom:10px;
+}
+
+/* ⭐ stars FIX */
+.stars{
+    display:flex;
+    justify-content:center;
+    gap:5px;
+    margin:10px 0;
+}
+
+.star{
+    font-size:24px;
+    color:rgba(255,255,255,0.2);
+}
+
+.star.full{
+    color:#ff2a2a;
+    text-shadow:0 0 10px rgba(255,0,0,0.6);
 }
 
 /* discord icon */
 .discord-icon{
     width:55px;
     height:55px;
-    margin:0 auto 10px;
     display:block;
-    filter:drop-shadow(0 0 10px rgba(255,0,0,0.4));
-}
-
-/* big stats */
-.big-value{
-    font-size:26px;
-    font-weight:700;
-    color:white;
-    margin-bottom:6px;
-}
-
-/* label */
-.stat-label{
-    font-size:12px;
-    color:rgba(255,150,150,0.9);
-    margin-bottom:10px;
-}
-
-/* ⭐ stars */
-.stars{
-    display:flex;
-    justify-content:center;
-    gap:6px;
-}
-
-.star{
-    font-size:24px;
-    color:rgba(255,255,255,0.15);
-    position:relative;
-}
-
-.star.full{
-    color:#ff2a2a;
-    text-shadow:0 0 10px rgba(255,0,0,0.5);
+    margin:0 auto 10px;
 }
 </style>
 </head>
@@ -173,51 +165,43 @@ canvas{
 <body>
 
 <canvas id="stars"></canvas>
-<div class="nebula" id="nebula"></div>
+<div class="nebula"></div>
 
-<div class="main-container" id="container">
+<div class="main-container">
 
 <!-- PROFILE -->
 <div class="card">
     <img src="avatar.png" class="avatar">
     <div class="name">Mezets</div>
 
-    <a class="btn" href="#">Steam</a>
-    <a class="btn" href="#">FACEIT</a>
-    <a class="btn" href="#">Epic Games</a>
-    <a class="btn" href="#">Roblox</a>
+    <a class="btn">Steam</a>
+    <a class="btn">FACEIT</a>
+    <a class="btn">Epic Games</a>
+    <a class="btn">Roblox</a>
 </div>
 
 <!-- STATS -->
 <div class="card stats-card">
 
-    <!-- ICON ABOVE DISCORD -->
     <img src="discord.png" class="discord-icon">
 
     <div class="name" style="font-size:22px;">Discord Server</div>
 
-    <!-- ORDERS -->
-    <div class="big-value">71 шт.</div>
-    <div class="stat-label">📦 Заказы</div>
+    <div class="big">71 шт.</div>
+    <div class="label">📦 Заказы</div>
 
-    <br>
-
-    <!-- RATING -->
-    <div class="stat-label">⭐ Рейтинг</div>
+    <div class="label">⭐ Рейтинг</div>
     <div class="stars" id="stars"></div>
 
-    <br>
-
-    <!-- PERIOD -->
-    <div class="big-value">С 2023 года по 2026-05-24 23:41:00</div>
-    <div class="stat-label">📅 Период</div>
+    <div class="big">С 2023 года по 2026-05-24 23:41:00</div>
+    <div class="label">📅 Период</div>
 
 </div>
 
 </div>
 
 <script>
-/* 🌌 background stars */
+/* ⭐ FIXED STARS BG */
 const canvas=document.getElementById("stars");
 const ctx=canvas.getContext("2d");
 
@@ -236,18 +220,8 @@ for(let i=0;i<140;i++){
     });
 }
 
-let mx=0,my=0,cx=0,cy=0;
-
-document.addEventListener("mousemove",(e)=>{
-    mx=(e.clientX/innerWidth-0.5)*40;
-    my=(e.clientY/innerHeight-0.5)*30;
-});
-
 function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    cx+=(mx-cx)*0.05;
-    cy+=(my-cy)*0.05;
 
     for(let s of stars){
         ctx.beginPath();
@@ -255,8 +229,8 @@ function animate(){
         ctx.fillStyle="rgba(255,0,0,0.7)";
         ctx.fill();
 
-        s.x+=s.dx+cx*0.02;
-        s.y+=s.dy+cy*0.02;
+        s.x+=s.dx;
+        s.y+=s.dy;
 
         if(s.x<0) s.x=canvas.width;
         if(s.x>canvas.width) s.x=0;
@@ -264,31 +238,21 @@ function animate(){
         if(s.y>canvas.height) s.y=0;
     }
 
-    document.getElementById("container").style.transform=
-        `perspective(900px) rotateY(${cx*0.4}deg) rotateX(${-cy*0.3}deg)`;
-
-    document.getElementById("nebula").style.transform=
-        `translate(${cx*0.3}px,${cy*0.3}px)`;
-
     requestAnimationFrame(animate);
 }
 
 animate();
 
-/* ⭐ rating with fill */
+/* ⭐ STAR RATING FIX */
 const rating=5.0;
-const starsContainer=document.getElementById("stars");
+const container=document.getElementById("stars");
 
 for(let i=1;i<=5;i++){
     let star=document.createElement("div");
     star.classList.add("star");
-
-    if(rating>=i){
-        star.classList.add("full");
-    }
-
+    if(i<=rating) star.classList.add("full");
     star.textContent="★";
-    starsContainer.appendChild(star);
+    container.appendChild(star);
 }
 </script>
 
