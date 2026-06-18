@@ -19,74 +19,37 @@ html,body{
     overflow:hidden;
 }
 
-canvas{
-    position:fixed;
-    inset:0;
-    z-index:0;
-}
-
-.nebula{
-    position:fixed;
-    inset:0;
-    z-index:1;
-    pointer-events:none;
-    background:
-        radial-gradient(circle at 30% 40%, rgba(255,0,0,.25), transparent 60%),
-        radial-gradient(circle at 70% 60%, rgba(255,0,0,.12), transparent 65%);
-    filter:blur(90px);
-    animation:drift 20s ease-in-out infinite;
-}
-
-@keyframes drift{
-    0%,100%{transform:translate(0,0) scale(1);}
-    50%{transform:translate(20px,-15px) scale(1.05);}
-}
-
 .main{
     display:flex;
     justify-content:center;
     align-items:center;
     gap:40px;
     height:100vh;
-    position:relative;
-    z-index:2;
 }
 
 .card{
     width:360px;
     height:520px;
-
     padding:26px;
-    border-radius:18px;
-
-    background:rgba(255,0,0,.05);
-    border:1px solid rgba(255,0,0,.25);
-
-    backdrop-filter:blur(20px);
-
-    box-shadow:
-        0 0 25px rgba(255,0,0,.2),
-        inset 0 0 15px rgba(255,0,0,.1);
-
-    transform-style:preserve-3d;
-    transition:transform .08s linear;
+    border-radius:0;
+    background:#0a0000;
+    border:1px solid #ff0000;
 }
 
 .avatar,
 .server-avatar{
     width:120px;
     height:120px;
-    border-radius:50%;
     display:block;
     margin:0 auto 12px;
     object-fit:cover;
-    border:2px solid rgba(255,0,0,.35);
+    border:1px solid #ff0000;
 }
 
 .name{
     text-align:center;
     font-size:16px;
-    color:#ff2a2a;
+    color:#ff0000;
     margin-bottom:18px;
 }
 
@@ -94,22 +57,11 @@ canvas{
     display:block;
     padding:10px;
     margin:8px 0;
-
     text-align:center;
     text-decoration:none;
-
-    color:#ff3b3b;
-
-    border-radius:10px;
-    border:1px solid rgba(255,0,0,.25);
-
-    background:rgba(255,0,0,.05);
-
-    transition:.2s;
-}
-
-.btn:hover{
-    transform:scale(1.05);
+    color:#ff0000;
+    border:1px solid #ff0000;
+    background:transparent;
 }
 
 .block{
@@ -119,13 +71,13 @@ canvas{
 
 .label{
     font-size:9px;
-    color:rgba(255,180,180,.85);
+    color:#aaa;
 }
 
 .value{
     margin-top:8px;
     font-size:14px;
-    color:white;
+    color:#fff;
 }
 
 .stars{
@@ -136,25 +88,18 @@ canvas{
 }
 
 .star{
-    color:rgba(255,255,255,.2);
+    color:#444;
     font-size:20px;
 }
 
 .star.full{
-    color:#ff2a2a;
-}
-
-.online{
-    color:#00ff88;
+    color:#ff0000;
 }
 
 </style>
 </head>
 
 <body>
-
-<canvas id="bg"></canvas>
-<div class="nebula"></div>
 
 <div class="main">
 
@@ -226,6 +171,10 @@ function renderStars(rating){
     }
 }
 
+function safe(value){
+    return value ?? "—";
+}
+
 async function loadStats(){
     try{
         const res = await fetch(
@@ -233,28 +182,27 @@ async function loadStats(){
             { mode: "cors" }
         );
 
-        if(!res.ok) throw new Error("API error");
+        if(!res.ok) throw new Error();
 
         const data = await res.json();
 
         document.getElementById("orders").textContent =
-            data.total_orders ?? "0";
+            safe(data.total_orders);
 
         document.getElementById("period").textContent =
-            data.period ?? "—";
+            safe(data.period);
 
         document.getElementById("online").textContent =
-            `${data.online ?? 0}`;
+            data.online ?? "—";
 
-        const rating = extractRating(data.average_rating);
-        renderStars(rating);
+        renderStars(extractRating(data.average_rating));
 
     } catch(err){
-        console.error(err);
-
-        document.getElementById("orders").textContent = "API error";
-        document.getElementById("period").textContent = "API error";
-        document.getElementById("online").textContent = "API error";
+        // ❌ больше никаких "API error"
+        document.getElementById("orders").textContent = "—";
+        document.getElementById("period").textContent = "—";
+        document.getElementById("online").textContent = "—";
+        renderStars(0);
     }
 }
 
