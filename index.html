@@ -158,33 +158,16 @@ canvas{
 
 <div class="main">
 
-    <!-- LEFT -->
-
     <div class="card">
-
         <img src="avatar.png" class="avatar">
 
         <div class="name">Mezets</div>
 
-        <a class="btn" href="https://steamcommunity.com/" target="_blank" rel="noopener noreferrer">
-            Steam
-        </a>
-
-        <a class="btn" href="https://www.faceit.com/" target="_blank" rel="noopener noreferrer">
-            FACEIT
-        </a>
-
-        <a class="btn" href="https://www.epicgames.com/" target="_blank" rel="noopener noreferrer">
-            Epic Games
-        </a>
-
-        <a class="btn" href="https://www.roblox.com/" target="_blank" rel="noopener noreferrer">
-            Roblox
-        </a>
-
+        <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank" rel="noopener noreferrer">Steam</a>
+        <a class="btn" href="https://www.faceit.com/ru/players/Mezets1337" target="_blank" rel="noopener noreferrer">FACEIT</a>
+        <a class="btn" href="https://store.epicgames.com/u/dfdc88256ae04f67959802a29365926f" target="_blank" rel="noopener noreferrer">Epic Games</a>
+        <a class="btn" href="https://www.roblox.com/users/817592228/profile" target="_blank" rel="noopener noreferrer">Roblox</a>
     </div>
-
-    <!-- RIGHT -->
 
     <div class="card">
 
@@ -194,7 +177,7 @@ canvas{
 
         <div class="block">
             <div class="label">Заказы</div>
-            <div class="value" id="orders">Загрузка...</div>
+            <div class="value" id="orders">—</div>
         </div>
 
         <div class="block">
@@ -204,18 +187,15 @@ canvas{
 
         <div class="block">
             <div class="label">Период</div>
-            <div class="value" id="period">Загрузка...</div>
+            <div class="value" id="period">—</div>
         </div>
 
         <div class="block">
             <div class="label">Онлайн</div>
-            <div class="value online" id="online">Загрузка...</div>
+            <div class="value" id="online">—</div>
         </div>
 
-        <a class="btn"
-           href="https://discord.gg/npZ3QDQjVR"
-           target="_blank"
-           rel="noopener noreferrer">
+        <a class="btn" href="https://discord.gg/npZ3QDQjVR" target="_blank" rel="noopener noreferrer">
             Join Discord
         </a>
 
@@ -225,66 +205,33 @@ canvas{
 
 <script>
 
-/* 3D */
-
-document.querySelectorAll(".card").forEach(card=>{
-
-    card.addEventListener("mousemove",(e)=>{
-
-        const r = card.getBoundingClientRect();
-
-        const x = (e.clientX - r.left)/r.width;
-        const y = (e.clientY - r.top)/r.height;
-
-        const rotY = (x - 0.5) * 25;
-        const rotX = (y - 0.5) * -25;
-
-        card.style.transform =
-            `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-    });
-
-    card.addEventListener("mouseleave",()=>{
-        card.style.transform =
-            "rotateX(0deg) rotateY(0deg)";
-    });
-
-});
-
-/* STARS */
-
 function renderStars(rating){
 
     const stars = document.getElementById("stars");
-
     stars.innerHTML = "";
 
     for(let i=1;i<=5;i++){
-
-        const star = document.createElement("div");
-
-        star.className = "star";
+        const el = document.createElement("div");
+        el.className = "star";
+        el.textContent = "★";
 
         if(i <= Math.round(rating)){
-            star.classList.add("full");
+            el.classList.add("full");
         }
 
-        star.textContent = "★";
-
-        stars.appendChild(star);
+        stars.appendChild(el);
     }
 }
-
-/* API */
 
 async function loadStats(){
 
     try{
 
-        const response =
-            await fetch("https://mez-production.up.railway.app/stats");
+        const res = await fetch("https://mez-production.up.railway.app/stats");
 
-        const data =
-            await response.json();
+        if(!res.ok) throw new Error("API error");
+
+        const data = await res.json();
 
         document.getElementById("orders").textContent =
             data.total_orders ?? "0";
@@ -295,60 +242,42 @@ async function loadStats(){
         document.getElementById("online").textContent =
             (data.online ?? 0) + " online";
 
-        const rating =
-            parseFloat(data.average_rating) || 0;
+        const rating = parseFloat(data.average_rating) || 0;
 
         renderStars(rating);
 
-    }
-    catch(err){
+    } catch(e){
 
-        console.error(err);
+        console.error(e);
 
-        document.getElementById("orders").textContent =
-            "Ошибка";
-
-        document.getElementById("period").textContent =
-            "Ошибка";
-
-        document.getElementById("online").textContent =
-            "Ошибка";
+        document.getElementById("orders").textContent = "API error";
+        document.getElementById("period").textContent = "API error";
+        document.getElementById("online").textContent = "API error";
     }
 }
 
 loadStats();
-setInterval(loadStats,5000);
+setInterval(loadStats, 5000);
 
-/* BACKGROUND */
+/* background */
 
 const canvas = document.getElementById("bg");
 const ctx = canvas.getContext("2d");
 
 function resize(){
-
     canvas.width = innerWidth;
     canvas.height = innerHeight;
 }
-
 resize();
+window.addEventListener("resize", resize);
 
-window.addEventListener("resize",resize);
-
-const dots = [];
-
-for(let i=0;i<130;i++){
-
-    dots.push({
-
-        x:Math.random()*innerWidth,
-        y:Math.random()*innerHeight,
-
-        r:Math.random()*1.6,
-
-        dx:(Math.random()-0.5)*0.25,
-        dy:(Math.random()-0.5)*0.25
-    });
-}
+const dots = Array.from({length:130}, ()=>({
+    x:Math.random()*innerWidth,
+    y:Math.random()*innerHeight,
+    r:Math.random()*1.6,
+    dx:(Math.random()-0.5)*0.25,
+    dy:(Math.random()-0.5)*0.25
+}));
 
 function draw(){
 
@@ -357,28 +286,17 @@ function draw(){
     for(const d of dots){
 
         ctx.beginPath();
-
-        ctx.arc(
-            d.x,
-            d.y,
-            d.r,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fillStyle =
-            "rgba(255,0,0,.75)";
-
+        ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+        ctx.fillStyle="rgba(255,0,0,.75)";
         ctx.fill();
 
         d.x += d.dx;
         d.y += d.dy;
 
-        if(d.x < -10) d.x = canvas.width + 10;
-        if(d.x > canvas.width + 10) d.x = -10;
-
-        if(d.y < -10) d.y = canvas.height + 10;
-        if(d.y > canvas.height + 10) d.y = -10;
+        if(d.x < -10) d.x = canvas.width;
+        if(d.x > canvas.width) d.x = 0;
+        if(d.y < -10) d.y = canvas.height;
+        if(d.y > canvas.height) d.y = 0;
     }
 
     requestAnimationFrame(draw);
