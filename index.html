@@ -17,7 +17,6 @@ html, body{
     background:#050000;
 }
 
-/* 🌌 MOVING BACKGROUND */
 body::before{
     content:"";
     position:fixed;
@@ -36,7 +35,6 @@ body::before{
     100%{transform:translate(60px,-40px) scale(1.1);}
 }
 
-/* MAIN */
 .main{
     display:flex;
     justify-content:center;
@@ -47,7 +45,6 @@ body::before{
     z-index:2;
 }
 
-/* CARD */
 .card{
     width:340px;
     height:420px;
@@ -58,28 +55,23 @@ body::before{
     border:1px solid rgba(255,0,0,0.25);
 
     backdrop-filter:blur(20px);
-
     box-shadow:0 0 25px rgba(255,0,0,0.25);
 
     transform-style:preserve-3d;
     transition:transform 0.08s ease;
 }
 
-/* 🖼️ FIX IMAGE STRETCH */
 .avatar, .server-avatar{
     width:110px;
     height:110px;
     border-radius:50%;
-
-    object-fit:cover;       /* 🔥 ВАЖНО — убирает растяжение */
-    object-position:center; /* центрирует */
-
+    object-fit:cover;
+    object-position:center;
     display:block;
     margin:0 auto 10px;
     border:2px solid rgba(255,0,0,0.35);
 }
 
-/* TEXT */
 .name{
     text-align:center;
     font-size:14px;
@@ -87,7 +79,6 @@ body::before{
     margin-bottom:12px;
 }
 
-/* BUTTON */
 .btn{
     display:block;
     padding:9px;
@@ -109,7 +100,6 @@ body::before{
     box-shadow:0 0 18px rgba(255,0,0,0.4);
 }
 
-/* BLOCK */
 .block{
     margin:10px 0;
     text-align:center;
@@ -124,13 +114,20 @@ body::before{
     font-size:14px;
     color:white;
     margin-top:5px;
+    transition:0.3s;
 }
 
-/* ONLINE */
 .online{
     font-size:10px;
     color:#00ff88;
     margin-top:6px;
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%{opacity:1;}
+    50%{opacity:0.4;}
+    100%{opacity:1;}
 }
 
 </style>
@@ -140,7 +137,6 @@ body::before{
 
 <div class="main">
 
-<!-- LEFT -->
 <div class="card" id="leftCard">
     <img src="avatar.png" class="avatar">
     <div class="name">Mezets</div>
@@ -151,7 +147,6 @@ body::before{
     <a class="btn">Roblox</a>
 </div>
 
-<!-- RIGHT -->
 <div class="card" id="rightCard">
 
     <img src="avatar_server.png" class="server-avatar">
@@ -187,7 +182,6 @@ body::before{
 
 <script>
 
-/* 🧲 3D EFFECT */
 document.addEventListener("mousemove",(e)=>{
     const x = (e.clientX / innerWidth - 0.5);
     const y = (e.clientY / innerHeight - 0.5);
@@ -201,19 +195,34 @@ document.addEventListener("mousemove",(e)=>{
     });
 });
 
-/* 📡 LOAD API */
+function setText(id, value){
+    const el = document.getElementById(id);
+    if(!el) return;
+
+    el.style.opacity = 0;
+
+    setTimeout(()=>{
+        el.textContent = value;
+        el.style.opacity = 1;
+    },120);
+}
+
 async function loadStats(){
     try{
-        const res = await fetch("https://mez-api-production.up.railway.app/stats");
+        const res = await fetch("https://mez-production.up.railway.app/stats");
         const data = await res.json();
 
-        document.getElementById("orders").textContent = data.total_orders;
-        document.getElementById("rating").textContent = data.average_rating;
-        document.getElementById("period").textContent = data.period;
-        document.getElementById("online").textContent = data.online + " online";
+        setText("orders", data.total_orders);
+        setText("rating", data.average_rating);
+        setText("period", data.period);
+        setText("online", data.online + " online");
 
     } catch(e){
-        console.log(e);
+        setText("orders", "—");
+        setText("rating", "—");
+        setText("period", "—");
+        setText("online", "offline");
+        console.log("API error:", e);
     }
 }
 
