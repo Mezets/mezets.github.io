@@ -596,8 +596,12 @@
           document.getElementById('resultCode').classList.add('show');
 
           const winSound = new Audio('win.mp3');
+          winSound.currentTime = 0;
           winSound.volume = 0.8;
-          winSound.play();
+
+          winSound.play().catch(err => {
+            console.log('sound error:', err);
+          });
           
           spinning = false;
           const btn = document.getElementById('spinBtn');
