@@ -6,20 +6,19 @@
 <title>Mezets</title>
 
 <link rel="icon" href="favicon.png">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
 
-/* ================= GLOBAL ================= */
 html, body{
     margin:0;
     padding:0;
-    font-family:'Rajdhani',sans-serif;
     background:#050000;
+    font-family:'Press Start 2P', monospace;
     overflow:hidden;
 }
 
-/* ================= BACKGROUND ================= */
 canvas{
     position:fixed;
     inset:0;
@@ -43,143 +42,108 @@ canvas{
     50%{transform:translate(20px,-15px) scale(1.05);}
 }
 
-/* ================= LAYOUT ================= */
 .main{
     display:flex;
     gap:40px;
     justify-content:center;
     align-items:center;
     height:100vh;
-    z-index:2;
     position:relative;
+    z-index:2;
 }
 
-/* ================= CARD ================= */
 .card{
     width:340px;
-    padding:28px;
-    border-radius:22px;
-
+    padding:26px;
+    border-radius:18px;
     background:rgba(255,0,0,0.05);
     border:1px solid rgba(255,0,0,0.25);
-
     backdrop-filter:blur(20px);
     box-shadow:0 0 40px rgba(255,0,0,0.15);
-
-    animation: float 6s ease-in-out infinite;
+    transform-style:preserve-3d;
+    transition:transform 0.15s ease;
 }
 
-@keyframes float{
-    0%,100%{transform:translateY(0);}
-    50%{transform:translateY(-8px);}
-}
-
-/* ================= AVATARS ================= */
-.avatar{
+.avatar, .server-avatar{
     width:115px;
     height:115px;
     border-radius:50%;
-    object-fit:cover;
     display:block;
     margin:0 auto 12px;
     border:2px solid rgba(255,0,0,0.35);
-}
-
-.server-avatar{
-    width:70px;
-    height:70px;
-    border-radius:18px;
     object-fit:cover;
-    display:block;
-    margin:0 auto 10px;
-    border:1px solid rgba(255,0,0,0.4);
-    box-shadow:0 0 18px rgba(255,0,0,0.25);
 }
 
-/* ================= TEXT ================= */
 .name{
     text-align:center;
-    font-size:28px;
-    font-weight:700;
+    font-size:18px;
     color:#ff2a2a;
-    margin-bottom:18px;
-    text-shadow:0 0 15px rgba(255,0,0,0.3);
+    margin-bottom:16px;
 }
 
-/* ================= BUTTONS (RESTORED EFFECTS) ================= */
 .btn{
     display:block;
-    padding:12px;
+    padding:10px;
     margin:8px 0;
     text-align:center;
     text-decoration:none;
-
     color:#ff3b3b;
-    border-radius:12px;
-
+    border-radius:10px;
     background:rgba(255,0,0,0.05);
     border:1px solid rgba(255,0,0,0.25);
-
-    position:relative;
-    overflow:hidden;
     transition:0.2s;
 }
 
-.btn::before{
-    content:"";
-    position:absolute;
-    top:0;
-    left:-120%;
-    width:120%;
-    height:100%;
-    background:linear-gradient(120deg,transparent,rgba(255,0,0,0.4),transparent);
-    transition:0.6s;
-}
-
-.btn:hover::before{
-    left:120%;
-}
-
 .btn:hover{
-    transform:scale(1.07);
-    box-shadow:0 0 25px rgba(255,0,0,0.35);
+    transform:scale(1.05);
+    box-shadow:0 0 20px rgba(255,0,0,0.3);
 }
 
-/* ================= STATS ================= */
 .stats{
     text-align:center;
 }
 
-.big{
-    font-size:32px;
-    font-weight:700;
-    color:white;
-    text-shadow:0 0 12px rgba(255,0,0,0.25);
+.block{
+    margin:14px 0;
 }
 
 .label{
-    font-size:12px;
+    font-size:10px;
     color:rgba(255,180,180,0.85);
-    margin:6px 0;
 }
 
-/* ================= STARS ================= */
+.value{
+    font-size:18px;
+    color:#fff;
+    margin-top:8px;
+    display:block;
+}
+
 .stars{
     display:flex;
     justify-content:center;
-    gap:6px;
-    margin:10px 0;
+    gap:4px;
+    margin-top:10px;
 }
 
 .star{
-    font-size:22px;
     color:rgba(255,255,255,0.2);
-    transition:0.2s;
+    font-size:16px;
 }
 
 .star.full{
     color:#ff2a2a;
-    text-shadow:0 0 12px rgba(255,0,0,0.7);
+    animation:pop 0.4s ease forwards;
+}
+
+@keyframes pop{
+    0%{transform:scale(0.5) rotate(0deg);}
+    100%{transform:scale(1) rotate(360deg);}
+}
+
+@keyframes countUp{
+    from{filter:blur(6px); transform:translateY(6px);}
+    to{filter:blur(0); transform:translateY(0);}
 }
 
 </style>
@@ -192,32 +156,35 @@ canvas{
 
 <div class="main">
 
-<!-- LEFT -->
-<div class="card">
+<div class="card" id="leftCard">
     <img src="avatar.png" class="avatar">
     <div class="name">Mezets</div>
 
-    <a class="btn">Steam</a>
-    <a class="btn">FACEIT</a>
-    <a class="btn">Epic Games</a>
-    <a class="btn">Roblox</a>
+    <a class="btn" href="#">Steam</a>
+    <a class="btn" href="#">FACEIT</a>
+    <a class="btn" href="#">Epic Games</a>
+    <a class="btn" href="#">Roblox</a>
 </div>
 
-<!-- RIGHT -->
-<div class="card stats">
+<div class="card stats" id="rightCard">
 
     <img src="avatar_server.png" class="server-avatar">
+    <div class="name">Discord Server</div>
 
-    <div class="name" style="font-size:20px;">Discord Server</div>
+    <div class="block">
+        <div class="label">Заказы</div>
+        <span class="value" id="orders">0</span>
+    </div>
 
-    <div class="big">71 шт.</div>
-    <div class="label">📦 Заказы</div>
+    <div class="block">
+        <div class="label">Рейтинг</div>
+        <div class="stars" id="stars"></div>
+    </div>
 
-    <div class="label">⭐ Рейтинг</div>
-    <div class="stars" id="stars"></div>
-
-    <div class="big">2023 → 2026-05-24</div>
-    <div class="label">📅 Период</div>
+    <div class="block">
+        <div class="label">Период</div>
+        <span class="value" id="period">2023 → 2026-05-24</span>
+    </div>
 
 </div>
 
@@ -225,7 +192,25 @@ canvas{
 
 <script>
 
-/* ⭐ STARS FIX */
+const leftCard = document.getElementById("leftCard");
+const rightCard = document.getElementById("rightCard");
+
+function tilt(card, e){
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+
+    const rotX = (y - 0.5) * -12;
+    const rotY = (x - 0.5) * 12;
+
+    card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+}
+
+[leftCard, rightCard].forEach(card=>{
+    card.addEventListener("mousemove", e=>tilt(card,e));
+    card.addEventListener("mouseleave", ()=>card.style.transform="rotateX(0) rotateY(0)");
+});
+
 const starsEl = document.getElementById("stars");
 const rating = 5;
 
@@ -233,30 +218,55 @@ for(let i=1;i<=5;i++){
     const s = document.createElement("div");
     s.className = "star";
     s.textContent = "★";
-    if(i <= rating) s.classList.add("full");
     starsEl.appendChild(s);
 }
 
-/* 🌌 BACKGROUND */
+let starIndex = 0;
+function animateStars(){
+    if(starIndex < rating){
+        starsEl.children[starIndex].classList.add("full");
+        starIndex++;
+        setTimeout(animateStars, 200);
+    }
+}
+animateStars();
+
+const ordersEl = document.getElementById("orders");
+let orders = 0;
+const targetOrders = 71;
+
+function countOrders(){
+    if(orders < targetOrders){
+        orders++;
+        ordersEl.textContent = orders;
+        requestAnimationFrame(()=>setTimeout(countOrders, 20));
+    }
+}
+countOrders();
+
 const canvas = document.getElementById("bg");
 const ctx = canvas.getContext("2d");
 
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+function resize(){
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
 
 let dots = [];
 
 for(let i=0;i<120;i++){
     dots.push({
-        x:Math.random()*canvas.width,
-        y:Math.random()*canvas.height,
+        x:Math.random()*innerWidth,
+        y:Math.random()*innerHeight,
         r:Math.random()*1.4,
         dx:(Math.random()-0.5)*0.2,
         dy:(Math.random()-0.5)*0.2
     });
 }
 
-function animate(){
+function draw(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     for(let d of dots){
@@ -268,16 +278,16 @@ function animate(){
         d.x += d.dx;
         d.y += d.dy;
 
-        if(d.x<0) d.x=canvas.width;
-        if(d.x>canvas.width) d.x=0;
-        if(d.y<0) d.y=canvas.height;
-        if(d.y>canvas.height) d.y=0;
+        if(d.x < -5) d.x = canvas.width + 5;
+        if(d.x > canvas.width + 5) d.x = -5;
+        if(d.y < -5) d.y = canvas.height + 5;
+        if(d.y > canvas.height + 5) d.y = -5;
     }
 
-    requestAnimationFrame(animate);
+    requestAnimationFrame(draw);
 }
 
-animate();
+draw();
 
 </script>
 
