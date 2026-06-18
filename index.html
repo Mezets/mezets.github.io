@@ -1,23 +1,20 @@
-<!DOCTYPE html>
-<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mezets</title>
 
 <link rel="icon" href="favicon.png">
-<!-- 🌌 ИСПРАВЛЕНО: Правильное подключение шрифта Orbitron напрямую из Google Fonts -->
-<link href="https://googleapis.com" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-/* 🔴 Применяем Orbitron и сброс отступов для ВСЕХ элементов сайта */
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family: 'Orbitron', sans-serif !important;
+    font-family: 'Orbitron', 'Segoe UI', sans-serif !important;
 }
-
+    
 body{
     height:100vh;
     overflow:hidden;
@@ -225,10 +222,10 @@ canvas{
     <div class="card" id="card1">
         <img src="avatar.png" class="avatar">
         <div class="name">Mezets</div>
-        <a class="btn" href="https://steamcommunity.com" target="_blank">Steam</a>
-        <a class="btn" href="https://faceit.com" target="_blank">FACEIT</a>
-        <a class="btn" href="https://epicgames.com" target="_blank">Epic Games</a>
-        <a class="btn" href="https://roblox.com" target="_blank">Roblox</a>
+        <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank">Steam</a>
+        <a class="btn" href="https://www.faceit.com/ru/players/Mezets1337" target="_blank">FACEIT</a>
+        <a class="btn" href="https://store.epicgames.com/u/dfdc88256ae04f67959802a29365926f" target="_blank">Epic Games</a>
+        <a class="btn" href="https://www.roblox.com/users/817592228/profile" target="_blank">Roblox</a>
     </div>
 
     <!-- Правая карточка (Статистика Дискорд) -->
@@ -323,7 +320,7 @@ window.addEventListener("resize", () => {
 });
 
 function fetchStats() {
-    fetch("https://railway.app")
+    fetch("https://mez-api-production.up.railway.app/stats")
         .then(response => response.json())
         .then(data => {
             if (!data.error) {
