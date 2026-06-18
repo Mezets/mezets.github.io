@@ -7,15 +7,14 @@
 
 <link rel="icon" href="favicon.png">
 
-<!-- 🔤 Orbitron-замена с кириллицей -->
-<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:'Exo 2','Segoe UI',sans-serif;
+    font-family:'Rajdhani','Segoe UI',sans-serif;
 }
 
 body{
@@ -27,43 +26,37 @@ body{
     background:#050000;
 }
 
-/* 🌌 stars */
+/* 🌌 STAR CANVAS */
 canvas{
     position:fixed;
     inset:0;
     z-index:0;
 }
 
-/* 🔴 nebula */
+/* 🔴 NEBULA BACKGROUND */
 .nebula{
     position:fixed;
     inset:0;
     z-index:1;
     pointer-events:none;
+
     background:
-        radial-gradient(circle at 30% 40%, rgba(255,0,0,0.22), transparent 50%),
+        radial-gradient(circle at 30% 40%, rgba(255,0,0,0.25), transparent 50%),
         radial-gradient(circle at 70% 60%, rgba(180,0,0,0.12), transparent 55%),
         radial-gradient(circle at 50% 50%, rgba(255,0,0,0.08), transparent 65%);
-    filter: blur(85px);
-    animation:redDrift 25s ease-in-out infinite;
+
+    filter: blur(90px);
 }
 
-@keyframes redDrift{
-    0%,100%{transform:translate(0,0) scale(1);}
-    25%{transform:translate(20px,-10px) scale(1.05);}
-    50%{transform:translate(-15px,15px) scale(1.08);}
-    75%{transform:translate(10px,20px) scale(1.03);}
-}
-
-/* 📦 layout */
+/* layout */
 .main-container{
     display:flex;
     gap:40px;
     z-index:2;
-    transform-style:preserve-3d;
+    transition: transform 0.08s linear;
 }
 
-/* 💠 card */
+/* card */
 .card{
     width:340px;
     padding:28px;
@@ -73,16 +66,9 @@ canvas{
     border:1px solid rgba(255,0,0,0.3);
     backdrop-filter:blur(25px);
 
-    box-shadow:
-        0 0 25px rgba(255,0,0,0.2),
-        0 0 60px rgba(255,0,0,0.08);
+    box-shadow:0 0 35px rgba(255,0,0,0.2);
 
-    animation:breath 6s ease-in-out infinite;
-}
-
-/* stats card */
-.stats-card{
-    text-align:left;
+    transition: transform 0.08s linear;
 }
 
 /* avatar */
@@ -91,30 +77,31 @@ canvas{
     height:115px;
     border-radius:50%;
     object-fit:cover;
-    border:2px solid rgba(255,0,0,0.4);
-    margin:0 auto 12px auto;
+    margin:0 auto 12px;
     display:block;
+    border:2px solid rgba(255,0,0,0.4);
 }
 
 /* name */
 .name{
+    text-align:center;
     font-size:28px;
     font-weight:700;
-    margin-bottom:18px;
     color:#ff2a2a;
-    text-align:center;
+    margin-bottom:18px;
 }
 
 /* buttons */
 .btn{
     display:block;
-    text-decoration:none;
-    color:#ff3b3b;
     padding:12px;
     margin:8px 0;
+    text-align:center;
+    text-decoration:none;
+    color:#ff3b3b;
+    border:1px solid rgba(255,0,0,0.25);
     border-radius:12px;
     background:rgba(255,0,0,0.06);
-    border:1px solid rgba(255,0,0,0.25);
     transition:0.2s;
 }
 
@@ -124,43 +111,37 @@ canvas{
 }
 
 /* stats */
+.stats-card{
+    text-align:left;
+}
+
 .stat-block{
     margin-bottom:22px;
 }
 
 .stat-label{
-    font-size:11px;
-    color:rgba(255,80,80,0.85);
+    font-size:12px;
+    color:rgba(255,120,120,0.9);
     margin-bottom:6px;
     font-weight:600;
 }
 
 .stat-value{
-    font-size:14px;
+    font-size:15px;
     color:#fff;
 }
 
-/* ⭐ stars rating */
+/* ⭐ stars */
 .stars{
     display:flex;
     gap:6px;
-    margin-bottom:8px;
+    margin-bottom:6px;
 }
 
 .star{
     font-size:22px;
-    color:rgba(255,255,255,0.15);
-}
-
-.star.full{
     color:#ff2a2a;
     text-shadow:0 0 10px rgba(255,0,0,0.5);
-}
-
-/* breath animation */
-@keyframes breath{
-    0%,100%{box-shadow:0 0 25px rgba(255,0,0,0.15);}
-    50%{box-shadow:0 0 45px rgba(255,0,0,0.3);}
 }
 </style>
 </head>
@@ -170,53 +151,46 @@ canvas{
 <canvas id="stars"></canvas>
 <div class="nebula" id="nebula"></div>
 
-<div class="main-container" id="mainContainer">
+<div class="main-container" id="container">
 
-    <!-- PROFILE -->
-    <div class="card">
-        <img src="avatar_server.png" class="avatar"
-             onerror="this.src='avatar.png'">
+<!-- PROFILE -->
+<div class="card" id="card1">
+    <img src="avatar.png" class="avatar">
+    <div class="name">Mezets</div>
 
-        <div class="name">Mezets</div>
+    <a class="btn" href="#">Steam</a>
+    <a class="btn" href="#">FACEIT</a>
+    <a class="btn" href="#">Epic Games</a>
+    <a class="btn" href="#">Roblox</a>
+</div>
 
-        <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank">Steam</a>
-        <a class="btn" href="https://www.faceit.com/ru/players/Mezets1337" target="_blank">FACEIT</a>
-        <a class="btn" href="https://store.epicgames.com/u/dfdc88256ae04f67959802a29365926f" target="_blank">Epic Games</a>
-        <a class="btn" href="https://www.roblox.com/users/817592228/profile" target="_blank">Roblox</a>
+<!-- STATS -->
+<div class="card" id="card2">
+
+    <div class="name" style="font-size:22px;">Discord Server</div>
+
+    <div class="stat-block">
+        <div class="stat-label">📦 Заказы</div>
+        <div class="stat-value">71 шт.</div>
     </div>
 
-    <!-- STATS -->
-    <div class="card stats-card">
+    <div class="stat-block">
+        <div class="stat-label">⭐ Рейтинг</div>
+        <div class="stars" id="stars"></div>
+        <div class="stat-value">5.0 / 5.0</div>
+    </div>
 
-        <div class="name" style="font-size:22px;">Discord Server</div>
-
-        <!-- ORDERS -->
-        <div class="stat-block">
-            <div class="stat-label">📦 Заказы</div>
-            <div class="stat-value" id="totalOrders">LOADING...</div>
-        </div>
-
-        <!-- RATING -->
-        <div class="stat-block">
-            <div class="stat-label">⭐ Рейтинг</div>
-
-            <div class="stars" id="stars"></div>
-
-            <div class="stat-value" id="avgRating">LOADING...</div>
-        </div>
-
-        <!-- PERIOD -->
-        <div class="stat-block">
-            <div class="stat-label">📅 Период</div>
-            <div class="stat-value" id="period">LOADING...</div>
-        </div>
-
+    <div class="stat-block">
+        <div class="stat-label">📅 Период</div>
+        <div class="stat-value">С 2023 года по 2026-05-24 23:41:00</div>
     </div>
 
 </div>
 
+</div>
+
 <script>
-/* 🌌 stars background */
+/* 🌠 STAR BACKGROUND */
 const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
 
@@ -225,37 +199,37 @@ canvas.height = innerHeight;
 
 let stars = [];
 
-for(let i=0;i<120;i++){
+for(let i=0;i<140;i++){
     stars.push({
         x:Math.random()*canvas.width,
         y:Math.random()*canvas.height,
-        r:Math.random()*1.3,
-        dx:(Math.random()-0.5)*0.15,
-        dy:(Math.random()-0.5)*0.15
+        r:Math.random()*1.4,
+        dx:(Math.random()-0.5)*0.2,
+        dy:(Math.random()-0.5)*0.2
     });
 }
 
 let mx=0,my=0,cx=0,cy=0;
 
 document.addEventListener("mousemove",(e)=>{
-    mx=(e.clientX/innerWidth-0.5)*35;
-    my=(e.clientY/innerHeight-0.5)*25;
+    mx=(e.clientX/innerWidth-0.5)*40;
+    my=(e.clientY/innerHeight-0.5)*30;
 });
 
 function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    cx+=(mx-cx)*0.02;
-    cy+=(my-cy)*0.02;
+    cx+=(mx-cx)*0.05;
+    cy+=(my-cy)*0.05;
 
     for(let s of stars){
         ctx.beginPath();
         ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-        ctx.fillStyle="rgba(255,0,0,0.6)";
+        ctx.fillStyle="rgba(255,0,0,0.7)";
         ctx.fill();
 
-        s.x+=s.dx+cx*0.03;
-        s.y+=s.dy+cy*0.03;
+        s.x+=s.dx+cx*0.02;
+        s.y+=s.dy+cy*0.02;
 
         if(s.x<0) s.x=canvas.width;
         if(s.x>canvas.width) s.x=0;
@@ -263,60 +237,25 @@ function animate(){
         if(s.y>canvas.height) s.y=0;
     }
 
-    document.getElementById("nebula").style.transform =
-        `translate(${cx*0.5}px,${cy*0.5}px) scale(1.05)`;
+    document.getElementById("container").style.transform =
+        `perspective(900px) rotateY(${cx*0.4}deg) rotateX(${-cy*0.3}deg)`;
 
-    document.getElementById("mainContainer").style.transform =
-        `perspective(900px) rotateY(${cx*0.5}deg) rotateX(${-cy*0.5}deg)`;
+    document.getElementById("nebula").style.transform =
+        `translate(${cx*0.3}px,${cy*0.3}px)`;
 
     requestAnimationFrame(animate);
 }
 
 animate();
 
-window.addEventListener("resize",()=>{
-    canvas.width=innerWidth;
-    canvas.height=innerHeight;
-});
-
-/* 📡 API */
-function fetchStats(){
-    fetch("https://mez-api-production.up.railway.app/stats")
-    .then(r=>r.json())
-    .then(data=>{
-
-        let rating=parseFloat(data.average_rating);
-
-        document.getElementById("totalOrders").textContent=data.total_orders;
-        document.getElementById("avgRating").textContent=rating.toFixed(1)+"/5.0";
-        document.getElementById("period").textContent=data.period;
-
-        /* ⭐ stars render */
-        const starsContainer=document.getElementById("stars");
-        starsContainer.innerHTML="";
-
-        for(let i=1;i<=5;i++){
-            let star=document.createElement("div");
-            star.classList.add("star");
-
-            if(rating>=i){
-                star.classList.add("full");
-                star.textContent="★";
-            }else{
-                star.textContent="★";
-            }
-
-            starsContainer.appendChild(star);
-        }
-    })
-    .catch(()=>{
-        document.getElementById("totalOrders").textContent="ERROR";
-        document.getElementById("avgRating").textContent="ERROR";
-        document.getElementById("period").textContent="ERROR";
-    });
+/* ⭐ stars */
+const starsContainer=document.getElementById("stars");
+for(let i=0;i<5;i++){
+    let star=document.createElement("div");
+    star.classList.add("star");
+    star.textContent="★";
+    starsContainer.appendChild(star);
 }
-
-fetchStats();
 </script>
 
 </body>
