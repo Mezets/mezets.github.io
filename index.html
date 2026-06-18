@@ -34,12 +34,7 @@ canvas{
         radial-gradient(circle at 30% 40%, rgba(255,0,0,0.25), transparent 60%),
         radial-gradient(circle at 70% 60%, rgba(255,0,0,0.12), transparent 65%);
     filter:blur(90px);
-    animation: drift 20s ease-in-out infinite;
-}
-
-@keyframes drift{
-    0%,100%{transform:translate(0,0) scale(1);}
-    50%{transform:translate(20px,-15px) scale(1.05);}
+    transition:transform 0.2s ease;
 }
 
 /* ===== LAYOUT ===== */
@@ -56,40 +51,41 @@ canvas{
 /* ===== CARD ===== */
 .card{
     width:360px;
-    height:520px;
+    height:460px;
 
-    padding:26px;
+    padding:22px;
     border-radius:18px;
 
     background:rgba(255,0,0,0.05);
     border:1px solid rgba(255,0,0,0.25);
+
     backdrop-filter:blur(20px);
 
     box-shadow:
-        0 0 25px rgba(255,0,0,0.2),
+        0 0 20px rgba(255,0,0,0.2),
         inset 0 0 15px rgba(255,0,0,0.1);
 
     transform-style:preserve-3d;
-    transition:transform 0.08s linear, box-shadow 0.3s;
+    transition:transform 0.08s linear;
 }
 
 /* ===== AVATAR ===== */
 .avatar, .server-avatar{
-    width:120px;
-    height:120px;
+    width:110px;
+    height:110px;
     border-radius:50%;
     display:block;
-    margin:0 auto 12px;
+    margin:0 auto 10px;
     border:2px solid rgba(255,0,0,0.35);
     object-fit:cover;
 }
 
-/* ===== NAME ===== */
+/* ===== TEXT ===== */
 .name{
     text-align:center;
-    font-size:16px;
+    font-size:15px;
     color:#ff2a2a;
-    margin-bottom:18px;
+    margin-bottom:14px;
 }
 
 /* ===== BUTTONS ===== */
@@ -125,13 +121,13 @@ canvas{
 }
 
 .btn:hover{
-    transform:scale(1.08);
-    box-shadow:0 0 22px rgba(255,0,0,0.4);
+    transform:scale(1.06);
+    box-shadow:0 0 18px rgba(255,0,0,0.35);
 }
 
 /* ===== BLOCKS ===== */
 .block{
-    margin:14px 0;
+    margin:12px 0;
     text-align:center;
 }
 
@@ -141,7 +137,7 @@ canvas{
 }
 
 .value{
-    font-size:16px;
+    font-size:15px;
     color:#fff;
     margin-top:6px;
 }
@@ -155,19 +151,18 @@ canvas{
 }
 
 .star{
-    font-size:20px;
+    font-size:22px;
     color:rgba(255,255,255,0.2);
-    transition:0.3s;
 }
 
 .star.full{
     color:#ff2a2a;
-    animation:starPop 0.4s ease forwards;
+    animation:pop 0.4s ease;
 }
 
-@keyframes starPop{
+@keyframes pop{
     0%{transform:scale(0.4) rotate(0deg);}
-    100%{transform:scale(1.2) rotate(360deg);}
+    100%{transform:scale(1.15) rotate(360deg);}
 }
 
 </style>
@@ -176,7 +171,7 @@ canvas{
 <body>
 
 <canvas id="bg"></canvas>
-<div class="nebula"></div>
+<div class="nebula" id="nebula"></div>
 
 <div class="main">
 
@@ -206,8 +201,8 @@ canvas{
     </div>
 
     <div class="block">
-        <div class="label">Период ➜</div>
-        <div class="value">2023 → 2026-05-24</div>
+        <div class="label">Период</div>
+        <div class="value">2023 по 2026-05-24</div>
     </div>
 
 </div>
@@ -216,23 +211,22 @@ canvas{
 
 <script>
 
-/* ===== 3D TILT (stronger) ===== */
+/* ===== 3D CARDS (stronger + floating depth) ===== */
 const cards = document.querySelectorAll(".card");
+const nebula = document.getElementById("nebula");
 
-cards.forEach(card=>{
-    card.addEventListener("mousemove",(e)=>{
-        const r = card.getBoundingClientRect();
-        const x = (e.clientX - r.left)/r.width;
-        const y = (e.clientY - r.top)/r.height;
+document.addEventListener("mousemove",(e)=>{
+    const x = (e.clientX / innerWidth - 0.5);
+    const y = (e.clientY / innerHeight - 0.5);
 
-        const rotY = (x - 0.5) * 25;
-        const rotX = (y - 0.5) * -25;
+    nebula.style.transform = `translate(${x*20}px, ${y*20}px) scale(1.05)`;
 
-        card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(10px)`;
-    });
-
-    card.addEventListener("mouseleave",()=>{
-        card.style.transform = "rotateX(0) rotateY(0)";
+    cards.forEach(card=>{
+        card.style.transform = `
+            rotateX(${y * -30}deg)
+            rotateY(${x * 30}deg)
+            translateZ(20px)
+        `;
     });
 });
 
@@ -247,29 +241,29 @@ for(let i=0;i<5;i++){
     starsEl.appendChild(s);
 }
 
-let i = 0;
-(function animStars(){
-    if(i < rating){
-        starsEl.children[i].classList.add("full");
-        i++;
-        setTimeout(animStars,150);
+let si = 0;
+(function runStars(){
+    if(si < rating){
+        starsEl.children[si].classList.add("full");
+        si++;
+        setTimeout(runStars,140);
     }
 })();
 
-/* ===== ORDERS ANIMATION ===== */
+/* ===== ORDERS COUNT ===== */
 const ordersEl = document.getElementById("orders");
-let count = 0;
+let c = 0;
 const target = 71;
 
-(function countUp(){
-    if(count < target){
-        count++;
-        ordersEl.textContent = count;
-        requestAnimationFrame(()=>setTimeout(countUp,15));
+(function count(){
+    if(c < target){
+        c++;
+        ordersEl.textContent = c;
+        requestAnimationFrame(()=>setTimeout(count,12));
     }
 })();
 
-/* ===== BACKGROUND ===== */
+/* ===== BACKGROUND PARTICLES ===== */
 const canvas = document.getElementById("bg");
 const ctx = canvas.getContext("2d");
 
@@ -282,11 +276,11 @@ window.addEventListener("resize", resize);
 
 let dots = [];
 
-for(let i=0;i<130;i++){
+for(let i=0;i<140;i++){
     dots.push({
         x:Math.random()*innerWidth,
         y:Math.random()*innerHeight,
-        r:Math.random()*1.6,
+        r:Math.random()*1.5,
         dx:(Math.random()-0.5)*0.25,
         dy:(Math.random()-0.5)*0.25
     });
@@ -298,7 +292,7 @@ function draw(){
     for(let d of dots){
         ctx.beginPath();
         ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
-        ctx.fillStyle="rgba(255,0,0,0.75)";
+        ctx.fillStyle="rgba(255,0,0,0.7)";
         ctx.fill();
 
         d.x += d.dx;
