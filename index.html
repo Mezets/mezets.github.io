@@ -6,16 +6,19 @@
 <title>Mezets</title>
 
 <link rel="icon" href="favicon.png">
+
+<!-- 🔤 fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:'Rajdhani',sans-serif;
 }
 
+/* default font */
 body{
     height:100vh;
     overflow:hidden;
@@ -23,6 +26,12 @@ body{
     justify-content:center;
     align-items:center;
     background:#050000;
+    font-family:'Rajdhani',sans-serif;
+}
+
+/* pixel font helper */
+.pixel{
+    font-family:'Press Start 2P', monospace;
 }
 
 /* canvas */
@@ -39,19 +48,20 @@ canvas{
     z-index:1;
     pointer-events:none;
     background:
-        radial-gradient(circle at 30% 40%, rgba(255,0,0,0.25), transparent 50%),
-        radial-gradient(circle at 70% 60%, rgba(180,0,0,0.12), transparent 55%);
+        radial-gradient(circle at 30% 40%, rgba(255,0,0,0.25), transparent 55%),
+        radial-gradient(circle at 70% 60%, rgba(180,0,0,0.15), transparent 60%);
     filter:blur(90px);
 }
 
-/* layout FIXED */
+/* layout */
 .main-container{
     display:flex;
     gap:40px;
     z-index:2;
+    transition:transform 0.1s linear;
 }
 
-/* cards */
+/* card */
 .card{
     width:340px;
     padding:28px;
@@ -62,7 +72,7 @@ canvas{
     box-shadow:0 0 35px rgba(255,0,0,0.2);
 }
 
-/* avatar FIX */
+/* avatar */
 .avatar{
     width:115px;
     height:115px;
@@ -73,7 +83,7 @@ canvas{
     border:2px solid rgba(255,0,0,0.4);
 }
 
-/* text */
+/* name */
 .name{
     text-align:center;
     font-size:28px;
@@ -82,7 +92,7 @@ canvas{
     margin-bottom:18px;
 }
 
-/* buttons restored effect */
+/* buttons (glow restored) */
 .btn{
     display:block;
     padding:12px;
@@ -109,18 +119,30 @@ canvas{
     transition:0.5s;
 }
 
-.btn:hover::before{ left:120%; }
+.btn:hover::before{
+    left:120%;
+}
 
 .btn:hover{
     transform:scale(1.06);
+    box-shadow:0 0 25px rgba(255,0,0,0.4);
 }
 
-/* stats center FIX */
+/* stats */
 .stats-card{
     text-align:center;
 }
 
-/* big values centered */
+/* discord icon */
+.discord-icon{
+    width:60px;
+    height:60px;
+    margin:0 auto 10px;
+    display:block;
+    filter:drop-shadow(0 0 10px rgba(255,0,0,0.4));
+}
+
+/* big text */
 .big{
     font-size:26px;
     font-weight:700;
@@ -131,10 +153,10 @@ canvas{
 .label{
     font-size:12px;
     color:rgba(255,150,150,0.9);
-    margin-bottom:10px;
+    margin:6px 0;
 }
 
-/* ⭐ stars FIX */
+/* stars */
 .stars{
     display:flex;
     justify-content:center;
@@ -143,7 +165,7 @@ canvas{
 }
 
 .star{
-    font-size:24px;
+    font-size:22px;
     color:rgba(255,255,255,0.2);
 }
 
@@ -151,23 +173,15 @@ canvas{
     color:#ff2a2a;
     text-shadow:0 0 10px rgba(255,0,0,0.6);
 }
-
-/* discord icon */
-.discord-icon{
-    width:55px;
-    height:55px;
-    display:block;
-    margin:0 auto 10px;
-}
 </style>
 </head>
 
 <body>
 
 <canvas id="stars"></canvas>
-<div class="nebula"></div>
+<div class="nebula" id="nebula"></div>
 
-<div class="main-container">
+<div class="main-container" id="container">
 
 <!-- PROFILE -->
 <div class="card">
@@ -183,17 +197,23 @@ canvas{
 <!-- STATS -->
 <div class="card stats-card">
 
-    <img src="discord.png" class="discord-icon">
+    <img src="avatar_server.png" class="discord-icon">
 
-    <div class="name" style="font-size:22px;">Discord Server</div>
+    <!-- TITLE (pixel) -->
+    <div class="name pixel" style="font-size:18px;">
+        DISCORD SERVER
+    </div>
 
-    <div class="big">71 шт.</div>
+    <!-- ORDERS -->
+    <div class="big pixel">71</div>
     <div class="label">📦 Заказы</div>
 
+    <!-- RATING -->
     <div class="label">⭐ Рейтинг</div>
     <div class="stars" id="stars"></div>
 
-    <div class="big">С 2023 года по 2026-05-24 23:41:00</div>
+    <!-- PERIOD -->
+    <div class="big pixel">2023 → 2026</div>
     <div class="label">📅 Период</div>
 
 </div>
@@ -201,7 +221,7 @@ canvas{
 </div>
 
 <script>
-/* ⭐ FIXED STARS BG */
+/* background stars */
 const canvas=document.getElementById("stars");
 const ctx=canvas.getContext("2d");
 
@@ -220,8 +240,18 @@ for(let i=0;i<140;i++){
     });
 }
 
+let mx=0,my=0,cx=0,cy=0;
+
+document.addEventListener("mousemove",(e)=>{
+    mx=(e.clientX/innerWidth-0.5)*40;
+    my=(e.clientY/innerHeight-0.5)*30;
+});
+
 function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    cx+=(mx-cx)*0.05;
+    cy+=(my-cy)*0.05;
 
     for(let s of stars){
         ctx.beginPath();
@@ -229,8 +259,8 @@ function animate(){
         ctx.fillStyle="rgba(255,0,0,0.7)";
         ctx.fill();
 
-        s.x+=s.dx;
-        s.y+=s.dy;
+        s.x+=s.dx+cx*0.02;
+        s.y+=s.dy+cy*0.02;
 
         if(s.x<0) s.x=canvas.width;
         if(s.x>canvas.width) s.x=0;
@@ -238,17 +268,23 @@ function animate(){
         if(s.y>canvas.height) s.y=0;
     }
 
+    document.getElementById("container").style.transform=
+        `perspective(900px) rotateY(${cx*0.4}deg) rotateX(${-cy*0.3}deg)`;
+
+    document.getElementById("nebula").style.transform=
+        `translate(${cx*0.3}px,${cy*0.3}px)`;
+
     requestAnimationFrame(animate);
 }
 
 animate();
 
-/* ⭐ STAR RATING FIX */
-const rating=5.0;
-const container=document.getElementById("stars");
+/* rating stars */
+const rating = 5;
+const container = document.getElementById("stars");
 
 for(let i=1;i<=5;i++){
-    let star=document.createElement("div");
+    const star=document.createElement("div");
     star.classList.add("star");
     if(i<=rating) star.classList.add("full");
     star.textContent="★";
