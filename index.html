@@ -7,19 +7,15 @@
 
 <link rel="icon" href="favicon.png">
 
-<!-- 🔤 FONT (global fix) -->
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-/* 💣 FORCE FONT ON EVERYTHING */
-html, body, div, span, a, p {
-    font-family: 'Rajdhani', sans-serif !important;
-}
-
+/* 🌍 GLOBAL FIX FONT */
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
+    font-family:'Rajdhani',sans-serif;
 }
 
 body{
@@ -31,42 +27,46 @@ body{
     background:#050000;
 }
 
-/* 🌌 background */
+/* 🌌 BACKGROUND */
 canvas{
     position:fixed;
     inset:0;
     z-index:0;
 }
 
+/* 🔴 GLASS NEBULA */
 .nebula{
     position:fixed;
     inset:0;
     z-index:1;
     pointer-events:none;
     background:
-        radial-gradient(circle at 30% 40%, rgba(255,0,0,0.25), transparent 55%),
-        radial-gradient(circle at 70% 60%, rgba(180,0,0,0.15), transparent 60%);
-    filter:blur(90px);
+        radial-gradient(circle at 30% 40%, rgba(255,0,0,0.22), transparent 60%),
+        radial-gradient(circle at 70% 60%, rgba(255,0,0,0.12), transparent 65%);
+    filter:blur(100px);
 }
 
-/* layout FIX */
+/* 📦 LAYOUT */
 .main-container{
     display:flex;
     gap:40px;
     z-index:2;
 }
 
-/* cards */
+/* 🧊 GLASS CARDS (FIXED) */
 .card{
     width:340px;
     padding:28px;
-    border-radius:20px;
-    background:rgba(255,0,0,0.05);
-    border:1px solid rgba(255,0,0,0.3);
-    backdrop-filter:blur(25px);
+    border-radius:22px;
+
+    background:rgba(255,0,0,0.06);
+    border:1px solid rgba(255,0,0,0.25);
+
+    backdrop-filter:blur(18px);
+    box-shadow:0 0 35px rgba(255,0,0,0.15);
 }
 
-/* avatar FIX */
+/* 👤 AVATAR */
 .avatar{
     width:115px;
     height:115px;
@@ -74,10 +74,10 @@ canvas{
     object-fit:cover;
     display:block;
     margin:0 auto 12px;
-    border:2px solid rgba(255,0,0,0.4);
+    border:2px solid rgba(255,0,0,0.35);
 }
 
-/* name */
+/* 🧠 NAME */
 .name{
     text-align:center;
     font-size:28px;
@@ -86,7 +86,7 @@ canvas{
     margin-bottom:18px;
 }
 
-/* buttons */
+/* 🔘 BUTTONS (RESTORED EFFECTS) */
 .btn{
     display:block;
     padding:12px;
@@ -94,31 +94,54 @@ canvas{
     text-align:center;
     text-decoration:none;
     color:#ff3b3b;
+
     border-radius:12px;
-    background:rgba(255,0,0,0.06);
+    background:rgba(255,0,0,0.05);
     border:1px solid rgba(255,0,0,0.25);
+
+    position:relative;
+    overflow:hidden;
+    transition:0.2s;
 }
 
-/* stats CENTER FIX */
+.btn::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-120%;
+    width:120%;
+    height:100%;
+    background:linear-gradient(120deg,transparent,rgba(255,0,0,0.35),transparent);
+    transition:0.5s;
+}
+
+.btn:hover::before{ left:120%; }
+
+.btn:hover{
+    transform:scale(1.06);
+    box-shadow:0 0 25px rgba(255,0,0,0.35);
+}
+
+/* 📊 STATS CENTER */
 .stats{
     text-align:center;
 }
 
-/* BIG VALUES */
+/* 🔥 BIG NUMBERS */
 .big{
     font-size:28px;
     font-weight:700;
     color:white;
 }
 
-/* labels */
+/* 📌 LABELS */
 .label{
     font-size:12px;
-    color:rgba(255,150,150,0.9);
-    margin-bottom:10px;
+    color:rgba(255,170,170,0.85);
+    margin:6px 0;
 }
 
-/* ⭐ stars FIX */
+/* ⭐ STARS */
 .stars{
     display:flex;
     justify-content:center;
@@ -127,7 +150,7 @@ canvas{
 }
 
 .star{
-    font-size:24px;
+    font-size:22px;
     color:rgba(255,255,255,0.2);
 }
 
@@ -136,12 +159,17 @@ canvas{
     text-shadow:0 0 10px rgba(255,0,0,0.6);
 }
 
-/* discord icon FIX */
-.discord-icon{
-    width:60px;
-    height:60px;
+/* 🟣 SERVER AVATAR FIX (styled, not plain image) */
+.server-avatar{
+    width:70px;
+    height:70px;
+    border-radius:18px;
+    object-fit:cover;
     display:block;
     margin:0 auto 10px;
+
+    border:1px solid rgba(255,0,0,0.4);
+    box-shadow:0 0 20px rgba(255,0,0,0.25);
 }
 </style>
 </head>
@@ -167,8 +195,8 @@ canvas{
 <!-- STATS -->
 <div class="card stats">
 
-    <!-- FIXED ICON -->
-    <img src="avatar_server.png" class="discord-icon">
+    <!-- SERVER AVATAR (FIXED STYLE) -->
+    <img src="avatar_server.png" class="server-avatar">
 
     <div class="name" style="font-size:20px;">Discord Server</div>
 
@@ -181,7 +209,7 @@ canvas{
     <div class="stars" id="stars"></div>
 
     <!-- PERIOD -->
-    <div class="big">С 2023 по 2026-05-24</div>
+    <div class="big">С 2023 по 2026-05-24 23:41</div>
     <div class="label">📅 Период</div>
 
 </div>
@@ -189,9 +217,8 @@ canvas{
 </div>
 
 <script>
-/* ⭐ STARS FIX (guaranteed) */
+/* ⭐ STARS (100% SAFE) */
 window.onload = function(){
-
     const container = document.getElementById("stars");
     const rating = 5;
 
@@ -200,22 +227,20 @@ window.onload = function(){
         star.className = "star";
         star.textContent = "★";
 
-        if(i <= rating){
-            star.classList.add("full");
-        }
+        if(i<=rating) star.classList.add("full");
 
         container.appendChild(star);
     }
 };
 
-/* 🌌 background FIX */
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
+/* 🌌 BACKGROUND */
+const canvas=document.getElementById("bg");
+const ctx=canvas.getContext("2d");
 
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+canvas.width=innerWidth;
+canvas.height=innerHeight;
 
-let stars = [];
+let stars=[];
 
 for(let i=0;i<120;i++){
     stars.push({
