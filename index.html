@@ -6,12 +6,16 @@
 <title>Mezets</title>
 
 <link rel="icon" href="favicon.png">
+<!-- 🌌 Подключаем оригинальный шрифт Orbitron -->
+<link href="https://googleapis.com" rel="stylesheet">
 
 <style>
+/* 🔴 Задаем Orbitron и сброс отступов сразу для ВСЕХ элементов сайта */
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
+    font-family: 'Orbitron', sans-serif !important;
 }
 
 body{
@@ -21,8 +25,6 @@ body{
     justify-content:center;
     align-items:center;
     background:#050000;
-    /* 🔴 Вернули чистый системный шрифт, который был изначально */
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
 
 /* 🌌 stars */
@@ -159,7 +161,6 @@ canvas{
     overflow:hidden;
     transition:0.2s ease;
     text-align: center;
-    font-family: inherit; /* Наследует Segoe UI */
     font-weight: 600;
 }
 
@@ -190,26 +191,25 @@ canvas{
     transform:scale(0.98);
 }
 
-/* 📊 СТИЛИ ДЛЯ ДИСКОРД СТАТИСТИКИ */
+/* 📊 СТИЛИ ДЛЯ СТАТИСТИКИ */
 .stat-block {
     margin-bottom: 24px;
 }
 
 .stat-label {
-    font-size: 12px;
+    font-size: 10px;
     color: rgba(255, 40, 40, 0.85);
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
     margin-bottom: 6px;
     font-weight: 600;
 }
 
 .stat-value {
-    font-size: 15px;
+    font-size: 13px;
     color: #ffffff;
     font-weight: 600;
     letter-spacing: 0.5px;
     text-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
-    font-family: inherit; /* Наследует Segoe UI */
 }
 </style>
 </head>
@@ -221,7 +221,7 @@ canvas{
 
 <div class="main-container" id="mainContainer">
 
-    <!-- Левая карточка -->
+    <!-- Левая карточка (Профиль) -->
     <div class="card" id="card1">
         <img src="avatar.png" class="avatar">
         <div class="name">Mezets</div>
@@ -231,23 +231,23 @@ canvas{
         <a class="btn" href="https://roblox.com" target="_blank">Roblox</a>
     </div>
 
-    <!-- Правая карточка -->
+    <!-- Правая карточка (Статистика Дискорд) -->
     <div class="card stats-card" id="card2">
         <div class="name" style="font-size: 22px; margin-bottom: 28px;">Discord Bot</div>
         
         <div class="stat-block">
-            <div class="stat-label">📦 Всего выполнено заказов</div>
-            <div class="stat-value" id="totalOrders">Загрузка...</div>
+            <div class="stat-label">📦 Total Orders Done</div>
+            <div class="stat-value" id="totalOrders">LOADING...</div>
         </div>
 
         <div class="stat-block">
-            <div class="stat-label">⭐ Средний рейтинг</div>
-            <div class="stat-value" id="avgRating">Загрузка...</div>
+            <div class="stat-label">⭐ Average Rating</div>
+            <div class="stat-value" id="avgRating">LOADING...</div>
         </div>
 
         <div class="stat-block">
-            <div class="stat-label">📅 Период выполнения заказов</div>
-            <div class="stat-value" id="period">Загрузка...</div>
+            <div class="stat-label">📅 Order Execution Period</div>
+            <div class="stat-value" id="period">LOADING...</div>
         </div>
     </div>
 
@@ -327,9 +327,13 @@ function fetchStats() {
         .then(response => response.json())
         .then(data => {
             if (!data.error) {
-                document.getElementById("totalOrders").textContent = data.total_orders;
+                // Корректируем русский текст под шрифт Orbitron
+                let ordersText = data.total_orders.replace("шт.", "pcs");
+                let periodText = data.period.replace("С 2023 года по", "From 2023 to");
+                
+                document.getElementById("totalOrders").textContent = ordersText;
                 document.getElementById("avgRating").textContent = data.average_rating;
-                document.getElementById("period").textContent = data.period;
+                document.getElementById("period").textContent = periodText;
             } else {
                 showError();
             }
@@ -341,9 +345,9 @@ function fetchStats() {
 }
 
 function showError() {
-    document.getElementById("totalOrders").textContent = "Ошибка загрузки";
-    document.getElementById("avgRating").textContent = "Ошибка загрузки";
-    document.getElementById("period").textContent = "Ошибка загрузки";
+    document.getElementById("totalOrders").textContent = "ERROR";
+    document.getElementById("avgRating").textContent = "ERROR";
+    document.getElementById("period").textContent = "ERROR";
 }
 
 fetchStats();
