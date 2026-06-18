@@ -585,6 +585,7 @@
         stripEl.style.transform  = `translateX(-${targetX}px)`;
 
         setTimeout(() => {
+          spinSound.pause();
           document.getElementById('spinSound').pause();
           document.getElementById('stopSound').currentTime = 0;
           document.getElementById('stopSound').play();
@@ -594,10 +595,11 @@
           document.getElementById('resultPct').classList.add('show');
           document.getElementById('resultCode').textContent = code;
           document.getElementById('resultCode').classList.add('show');
-
+          
           const winSound = new Audio('win.mp3');
-          winSound.currentTime = 0;
           winSound.volume = 0.8;
+          winSound.currentTime = 0;
+          winSound.play().catch(() => {});
 
           winSound.play().catch(err => {
             console.log('sound error:', err);
@@ -627,7 +629,11 @@
 
     async function spin() {
       if (spinning) return;
-
+      
+      const spinSound = document.getElementById('spinSound');
+      spinSound.currentTime = 0;
+      spinSound.play();
+      
       spinning = true;
       document.getElementById('spinSound').currentTime = 0;
       document.getElementById('spinSound').play();
