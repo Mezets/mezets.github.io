@@ -110,7 +110,6 @@ canvas{
 
 .btn:hover{
     transform:scale(1.05);
-    box-shadow:0 0 22px rgba(255,0,0,.35);
 }
 
 .block{
@@ -151,6 +150,7 @@ canvas{
 
 </style>
 </head>
+
 <body>
 
 <canvas id="bg"></canvas>
@@ -158,97 +158,90 @@ canvas{
 
 <div class="main">
 
-    <div class="card">
-        <img src="avatar.png" class="avatar">
+<div class="card">
+    <img src="avatar.png" class="avatar">
 
-        <div class="name">Mezets</div>
+    <div class="name">Mezets</div>
 
-        <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank" rel="noopener noreferrer">Steam</a>
-        <a class="btn" href="https://www.faceit.com/ru/players/Mezets1337" target="_blank" rel="noopener noreferrer">FACEIT</a>
-        <a class="btn" href="https://store.epicgames.com/u/dfdc88256ae04f67959802a29365926f" target="_blank" rel="noopener noreferrer">Epic Games</a>
-        <a class="btn" href="https://www.roblox.com/users/817592228/profile" target="_blank" rel="noopener noreferrer">Roblox</a>
+    <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank">Steam</a>
+    <a class="btn" href="https://www.faceit.com/ru/players/Mezets1337" target="_blank">FACEIT</a>
+    <a class="btn" href="https://store.epicgames.com/u/dfdc88256ae04f67959802a29365926f" target="_blank">Epic Games</a>
+    <a class="btn" href="https://www.roblox.com/users/817592228/profile" target="_blank">Roblox</a>
+</div>
+
+<div class="card">
+
+    <img src="avatar_server.png" class="server-avatar">
+
+    <div class="name">Discord Server</div>
+
+    <div class="block">
+        <div class="label">Заказы</div>
+        <div class="value" id="orders">—</div>
     </div>
 
-    <div class="card">
-
-        <img src="avatar_server.png" class="server-avatar">
-
-        <div class="name">Discord Server</div>
-
-        <div class="block">
-            <div class="label">Заказы</div>
-            <div class="value" id="orders">—</div>
-        </div>
-
-        <div class="block">
-            <div class="label">Рейтинг</div>
-            <div class="stars" id="stars"></div>
-        </div>
-
-        <div class="block">
-            <div class="label">Период</div>
-            <div class="value" id="period">—</div>
-        </div>
-
-        <div class="block">
-            <div class="label">Онлайн</div>
-            <div class="value" id="online">—</div>
-        </div>
-
-        <a class="btn" href="https://discord.gg/npZ3QDQjVR" target="_blank" rel="noopener noreferrer">
-            Join Discord
-        </a>
-
+    <div class="block">
+        <div class="label">Рейтинг</div>
+        <div class="stars" id="stars"></div>
     </div>
+
+    <div class="block">
+        <div class="label">Период</div>
+        <div class="value" id="period">—</div>
+    </div>
+
+    <div class="block">
+        <div class="label">Онлайн</div>
+        <div class="value" id="online">—</div>
+    </div>
+
+</div>
 
 </div>
 
 <script>
 
 function renderStars(rating){
-
     const stars = document.getElementById("stars");
     stars.innerHTML = "";
 
     for(let i=1;i<=5;i++){
-        const el = document.createElement("div");
-        el.className = "star";
-        el.textContent = "★";
+        const s = document.createElement("div");
+        s.className = "star";
+        s.textContent = "★";
 
         if(i <= Math.round(rating)){
-            el.classList.add("full");
+            s.classList.add("full");
         }
 
-        stars.appendChild(el);
+        stars.appendChild(s);
     }
 }
 
 async function loadStats(){
-
     try{
-
-        const res = await fetch("https://mez-production.up.railway.app/stats");
+        const res = await fetch(
+            "https://mez-production.up.railway.app/stats",
+            { mode: "cors" }
+        );
 
         if(!res.ok) throw new Error("API error");
 
         const data = await res.json();
 
         document.getElementById("orders").textContent =
-            data.total_orders ?? "0";
+            data.total_orders || "0";
 
         document.getElementById("period").textContent =
-            data.period ?? "—";
+            data.period || "—";
 
         document.getElementById("online").textContent =
-            (data.online ?? 0) + " online";
+            (data.online || 0) + " online";
 
-        const rating = parseFloat(data.average_rating) || 0;
+        renderStars(parseFloat(data.average_rating) || 0);
 
-        renderStars(rating);
-
-    } catch(e){
-
-        console.error(e);
+    } catch(err){
+        console.error(err);
 
         document.getElementById("orders").textContent = "API error";
         document.getElementById("period").textContent = "API error";
@@ -258,51 +251,6 @@ async function loadStats(){
 
 loadStats();
 setInterval(loadStats, 5000);
-
-/* background */
-
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
-
-function resize(){
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
-}
-resize();
-window.addEventListener("resize", resize);
-
-const dots = Array.from({length:130}, ()=>({
-    x:Math.random()*innerWidth,
-    y:Math.random()*innerHeight,
-    r:Math.random()*1.6,
-    dx:(Math.random()-0.5)*0.25,
-    dy:(Math.random()-0.5)*0.25
-}));
-
-function draw(){
-
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    for(const d of dots){
-
-        ctx.beginPath();
-        ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
-        ctx.fillStyle="rgba(255,0,0,.75)";
-        ctx.fill();
-
-        d.x += d.dx;
-        d.y += d.dy;
-
-        if(d.x < -10) d.x = canvas.width;
-        if(d.x > canvas.width) d.x = 0;
-        if(d.y < -10) d.y = canvas.height;
-        if(d.y > canvas.height) d.y = 0;
-    }
-
-    requestAnimationFrame(draw);
-}
-
-draw();
 
 </script>
 
