@@ -403,6 +403,8 @@
 
 
   <script>
+    
+    let tickInterval = null;
 
     /* =========================
        КОНФИГ
@@ -596,9 +598,13 @@
           document.getElementById('resultCode').textContent = code;
           document.getElementById('resultCode').classList.add('show');
           
+          stopTick();
+          spinSound.pause();
+          spinSound.currentTime = 0;
+          
           const winSound = new Audio('win.mp3');
-          winSound.volume = 0.8;
           winSound.currentTime = 0;
+          winSound.volume = 0.8;
           winSound.play().catch(() => {});
 
           winSound.play().catch(err => {
@@ -629,14 +635,13 @@
 
     async function spin() {
       if (spinning) return;
-      
+    
+      spinning = true;
+    
       const spinSound = document.getElementById('spinSound');
       spinSound.currentTime = 0;
       spinSound.play();
       
-      spinning = true;
-      document.getElementById('spinSound').currentTime = 0;
-      document.getElementById('spinSound').play();
 
       let url;
       if (TEST_KEY) {
