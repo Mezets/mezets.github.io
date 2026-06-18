@@ -7,7 +7,7 @@
 
 <link rel="icon" href="favicon.png">
 
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
 
@@ -17,7 +17,7 @@
 html, body {
     margin: 0;
     padding: 0;
-    font-family: 'Rajdhani', sans-serif;
+    font-family: 'Press Start 2P', monospace;
     background: #050000;
 }
 
@@ -65,8 +65,8 @@ canvas{
 
 /* CARD GLASS */
 .card{
-    width:340px;
-    padding:28px;
+    width:360px;
+    padding:30px 26px;
     border-radius:22px;
 
     background:rgba(255,0,0,0.05);
@@ -138,11 +138,12 @@ canvas{
 /* NAME */
 .name{
     text-align:center;
-    font-size:28px;
-    font-weight:700;
+    font-size:18px;
+    line-height:1.6;
+    font-weight:400;
     color:#ff2a2a;
-    margin-bottom:18px;
-    letter-spacing:0.5px;
+    margin-bottom:22px;
+    letter-spacing:1px;
 }
 
 /* BUTTONS */
@@ -150,13 +151,14 @@ canvas{
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:10px;
-    padding:12px;
-    margin:8px 0;
+    gap:12px;
+    padding:16px 12px;
+    margin:10px 0;
     text-align:center;
     text-decoration:none;
-    font-weight:600;
-    font-size:16px;
+    font-weight:400;
+    font-size:11px;
+    line-height:1.6;
 
     color:#ff3b3b;
     border-radius:12px;
@@ -206,8 +208,9 @@ canvas{
 
 /* BIG VALUE */
 .big{
-    font-size:30px;
-    font-weight:700;
+    font-size:17px;
+    line-height:1.6;
+    font-weight:400;
     color:white;
     font-variant-numeric:tabular-nums;
 }
@@ -235,11 +238,12 @@ canvas{
     align-items:center;
     justify-content:center;
     gap:6px;
-    font-size:12px;
+    font-size:8px;
+    line-height:1.6;
     letter-spacing:1px;
     text-transform:uppercase;
     color:rgba(255,200,200,0.75);
-    margin:6px 0;
+    margin:10px 0;
 }
 
 .label svg{
@@ -279,7 +283,7 @@ canvas{
     }
     .card{
         width:100%;
-        max-width:340px;
+        max-width:360px;
     }
 }
 
@@ -326,7 +330,7 @@ canvas{
         <div class="status-dot"></div>
     </div>
 
-    <div class="name" style="font-size:20px;">Discord Server</div>
+    <div class="name" style="font-size:13px;">Discord Server</div>
 
     <!-- ORDERS -->
     <div class="stat-block">
@@ -348,7 +352,7 @@ canvas{
 
     <!-- PERIOD -->
     <div class="stat-block">
-        <div class="big" id="period" style="font-size:18px;">—</div>
+        <div class="big" id="period" style="font-size:12px;">—</div>
         <div class="label">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
             Период
