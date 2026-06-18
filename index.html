@@ -10,63 +10,65 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-/* 🌍 GLOBAL FIX FONT */
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Rajdhani',sans-serif;
+
+/* =========================
+   GLOBAL FIX
+========================= */
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Rajdhani', sans-serif;
+    background: #050000;
+    overflow: hidden;
 }
 
+/* layout */
 body{
-    height:100vh;
-    overflow:hidden;
     display:flex;
     justify-content:center;
     align-items:center;
-    background:#050000;
+    height:100vh;
 }
 
-/* 🌌 BACKGROUND */
+/* background */
 canvas{
     position:fixed;
     inset:0;
     z-index:0;
 }
 
-/* 🔴 GLASS NEBULA */
 .nebula{
     position:fixed;
     inset:0;
     z-index:1;
     pointer-events:none;
     background:
-        radial-gradient(circle at 30% 40%, rgba(255,0,0,0.22), transparent 60%),
-        radial-gradient(circle at 70% 60%, rgba(255,0,0,0.12), transparent 65%);
-    filter:blur(100px);
+        radial-gradient(circle at 30% 40%, rgba(255,0,0,0.2), transparent 60%),
+        radial-gradient(circle at 70% 60%, rgba(255,0,0,0.1), transparent 65%);
+    filter:blur(90px);
 }
 
-/* 📦 LAYOUT */
-.main-container{
+/* MAIN */
+.main{
     display:flex;
     gap:40px;
     z-index:2;
 }
 
-/* 🧊 GLASS CARDS (FIXED) */
+/* CARD GLASS */
 .card{
     width:340px;
     padding:28px;
     border-radius:22px;
 
-    background:rgba(255,0,0,0.06);
-    border:1px solid rgba(255,0,0,0.25);
+    background:rgba(255,0,0,0.05);
+    border:1px solid rgba(255,0,0,0.2);
 
-    backdrop-filter:blur(18px);
-    box-shadow:0 0 35px rgba(255,0,0,0.15);
+    backdrop-filter:blur(20px);
+    box-shadow:0 0 40px rgba(255,0,0,0.12);
 }
 
-/* 👤 AVATAR */
+/* AVATARS */
 .avatar{
     width:115px;
     height:115px;
@@ -77,7 +79,19 @@ canvas{
     border:2px solid rgba(255,0,0,0.35);
 }
 
-/* 🧠 NAME */
+/* SERVER AVATAR FIX */
+.server-avatar{
+    width:70px;
+    height:70px;
+    border-radius:16px;
+    object-fit:cover;
+    display:block;
+    margin:0 auto 10px;
+    border:1px solid rgba(255,0,0,0.4);
+    box-shadow:0 0 18px rgba(255,0,0,0.2);
+}
+
+/* NAME */
 .name{
     text-align:center;
     font-size:28px;
@@ -86,22 +100,23 @@ canvas{
     margin-bottom:18px;
 }
 
-/* 🔘 BUTTONS (RESTORED EFFECTS) */
+/* BUTTONS */
 .btn{
     display:block;
     padding:12px;
     margin:8px 0;
     text-align:center;
     text-decoration:none;
-    color:#ff3b3b;
 
+    color:#ff3b3b;
     border-radius:12px;
+
     background:rgba(255,0,0,0.05);
     border:1px solid rgba(255,0,0,0.25);
 
+    transition:0.2s;
     position:relative;
     overflow:hidden;
-    transition:0.2s;
 }
 
 .btn::before{
@@ -115,33 +130,34 @@ canvas{
     transition:0.5s;
 }
 
-.btn:hover::before{ left:120%; }
+.btn:hover::before{
+    left:120%;
+}
 
 .btn:hover{
     transform:scale(1.06);
-    box-shadow:0 0 25px rgba(255,0,0,0.35);
 }
 
-/* 📊 STATS CENTER */
+/* STATS */
 .stats{
     text-align:center;
 }
 
-/* 🔥 BIG NUMBERS */
+/* BIG VALUE */
 .big{
-    font-size:28px;
+    font-size:30px;
     font-weight:700;
     color:white;
 }
 
-/* 📌 LABELS */
+/* LABEL */
 .label{
     font-size:12px;
-    color:rgba(255,170,170,0.85);
+    color:rgba(255,200,200,0.85);
     margin:6px 0;
 }
 
-/* ⭐ STARS */
+/* STARS */
 .stars{
     display:flex;
     justify-content:center;
@@ -159,18 +175,6 @@ canvas{
     text-shadow:0 0 10px rgba(255,0,0,0.6);
 }
 
-/* 🟣 SERVER AVATAR FIX (styled, not plain image) */
-.server-avatar{
-    width:70px;
-    height:70px;
-    border-radius:18px;
-    object-fit:cover;
-    display:block;
-    margin:0 auto 10px;
-
-    border:1px solid rgba(255,0,0,0.4);
-    box-shadow:0 0 20px rgba(255,0,0,0.25);
-}
 </style>
 </head>
 
@@ -179,7 +183,7 @@ canvas{
 <canvas id="bg"></canvas>
 <div class="nebula"></div>
 
-<div class="main-container">
+<div class="main">
 
 <!-- PROFILE -->
 <div class="card">
@@ -195,13 +199,12 @@ canvas{
 <!-- STATS -->
 <div class="card stats">
 
-    <!-- SERVER AVATAR (FIXED STYLE) -->
     <img src="avatar_server.png" class="server-avatar">
 
     <div class="name" style="font-size:20px;">Discord Server</div>
 
     <!-- ORDERS -->
-    <div class="big">71 шт.</div>
+    <div class="big" id="totalOrders">71 шт.</div>
     <div class="label">📦 Заказы</div>
 
     <!-- STARS -->
@@ -209,7 +212,7 @@ canvas{
     <div class="stars" id="stars"></div>
 
     <!-- PERIOD -->
-    <div class="big">С 2023 по 2026-05-24 23:41</div>
+    <div class="big" id="period">2023 → 2026-05-24</div>
     <div class="label">📅 Период</div>
 
 </div>
@@ -217,33 +220,32 @@ canvas{
 </div>
 
 <script>
-/* ⭐ STARS (100% SAFE) */
-window.onload = function(){
-    const container = document.getElementById("stars");
+
+/* ⭐ STARS (100% WORK) */
+document.addEventListener("DOMContentLoaded", () => {
+    const el = document.getElementById("stars");
     const rating = 5;
 
     for(let i=1;i<=5;i++){
-        const star = document.createElement("div");
-        star.className = "star";
-        star.textContent = "★";
-
-        if(i<=rating) star.classList.add("full");
-
-        container.appendChild(star);
+        const s = document.createElement("div");
+        s.className = "star";
+        s.textContent = "★";
+        if(i <= rating) s.classList.add("full");
+        el.appendChild(s);
     }
-};
+});
 
 /* 🌌 BACKGROUND */
-const canvas=document.getElementById("bg");
-const ctx=canvas.getContext("2d");
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
 
-canvas.width=innerWidth;
-canvas.height=innerHeight;
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
-let stars=[];
+let dots = [];
 
 for(let i=0;i<120;i++){
-    stars.push({
+    dots.push({
         x:Math.random()*canvas.width,
         y:Math.random()*canvas.height,
         r:Math.random()*1.3,
@@ -255,19 +257,19 @@ for(let i=0;i<120;i++){
 function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    for(let s of stars){
+    for(let d of dots){
         ctx.beginPath();
-        ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+        ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
         ctx.fillStyle="rgba(255,0,0,0.6)";
         ctx.fill();
 
-        s.x+=s.dx;
-        s.y+=s.dy;
+        d.x += d.dx;
+        d.y += d.dy;
 
-        if(s.x<0) s.x=canvas.width;
-        if(s.x>canvas.width) s.x=0;
-        if(s.y<0) s.y=canvas.height;
-        if(s.y>canvas.height) s.y=0;
+        if(d.x<0) d.x=canvas.width;
+        if(d.x>canvas.width) d.x=0;
+        if(d.y<0) d.y=canvas.height;
+        if(d.y>canvas.height) d.y=0;
     }
 
     requestAnimationFrame(animate);
