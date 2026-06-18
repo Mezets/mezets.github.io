@@ -201,16 +201,24 @@ canvas{
 
 <script>
 
+function extractRating(value){
+    if(!value) return 0;
+    const match = String(value).match(/([\d.]+)/);
+    return match ? parseFloat(match[1]) : 0;
+}
+
 function renderStars(rating){
     const stars = document.getElementById("stars");
     stars.innerHTML = "";
+
+    const rounded = Math.round(rating);
 
     for(let i=1;i<=5;i++){
         const s = document.createElement("div");
         s.className = "star";
         s.textContent = "★";
 
-        if(i <= Math.round(rating)){
+        if(i <= rounded){
             s.classList.add("full");
         }
 
@@ -230,15 +238,16 @@ async function loadStats(){
         const data = await res.json();
 
         document.getElementById("orders").textContent =
-            data.total_orders || "0";
+            data.total_orders ?? "0";
 
         document.getElementById("period").textContent =
-            data.period || "—";
+            data.period ?? "—";
 
         document.getElementById("online").textContent =
-            (data.online || 0) + " online";
+            `${data.online ?? 0}`;
 
-        renderStars(parseFloat(data.average_rating) || 0);
+        const rating = extractRating(data.average_rating);
+        renderStars(rating);
 
     } catch(err){
         console.error(err);
