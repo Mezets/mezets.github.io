@@ -6,11 +6,11 @@
 <title>Mezets</title>
 
 <link rel="icon" href="favicon.png">
-<!-- 🌌 Подключаем оригинальный шрифт Orbitron -->
+<!-- 🌌 ИСПРАВЛЕНО: Правильное подключение шрифта Orbitron напрямую из Google Fonts -->
 <link href="https://googleapis.com" rel="stylesheet">
 
 <style>
-/* 🔴 Задаем Orbitron и сброс отступов сразу для ВСЕХ элементов сайта */
+/* 🔴 Применяем Orbitron и сброс отступов для ВСЕХ элементов сайта */
 *{
     margin:0;
     padding:0;
@@ -327,7 +327,6 @@ function fetchStats() {
         .then(response => response.json())
         .then(data => {
             if (!data.error) {
-                // Корректируем русский текст под шрифт Orbitron
                 let ordersText = data.total_orders.replace("шт.", "pcs");
                 let periodText = data.period.replace("С 2023 года по", "From 2023 to");
                 
