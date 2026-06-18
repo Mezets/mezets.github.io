@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mezets</title>
 
-<link rel="icon" href="favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
@@ -18,47 +17,40 @@ html, body{
     background:#050000;
 }
 
-/* ===== MOVING RED BACKGROUND ===== */
+/* 🌌 MOVING BACKGROUND */
 body::before{
     content:"";
     position:fixed;
-    inset:-40%;
-    background: radial-gradient(circle at 30% 30%, rgba(255,0,0,0.25), transparent 40%),
-                radial-gradient(circle at 70% 60%, rgba(255,0,0,0.15), transparent 45%),
-                radial-gradient(circle at 40% 80%, rgba(255,0,0,0.12), transparent 50%);
-    animation: flow 10s ease-in-out infinite alternate;
-    filter: blur(60px);
+    inset:-50%;
+    background:
+        radial-gradient(circle at 30% 30%, rgba(255,0,0,0.25), transparent 40%),
+        radial-gradient(circle at 70% 60%, rgba(255,0,0,0.15), transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(255,0,0,0.1), transparent 50%);
+    filter:blur(70px);
+    animation:move 12s ease-in-out infinite alternate;
     z-index:0;
 }
 
-@keyframes flow{
+@keyframes move{
     0%{transform:translate(0,0) scale(1);}
     100%{transform:translate(60px,-40px) scale(1.1);}
 }
 
-/* ===== CANVAS ===== */
-canvas{
-    position:fixed;
-    inset:0;
-    z-index:1;
-}
-
-/* ===== LAYOUT ===== */
+/* MAIN */
 .main{
     display:flex;
-    gap:40px;
     justify-content:center;
     align-items:center;
     height:100vh;
+    gap:40px;
     position:relative;
     z-index:2;
 }
 
-/* ===== CARD ===== */
+/* CARD */
 .card{
     width:340px;
     height:420px;
-
     padding:20px;
     border-radius:16px;
 
@@ -67,49 +59,49 @@ canvas{
 
     backdrop-filter:blur(20px);
 
-    box-shadow:
-        0 0 20px rgba(255,0,0,0.2),
-        inset 0 0 12px rgba(255,0,0,0.1);
+    box-shadow:0 0 25px rgba(255,0,0,0.25);
 
     transform-style:preserve-3d;
-    transition:transform 0.1s ease;
+    transition:transform 0.08s ease;
 }
 
-/* ===== AVATAR ===== */
+/* 🖼️ FIX IMAGE STRETCH */
 .avatar, .server-avatar{
-    width:105px;
-    height:105px;
+    width:110px;
+    height:110px;
     border-radius:50%;
+
+    object-fit:cover;       /* 🔥 ВАЖНО — убирает растяжение */
+    object-position:center; /* центрирует */
+
     display:block;
     margin:0 auto 10px;
     border:2px solid rgba(255,0,0,0.35);
 }
 
-/* ===== TEXT ===== */
+/* TEXT */
 .name{
     text-align:center;
     font-size:14px;
     color:#ff2a2a;
-    margin-bottom:14px;
+    margin-bottom:12px;
 }
 
-/* ===== BUTTON ===== */
+/* BUTTON */
 .btn{
     display:block;
     padding:9px;
     margin:7px 0;
     text-align:center;
-    text-decoration:none;
 
     color:#ff3b3b;
-    border-radius:10px;
+    text-decoration:none;
 
     background:rgba(255,0,0,0.05);
     border:1px solid rgba(255,0,0,0.25);
+    border-radius:10px;
 
     transition:0.2s;
-    position:relative;
-    overflow:hidden;
 }
 
 .btn:hover{
@@ -117,7 +109,7 @@ canvas{
     box-shadow:0 0 18px rgba(255,0,0,0.4);
 }
 
-/* ===== BLOCKS ===== */
+/* BLOCK */
 .block{
     margin:10px 0;
     text-align:center;
@@ -130,52 +122,21 @@ canvas{
 
 .value{
     font-size:14px;
-    color:#fff;
+    color:white;
     margin-top:5px;
 }
 
-/* ===== STARS ===== */
-.stars{
-    display:flex;
-    justify-content:center;
-    gap:5px;
-    margin-top:8px;
-}
-
-.star{
-    font-size:20px;
-    color:rgba(255,255,255,0.2);
-}
-
-.star.full{
-    color:#ff2a2a;
-    animation:pop 0.4s ease;
-}
-
-@keyframes pop{
-    0%{transform:scale(0.4) rotate(0deg);}
-    100%{transform:scale(1.1) rotate(360deg);}
-}
-
-/* ===== ONLINE ===== */
+/* ONLINE */
 .online{
-    color:#00ff88;
     font-size:10px;
+    color:#00ff88;
     margin-top:6px;
-    animation:pulse 1.5s infinite;
-}
-
-@keyframes pulse{
-    0%,100%{opacity:0.6;}
-    50%{opacity:1;}
 }
 
 </style>
 </head>
 
 <body>
-
-<canvas id="bg"></canvas>
 
 <div class="main">
 
@@ -198,22 +159,22 @@ canvas{
 
     <div class="block">
         <div class="label">Заказы</div>
-        <div class="value" id="orders">0</div>
+        <div class="value" id="orders">...</div>
     </div>
 
     <div class="block">
         <div class="label">Рейтинг</div>
-        <div class="stars" id="stars"></div>
+        <div class="value" id="rating">...</div>
     </div>
 
     <div class="block">
         <div class="label">Период</div>
-        <div class="value">2023 по 2026-05-24</div>
+        <div class="value" id="period">...</div>
     </div>
 
     <div class="block">
         <div class="label">Онлайн</div>
-        <div class="online" id="online">0 online</div>
+        <div class="online" id="online">...</div>
     </div>
 
     <a class="btn" href="http://discord.gg/npZ3QDQjVR" target="_blank">
@@ -226,109 +187,38 @@ canvas{
 
 <script>
 
-/* ===== 3D EFFECT ===== */
+/* 🧲 3D EFFECT */
 document.addEventListener("mousemove",(e)=>{
     const x = (e.clientX / innerWidth - 0.5);
     const y = (e.clientY / innerHeight - 0.5);
 
     document.querySelectorAll(".card").forEach(card=>{
         card.style.transform = `
-            rotateX(${y * -25}deg)
-            rotateY(${x * 25}deg)
-            translateZ(25px)
+            rotateX(${y * -20}deg)
+            rotateY(${x * 20}deg)
+            translateZ(20px)
         `;
     });
 });
 
-/* ===== STARS ===== */
-const starsEl = document.getElementById("stars");
-const rating = 5;
+/* 📡 LOAD API */
+async function loadStats(){
+    try{
+        const res = await fetch("https://mez-api-production.up.railway.app/stats");
+        const data = await res.json();
 
-for(let i=0;i<5;i++){
-    const s = document.createElement("div");
-    s.className = "star";
-    s.textContent = "★";
-    starsEl.appendChild(s);
-}
+        document.getElementById("orders").textContent = data.total_orders;
+        document.getElementById("rating").textContent = data.average_rating;
+        document.getElementById("period").textContent = data.period;
+        document.getElementById("online").textContent = data.online + " online";
 
-let si = 0;
-(function runStars(){
-    if(si < rating){
-        starsEl.children[si].classList.add("full");
-        si++;
-        setTimeout(runStars,140);
+    } catch(e){
+        console.log(e);
     }
-})();
-
-/* ===== ORDERS ===== */
-const ordersEl = document.getElementById("orders");
-let c = 0;
-const target = 71;
-
-(function count(){
-    if(c < target){
-        c++;
-        ordersEl.textContent = c;
-        setTimeout(count,15);
-    }
-})();
-
-/* ===== ONLINE FAKE COUNTER ===== */
-const onlineEl = document.getElementById("online");
-let online = 18;
-
-setInterval(()=>{
-    online += Math.floor(Math.random()*3 - 1);
-    if(online < 5) online = 5;
-    if(online > 42) online = 42;
-    onlineEl.textContent = online + " online";
-},1200);
-
-/* ===== BACKGROUND ===== */
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
-
-function resize(){
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
-}
-resize();
-window.addEventListener("resize", resize);
-
-let dots = [];
-
-for(let i=0;i<140;i++){
-    dots.push({
-        x:Math.random()*innerWidth,
-        y:Math.random()*innerHeight,
-        r:Math.random()*1.5,
-        dx:(Math.random()-0.5)*0.25,
-        dy:(Math.random()-0.5)*0.25
-    });
 }
 
-function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    for(let d of dots){
-        ctx.beginPath();
-        ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
-        ctx.fillStyle="rgba(255,0,0,0.7)";
-        ctx.fill();
-
-        d.x += d.dx;
-        d.y += d.dy;
-
-        if(d.x < -10) d.x = canvas.width + 10;
-        if(d.x > canvas.width + 10) d.x = -10;
-        if(d.y < -10) d.y = canvas.height + 10;
-        if(d.y > canvas.height + 10) d.y = -10;
-    }
-
-    requestAnimationFrame(draw);
-}
-
-draw();
+loadStats();
+setInterval(loadStats, 5000);
 
 </script>
 
