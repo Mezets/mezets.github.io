@@ -13,28 +13,34 @@
 html, body{
     margin:0;
     padding:0;
-    background:#050000;
     font-family:'Press Start 2P', monospace;
     overflow:hidden;
+    background:#050000;
 }
 
-/* ===== BACKGROUND ===== */
-canvas{
+/* ===== MOVING RED BACKGROUND ===== */
+body::before{
+    content:"";
     position:fixed;
-    inset:0;
+    inset:-40%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,0,0,0.25), transparent 40%),
+                radial-gradient(circle at 70% 60%, rgba(255,0,0,0.15), transparent 45%),
+                radial-gradient(circle at 40% 80%, rgba(255,0,0,0.12), transparent 50%);
+    animation: flow 10s ease-in-out infinite alternate;
+    filter: blur(60px);
     z-index:0;
 }
 
-.nebula{
+@keyframes flow{
+    0%{transform:translate(0,0) scale(1);}
+    100%{transform:translate(60px,-40px) scale(1.1);}
+}
+
+/* ===== CANVAS ===== */
+canvas{
     position:fixed;
     inset:0;
     z-index:1;
-    pointer-events:none;
-    background:
-        radial-gradient(circle at 30% 40%, rgba(255,0,0,0.25), transparent 60%),
-        radial-gradient(circle at 70% 60%, rgba(255,0,0,0.12), transparent 65%);
-    filter:blur(90px);
-    transition:transform 0.2s ease;
 }
 
 /* ===== LAYOUT ===== */
@@ -50,11 +56,11 @@ canvas{
 
 /* ===== CARD ===== */
 .card{
-    width:360px;
-    height:460px;
+    width:340px;
+    height:420px;
 
-    padding:22px;
-    border-radius:18px;
+    padding:20px;
+    border-radius:16px;
 
     background:rgba(255,0,0,0.05);
     border:1px solid rgba(255,0,0,0.25);
@@ -63,36 +69,35 @@ canvas{
 
     box-shadow:
         0 0 20px rgba(255,0,0,0.2),
-        inset 0 0 15px rgba(255,0,0,0.1);
+        inset 0 0 12px rgba(255,0,0,0.1);
 
     transform-style:preserve-3d;
-    transition:transform 0.08s linear;
+    transition:transform 0.1s ease;
 }
 
 /* ===== AVATAR ===== */
 .avatar, .server-avatar{
-    width:110px;
-    height:110px;
+    width:105px;
+    height:105px;
     border-radius:50%;
     display:block;
     margin:0 auto 10px;
     border:2px solid rgba(255,0,0,0.35);
-    object-fit:cover;
 }
 
 /* ===== TEXT ===== */
 .name{
     text-align:center;
-    font-size:15px;
+    font-size:14px;
     color:#ff2a2a;
     margin-bottom:14px;
 }
 
-/* ===== BUTTONS ===== */
+/* ===== BUTTON ===== */
 .btn{
     display:block;
-    padding:10px;
-    margin:8px 0;
+    padding:9px;
+    margin:7px 0;
     text-align:center;
     text-decoration:none;
 
@@ -107,51 +112,38 @@ canvas{
     overflow:hidden;
 }
 
-.btn::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:linear-gradient(120deg,transparent,rgba(255,0,0,0.4),transparent);
-    transform:translateX(-120%);
-    transition:0.5s;
-}
-
-.btn:hover::after{
-    transform:translateX(120%);
-}
-
 .btn:hover{
-    transform:scale(1.06);
-    box-shadow:0 0 18px rgba(255,0,0,0.35);
+    transform:scale(1.05);
+    box-shadow:0 0 18px rgba(255,0,0,0.4);
 }
 
 /* ===== BLOCKS ===== */
 .block{
-    margin:12px 0;
+    margin:10px 0;
     text-align:center;
 }
 
 .label{
-    font-size:9px;
+    font-size:8px;
     color:rgba(255,180,180,0.85);
 }
 
 .value{
-    font-size:15px;
+    font-size:14px;
     color:#fff;
-    margin-top:6px;
+    margin-top:5px;
 }
 
 /* ===== STARS ===== */
 .stars{
     display:flex;
     justify-content:center;
-    gap:6px;
-    margin-top:10px;
+    gap:5px;
+    margin-top:8px;
 }
 
 .star{
-    font-size:22px;
+    font-size:20px;
     color:rgba(255,255,255,0.2);
 }
 
@@ -162,7 +154,20 @@ canvas{
 
 @keyframes pop{
     0%{transform:scale(0.4) rotate(0deg);}
-    100%{transform:scale(1.15) rotate(360deg);}
+    100%{transform:scale(1.1) rotate(360deg);}
+}
+
+/* ===== ONLINE ===== */
+.online{
+    color:#00ff88;
+    font-size:10px;
+    margin-top:6px;
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+    0%,100%{opacity:0.6;}
+    50%{opacity:1;}
 }
 
 </style>
@@ -171,10 +176,10 @@ canvas{
 <body>
 
 <canvas id="bg"></canvas>
-<div class="nebula" id="nebula"></div>
 
 <div class="main">
 
+<!-- LEFT -->
 <div class="card" id="leftCard">
     <img src="avatar.png" class="avatar">
     <div class="name">Mezets</div>
@@ -185,6 +190,7 @@ canvas{
     <a class="btn">Roblox</a>
 </div>
 
+<!-- RIGHT -->
 <div class="card" id="rightCard">
 
     <img src="avatar_server.png" class="server-avatar">
@@ -205,27 +211,31 @@ canvas{
         <div class="value">2023 по 2026-05-24</div>
     </div>
 
+    <div class="block">
+        <div class="label">Онлайн</div>
+        <div class="online" id="online">0 online</div>
+    </div>
+
+    <a class="btn" href="http://discord.gg/npZ3QDQjVR" target="_blank">
+        Join Discord
+    </a>
+
 </div>
 
 </div>
 
 <script>
 
-/* ===== 3D CARDS (stronger + floating depth) ===== */
-const cards = document.querySelectorAll(".card");
-const nebula = document.getElementById("nebula");
-
+/* ===== 3D EFFECT ===== */
 document.addEventListener("mousemove",(e)=>{
     const x = (e.clientX / innerWidth - 0.5);
     const y = (e.clientY / innerHeight - 0.5);
 
-    nebula.style.transform = `translate(${x*20}px, ${y*20}px) scale(1.05)`;
-
-    cards.forEach(card=>{
+    document.querySelectorAll(".card").forEach(card=>{
         card.style.transform = `
-            rotateX(${y * -30}deg)
-            rotateY(${x * 30}deg)
-            translateZ(20px)
+            rotateX(${y * -25}deg)
+            rotateY(${x * 25}deg)
+            translateZ(25px)
         `;
     });
 });
@@ -250,7 +260,7 @@ let si = 0;
     }
 })();
 
-/* ===== ORDERS COUNT ===== */
+/* ===== ORDERS ===== */
 const ordersEl = document.getElementById("orders");
 let c = 0;
 const target = 71;
@@ -259,11 +269,22 @@ const target = 71;
     if(c < target){
         c++;
         ordersEl.textContent = c;
-        requestAnimationFrame(()=>setTimeout(count,12));
+        setTimeout(count,15);
     }
 })();
 
-/* ===== BACKGROUND PARTICLES ===== */
+/* ===== ONLINE FAKE COUNTER ===== */
+const onlineEl = document.getElementById("online");
+let online = 18;
+
+setInterval(()=>{
+    online += Math.floor(Math.random()*3 - 1);
+    if(online < 5) online = 5;
+    if(online > 42) online = 42;
+    onlineEl.textContent = online + " online";
+},1200);
+
+/* ===== BACKGROUND ===== */
 const canvas = document.getElementById("bg");
 const ctx = canvas.getContext("2d");
 
