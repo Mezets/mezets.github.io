@@ -4,292 +4,80 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mezets</title>
-
 <link rel="icon" href="favicon.png">
-
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-
 <style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{font-family:'Press Start 2P',monospace;background:#050000;min-height:100vh;overflow-x:hidden}
+body{display:flex;justify-content:center;align-items:center;min-height:100vh}
+canvas{position:fixed;inset:0;z-index:0}
+.nebula{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(circle at 30% 40%,rgba(255,0,0,0.2),transparent 60%),
+             radial-gradient(circle at 70% 60%,rgba(255,0,0,0.1),transparent 65%);
+  filter:blur(90px);animation:breathe 8s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.85}50%{opacity:1}}
 
-/* =========================
-   GLOBAL
-========================= */
-html, body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Press Start 2P', monospace;
-    background: #050000;
-}
+.main{display:flex;flex-wrap:wrap;justify-content:center;gap:40px;z-index:2;padding:60px 20px;perspective:1200px}
 
-body{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
-    overflow-x:hidden;
-}
-
-/* background */
-canvas{
-    position:fixed;
-    inset:0;
-    z-index:0;
-}
-
-.nebula{
-    position:fixed;
-    inset:0;
-    z-index:1;
-    pointer-events:none;
-    background:
-        radial-gradient(circle at 30% 40%, rgba(255,0,0,0.2), transparent 60%),
-        radial-gradient(circle at 70% 60%, rgba(255,0,0,0.1), transparent 65%);
-    filter:blur(90px);
-    animation:breathe 8s ease-in-out infinite;
-}
-
-@keyframes breathe{
-    0%,100%{ opacity:0.85; }
-    50%{     opacity:1;    }
-}
-
-/* MAIN */
-.main{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:40px;
-    z-index:2;
-    padding:60px 20px;
-}
-
-/* CARD GLASS */
 .card{
-    width:360px;
-    padding:30px 26px;
-    border-radius:22px;
+  width:360px;padding:30px 26px;border-radius:22px;
+  background:rgba(255,0,0,0.05);border:1px solid rgba(255,0,0,0.2);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 0 40px rgba(255,0,0,0.12);
+  transition:border-color .25s,box-shadow .25s,transform .1s ease-out;
+  transform-style:preserve-3d;will-change:transform;cursor:default}
+.card:hover{border-color:rgba(255,0,0,0.4);box-shadow:0 0 56px rgba(255,0,0,0.2)}
 
-    background:rgba(255,0,0,0.05);
-    border:1px solid rgba(255,0,0,0.2);
+.avatar-wrap{position:relative;width:115px;margin:0 auto 12px}
+.avatar{width:115px;height:115px;border-radius:50%;object-fit:cover;display:block;border:2px solid rgba(255,0,0,0.35)}
+.status-dot{position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:50%;
+  background:#ff2a2a;border:3px solid #1a0202;box-shadow:0 0 10px rgba(255,0,0,0.8);
+  animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.85)}}
 
-    backdrop-filter:blur(20px);
-    -webkit-backdrop-filter:blur(20px);
-    box-shadow:0 0 40px rgba(255,0,0,0.12);
+.name{text-align:center;font-size:18px;line-height:1.6;font-weight:400;color:#ff2a2a;margin-bottom:22px;letter-spacing:1px}
+.ds-name{text-align:center;font-size:11px;line-height:1.6;font-weight:400;color:#ff2a2a;margin-bottom:16px;letter-spacing:1px}
 
-    transition:border-color .25s, box-shadow .25s;
-}
-
-.card:hover{
-    border-color:rgba(255,0,0,0.4);
-    box-shadow:0 0 56px rgba(255,0,0,0.2);
-}
-
-/* AVATARS */
-.avatar-wrap{
-    position:relative;
-    width:115px;
-    margin:0 auto 12px;
-}
-
-.avatar{
-    width:115px;
-    height:115px;
-    border-radius:50%;
-    object-fit:cover;
-    display:block;
-    border:2px solid rgba(255,0,0,0.35);
-}
-
-/* SERVER AVATAR */
-.server-avatar-wrap{
-    position:relative;
-    width:70px;
-    margin:0 auto 10px;
-}
-
-.server-avatar{
-    width:70px;
-    height:70px;
-    border-radius:16px;
-    object-fit:cover;
-    display:block;
-    border:1px solid rgba(255,0,0,0.4);
-    box-shadow:0 0 18px rgba(255,0,0,0.2);
-}
-
-.status-dot{
-    position:absolute;
-    bottom:-2px;
-    right:-2px;
-    width:16px;
-    height:16px;
-    border-radius:50%;
-    background:#ff2a2a;
-    border:3px solid #1a0202;
-    box-shadow:0 0 10px rgba(255,0,0,0.8);
-    animation:pulse 1.8s ease-in-out infinite;
-}
-
-@keyframes pulse{
-    0%,100%{ opacity:1;    transform:scale(1);   }
-    50%{     opacity:0.45; transform:scale(0.85);}
-}
-
-/* NAME */
-.name{
-    text-align:center;
-    font-size:18px;
-    line-height:1.6;
-    font-weight:400;
-    color:#ff2a2a;
-    margin-bottom:22px;
-    letter-spacing:1px;
-}
-
-/* BUTTONS */
 .btn{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:12px;
-    padding:16px 12px;
-    margin:10px 0;
-    text-align:center;
-    text-decoration:none;
-    font-weight:400;
-    font-size:11px;
-    line-height:1.6;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  padding:16px 12px;margin:10px 0;text-align:center;text-decoration:none;
+  font-weight:400;font-size:11px;line-height:1.6;color:#ff3b3b;border-radius:12px;
+  background:rgba(255,0,0,0.05);border:1px solid rgba(255,0,0,0.25);
+  transition:.2s;position:relative;overflow:hidden;font-family:'Press Start 2P',monospace}
+.btn::before{content:"";position:absolute;top:0;left:-120%;width:120%;height:100%;
+  background:linear-gradient(120deg,transparent,rgba(255,0,0,0.35),transparent);transition:.5s}
+.btn:hover::before{left:120%}
+.btn:hover{transform:scale(1.04);border-color:rgba(255,0,0,0.5)}
 
-    color:#ff3b3b;
-    border-radius:12px;
+/* STATS SCROLL */
+.stats{text-align:center;overflow:hidden}
+.stats-scroll{overflow:hidden;position:relative}
+.scroll-inner{display:flex;flex-direction:column;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+.stat-slide{min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0}
 
-    background:rgba(255,0,0,0.05);
-    border:1px solid rgba(255,0,0,0.25);
+.big{font-size:17px;line-height:1.6;font-weight:400;color:white;font-variant-numeric:tabular-nums}
+.big.online-value{display:flex;align-items:center;justify-content:center;gap:10px;color:#ff3b3b}
+.live-dot{width:10px;height:10px;border-radius:50%;background:#ff2a2a;
+  box-shadow:0 0 8px rgba(255,0,0,0.9);animation:pulse 1.8s ease-in-out infinite}
 
-    transition:0.2s;
-    position:relative;
-    overflow:hidden;
-}
+.label{display:flex;align-items:center;justify-content:center;gap:6px;
+  font-size:8px;line-height:1.6;letter-spacing:1px;text-transform:uppercase;
+  color:rgba(255,200,200,0.75);margin:10px 0}
+.label svg{width:13px;height:13px;opacity:.8}
 
-.btn svg{
-    width:18px;
-    height:18px;
-    flex-shrink:0;
-}
+.stars{display:flex;justify-content:center;gap:6px;margin:10px 0}
+.star{font-size:22px;color:rgba(255,255,255,0.2)}
+.star.full{color:#ff2a2a;text-shadow:0 0 10px rgba(255,0,0,0.6)}
 
-.btn::before{
-    content:"";
-    position:absolute;
-    top:0;
-    left:-120%;
-    width:120%;
-    height:100%;
-    background:linear-gradient(120deg,transparent,rgba(255,0,0,0.35),transparent);
-    transition:0.5s;
-}
+.dots-nav{display:flex;justify-content:center;gap:8px;margin-top:10px}
+.dot-btn{width:8px;height:8px;border-radius:50%;background:rgba(255,0,0,0.2);
+  border:none;cursor:pointer;transition:.2s;padding:0}
+.dot-btn.active{background:#ff2a2a;box-shadow:0 0 6px rgba(255,0,0,0.8)}
 
-.btn:hover::before{
-    left:120%;
-}
-
-.btn:hover{
-    transform:scale(1.04);
-    border-color:rgba(255,0,0,0.5);
-}
-
-/* STATS */
-.stats{
-    text-align:center;
-}
-
-.stat-block{
-    margin:18px 0;
-}
-
-/* BIG VALUE */
-.big{
-    font-size:17px;
-    line-height:1.6;
-    font-weight:400;
-    color:white;
-    font-variant-numeric:tabular-nums;
-}
-
-.big.online-value{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    color:#ff3b3b;
-}
-
-.live-dot{
-    width:10px;
-    height:10px;
-    border-radius:50%;
-    background:#ff2a2a;
-    box-shadow:0 0 8px rgba(255,0,0,0.9);
-    animation:pulse 1.8s ease-in-out infinite;
-}
-
-/* LABEL */
-.label{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    font-size:8px;
-    line-height:1.6;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    color:rgba(255,200,200,0.75);
-    margin:10px 0;
-}
-
-.label svg{
-    width:13px;
-    height:13px;
-    opacity:0.8;
-}
-
-/* STARS */
-.stars{
-    display:flex;
-    justify-content:center;
-    gap:6px;
-    margin:10px 0;
-}
-
-.star{
-    font-size:22px;
-    color:rgba(255,255,255,0.2);
-}
-
-.star.full{
-    color:#ff2a2a;
-    text-shadow:0 0 10px rgba(255,0,0,0.6);
-}
-
-@media (prefers-reduced-motion: reduce){
-    .nebula, .status-dot, .live-dot{
-        animation:none;
-    }
-}
-
-@media (max-width:760px){
-    .main{
-        gap:24px;
-        padding:40px 16px;
-    }
-    .card{
-        width:100%;
-        max-width:360px;
-    }
-}
-
+@media(prefers-reduced-motion:reduce){.nebula,.status-dot,.live-dot{animation:none}}
+@media(max-width:760px){.main{gap:24px;padding:40px 16px}.card{width:100%;max-width:360px}}
 </style>
 </head>
-
 <body>
 
 <canvas id="bg"></canvas>
@@ -297,202 +85,207 @@ canvas{
 
 <div class="main">
 
-<!-- PROFILE -->
-<div class="card">
+  <!-- PROFILE -->
+  <div class="card" id="card1">
     <div class="avatar-wrap">
-        <img src="avatar.png" class="avatar">
+      <img src="avatar.png" class="avatar" alt="Mezets">
     </div>
     <div class="name">Mezets</div>
+    <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank">Steam</a>
+    <a class="btn" href="https://www.faceit.com/ru/players/Mezets1337" target="_blank">Faceit</a>
+    <a class="btn" href="https://store.epicgames.com/u/dfdc88256ae04f67959802a29365926f" target="_blank">Epic Games</a>
+    <a class="btn" href="https://www.roblox.com/users/817592228/profile" target="_blank">Roblox</a>
+  </div>
 
-    <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M3 12h6M15 12h6"/></svg>
-        Steam
-    </a>
-    <a class="btn" href="https://www.faceit.com/ru/players/Mezets1337" target="_blank">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
-        Faceit
-    </a>
-    <a class="btn" href="https://store.epicgames.com/u/dfdc88256ae04f67959802a29365926f" target="_blank">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8v8H8z"/></svg>
-        Epic Games
-    </a>
-    <a class="btn" href="https://www.roblox.com/users/817592228/profile" target="_blank">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="8" height="8" rx="1" transform="rotate(0 7 7)"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
-        Roblox
-    </a>
-</div>
-
-<!-- STATS -->
-<div class="card stats">
-
-    <div class="server-avatar-wrap">
-        <img src="avatar_server.png" class="server-avatar">
-        <div class="status-dot"></div>
+  <!-- STATS -->
+  <div class="card stats" id="card2">
+    <div class="avatar-wrap" style="margin-bottom:12px">
+      <img src="avatar.png" class="avatar" alt="Discord Server">
+      <div class="status-dot"></div>
     </div>
+    <div class="ds-name">Discord Server</div>
 
-    <div class="name" style="font-size:13px;">Discord Server</div>
+    <div class="stats-scroll">
+      <div class="scroll-inner" id="scrollInner">
 
-    <!-- ORDERS -->
-    <div class="stat-block">
-        <div class="big" id="orders">—</div>
-        <div class="label">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+        <!-- slide 0: orders -->
+        <div class="stat-slide">
+          <div class="big" id="orders">—</div>
+          <div class="label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/>
+            </svg>
             Заказы
+          </div>
         </div>
-    </div>
 
-    <!-- STARS -->
-    <div class="stat-block">
-        <div class="label">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.8L6 21l1.6-7L2.2 9.2l7.1-.6z"/></svg>
+        <!-- slide 1: rating -->
+        <div class="stat-slide">
+          <div class="label">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.8L6 21l1.6-7L2.2 9.2l7.1-.6z"/>
+            </svg>
             Рейтинг
+          </div>
+          <div class="stars" id="stars"></div>
         </div>
-        <div class="stars" id="stars"></div>
-    </div>
 
-    <!-- PERIOD -->
-    <div class="stat-block">
-        <div class="big" id="period" style="font-size:12px;">—</div>
-        <div class="label">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+        <!-- slide 2: period -->
+        <div class="stat-slide">
+          <div class="big" id="period" style="font-size:12px">—</div>
+          <div class="label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <rect x="3" y="4" width="18" height="17" rx="2"/>
+              <path d="M3 9h18M8 2v4M16 2v4"/>
+            </svg>
             Период
+          </div>
         </div>
-    </div>
 
-    <!-- ONLINE -->
-    <div class="stat-block">
-        <div class="big online-value">
+        <!-- slide 3: online -->
+        <div class="stat-slide">
+          <div class="big online-value">
             <span class="live-dot"></span>
             <span id="online">—</span>
+          </div>
+          <div class="label">Онлайн сейчас</div>
         </div>
-        <div class="label">Онлайн сейчас</div>
+
+      </div>
     </div>
 
-</div>
+    <div class="dots-nav" id="dotsNav"></div>
+
+    <a class="btn" href="https://discord.gg/npZ3QDQjVR" target="_blank" style="margin-top:16px">
+      Вступить в Discord
+    </a>
+  </div>
 
 </div>
 
 <script>
+/* ── STATS SCROLL ── */
+const slides = document.querySelectorAll('.stat-slide');
+const inner  = document.getElementById('scrollInner');
+const nav    = document.getElementById('dotsNav');
+let current  = 0;
+let autoTimer;
 
-/* ⭐ STARS */
-function extractRating(value){
-    if(!value) return 0;
-    const match = String(value).match(/([\d.]+)/);
-    return match ? parseFloat(match[1]) : 0;
+slides.forEach((_,i) => {
+  const b = document.createElement('button');
+  b.className = 'dot-btn' + (i===0 ? ' active' : '');
+  b.onclick = () => { goTo(i); resetAuto(); };
+  nav.appendChild(b);
+});
+
+function goTo(n) {
+  current = n;
+  inner.style.transform = `translateY(-${n * 120}px)`;
+  document.querySelectorAll('.dot-btn').forEach((b,i) => b.classList.toggle('active', i===n));
 }
 
-function renderStars(rating){
-    const el = document.getElementById("stars");
-    el.innerHTML = "";
-
-    const rounded = Math.round(rating);
-
-    for(let i=1;i<=5;i++){
-        const s = document.createElement("div");
-        s.className = "star";
-        s.textContent = "★";
-        if(i <= rounded) s.classList.add("full");
-        el.appendChild(s);
-    }
+function resetAuto() {
+  clearInterval(autoTimer);
+  autoTimer = setInterval(() => goTo((current + 1) % slides.length), 3000);
 }
+resetAuto();
 
-function safe(value){
-    return value ?? "—";
+/* ── API ── */
+function extractRating(v) {
+  if (!v) return 0;
+  const m = String(v).match(/([\d.]+)/);
+  return m ? parseFloat(m[1]) : 0;
 }
-
-/* 📡 STATS API */
-async function loadStats(){
-    try{
-        const res = await fetch(
-            "https://mez-production.up.railway.app/stats",
-            { mode: "cors" }
-        );
-
-        if(!res.ok) throw new Error("HTTP " + res.status);
-
-        const data = await res.json();
-
-        document.getElementById("orders").textContent = safe(data.total_orders);
-        document.getElementById("period").textContent = safe(data.period);
-        document.getElementById("online").textContent = data.online ?? "—";
-
-        renderStars(extractRating(data.average_rating));
-
-    } catch(err){
-        console.error("Stats fetch failed:", err);
-        document.getElementById("orders").textContent = "—";
-        document.getElementById("period").textContent = "—";
-        document.getElementById("online").textContent = "—";
-        renderStars(0);
-    }
+function renderStars(r) {
+  const el = document.getElementById('stars');
+  el.innerHTML = '';
+  const rounded = Math.round(r);
+  for (let i = 1; i <= 5; i++) {
+    const s = document.createElement('div');
+    s.className = 'star' + (i <= rounded ? ' full' : '');
+    s.textContent = '★';
+    el.appendChild(s);
+  }
 }
+function safe(v) { return v ?? '—'; }
 
+async function loadStats() {
+  try {
+    const res = await fetch('https://mez-production.up.railway.app/stats', { mode: 'cors' });
+    if (!res.ok) throw new Error();
+    const d = await res.json();
+    document.getElementById('orders').textContent = safe(d.total_orders);
+    document.getElementById('period').textContent  = safe(d.period);
+    document.getElementById('online').textContent  = d.online ?? '—';
+    renderStars(extractRating(d.average_rating));
+  } catch(e) {
+    document.getElementById('orders').textContent = '—';
+    document.getElementById('period').textContent  = '—';
+    document.getElementById('online').textContent  = '—';
+    renderStars(0);
+  }
+}
 loadStats();
 setInterval(loadStats, 5000);
 
-/* 🌌 BACKGROUND PARTICLES */
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
-
-function resize(){
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
+/* ── 3D TILT ── */
+function tilt(card) {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width  - 0.5;
+    const y = (e.clientY - r.top)  / r.height - 0.5;
+    card.style.transform = `rotateY(${x*16}deg) rotateX(${-y*16}deg) scale(1.02)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'rotateY(0deg) rotateX(0deg) scale(1)';
+  });
 }
+tilt(document.getElementById('card1'));
+tilt(document.getElementById('card2'));
+
+/* ── PARTICLES ── */
+const canvas = document.getElementById('bg');
+const ctx    = canvas.getContext('2d');
+function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
 resize();
-addEventListener("resize", resize);
+addEventListener('resize', resize);
 
 let dots = [];
-
-function initDots(){
-    dots = [];
-    const count = Math.round((innerWidth * innerHeight) / 9000);
-    for(let i=0;i<count;i++){
-        dots.push({
-            x:Math.random()*canvas.width,
-            y:Math.random()*canvas.height,
-            r:Math.random()*1.3 + 0.3,
-            dx:(Math.random()-0.5)*0.15,
-            dy:(Math.random()-0.5)*0.15
-        });
-    }
+function initDots() {
+  dots = [];
+  const count = Math.round((innerWidth * innerHeight) / 9000);
+  for (let i = 0; i < count; i++) {
+    dots.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.3 + 0.3,
+      dx: (Math.random() - .5) * .15,
+      dy: (Math.random() - .5) * .15
+    });
+  }
 }
 initDots();
-addEventListener("resize", initDots);
+addEventListener('resize', initDots);
 
-const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const noMotion = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
 
-function animate(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    for(let d of dots){
-        ctx.beginPath();
-        ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
-        ctx.fillStyle="rgba(255,0,0,0.6)";
-        ctx.fill();
-
-        d.x += d.dx;
-        d.y += d.dy;
-
-        if(d.x<0) d.x=canvas.width;
-        if(d.x>canvas.width) d.x=0;
-        if(d.y<0) d.y=canvas.height;
-        if(d.y>canvas.height) d.y=0;
-    }
-
-    requestAnimationFrame(animate);
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let d of dots) {
+    ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,0,0,0.6)'; ctx.fill();
+    d.x += d.dx; d.y += d.dy;
+    if (d.x < 0) d.x = canvas.width;  if (d.x > canvas.width)  d.x = 0;
+    if (d.y < 0) d.y = canvas.height; if (d.y > canvas.height) d.y = 0;
+  }
+  requestAnimationFrame(animate);
 }
 
-if(!prefersReducedMotion){
-    animate();
-} else {
-    for(let d of dots){
-        ctx.beginPath();
-        ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
-        ctx.fillStyle="rgba(255,0,0,0.6)";
-        ctx.fill();
-    }
+if (!noMotion) animate();
+else for (let d of dots) {
+  ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,0,0,0.6)'; ctx.fill();
 }
 </script>
-
 </body>
 </html>
