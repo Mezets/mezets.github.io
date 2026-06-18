@@ -119,7 +119,6 @@
 
     /* =========================
        КНОПКА-ТРИГГЕР РУЛЕТКИ
-       Картинка koleso.png в правом нижнем углу
     ========================= */
     .koleso-btn {
       position: fixed;
@@ -149,7 +148,7 @@
     .koleso-btn:active { transform: scale(0.96); }
 
     /* =========================
-       ОВЕРЛЕЙ РУЛЕТКИ (поверх всего)
+       ОВЕРЛЕЙ РУЛЕТКИ
     ========================= */
     .roulette-overlay {
       position: fixed;
@@ -169,7 +168,6 @@
       pointer-events: all;
     }
 
-    /* окно рулетки */
     .roulette-box {
       width: 420px;
       max-width: 95vw;
@@ -182,7 +180,6 @@
       position: relative;
     }
 
-    /* крестик закрыть */
     .roulette-close {
       position: absolute;
       top: 14px; right: 18px;
@@ -203,7 +200,6 @@
       line-height: 1.6;
     }
 
-    /* полоса */
     .strip-wrap {
       width: 100%;
       height: 70px;
@@ -237,21 +233,18 @@
     .strip-item .si-pct   { font-size: 17px; line-height: 1.2; }
     .strip-item .si-label { font-size: 7px; color: rgba(255,200,200,0.6); margin-top: 4px; }
 
-    /* цвета секторов */
     .si-100 { background: rgba(255,20,20,0.22); }  .si-100 .si-pct { color: #ff4444; }
     .si-75  { background: rgba(255,80,0,0.18); }   .si-75  .si-pct { color: #ff7733; }
     .si-50  { background: rgba(200,100,0,0.15); }  .si-50  .si-pct { color: #ffaa44; }
     .si-25  { background: rgba(150,120,0,0.13); }  .si-25  .si-pct { color: #ffcc44; }
     .si-10  { background: rgba(50,50,50,0.22); }   .si-10  .si-pct { color: rgba(255,200,200,0.45); }
 
-    /* шансы */
     .chances {
       display: flex; justify-content: center; gap: 10px;
       flex-wrap: wrap; margin: 8px 0 16px;
     }
     .chance-item { font-size: 7px; color: rgba(255,200,200,0.45); line-height: 1.8; }
 
-    /* результат */
     .roulette-result { min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 10px 0; }
     .result-pct  { font-size: 20px; color: #ff2a2a; line-height: 1.4; opacity: 0; transition: opacity .4s; }
     .result-code {
@@ -264,6 +257,27 @@
     .result-pct.show, .result-code.show { opacity: 1; }
     .copied-msg { font-size: 8px; color: #ff4444; margin-top: 4px; opacity: 0; transition: opacity .3s; }
     .copied-msg.show { opacity: 1; }
+
+    /* кнопка логина через дискорд */
+    .discord-login-btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 16px 12px; margin-top: 4px;
+      font-family: 'Press Start 2P', monospace; font-size: 10px; line-height: 1.6;
+      color: #fff; border-radius: 12px; cursor: pointer; text-decoration: none;
+      background: #5865F2; border: 1px solid #5865F2;
+      transition: .2s;
+    }
+    .discord-login-btn:hover { transform: scale(1.03); box-shadow: 0 0 24px rgba(88,101,242,0.5); }
+
+    .login-hint {
+      font-size: 8px; color: rgba(255,200,200,0.5);
+      margin-top: 14px; line-height: 1.6;
+    }
+
+    .logged-as {
+      font-size: 8px; color: rgba(150,255,150,0.7);
+      margin-bottom: 14px; line-height: 1.6;
+    }
 
     @media (prefers-reduced-motion: reduce) { .live-dot, .fluff-1, .fluff-2 { animation: none; } }
     @media (max-width: 760px) {
@@ -371,10 +385,21 @@
         <div class="copied-msg" id="copiedMsg">скопировано!</div>
       </div>
 
-      <!-- Кнопка -->
-      <button class="btn" id="spinBtn" onclick="spin()" style="width:100%;cursor:pointer;border:none">
-        Крутить
-      </button>
+      <!-- Если НЕ залогинен: кнопка логина -->
+      <div id="loginBlock">
+        <a class="discord-login-btn" id="discordLoginBtn" href="#">
+          Войти через Discord
+        </a>
+        <div class="login-hint">Нужно войти, чтобы крутить рулетку (1 раз на аккаунт)</div>
+      </div>
+
+      <!-- Если залогинен: статус + кнопка крутить -->
+      <div id="spinBlock" style="display:none">
+        <div class="logged-as" id="loggedAs"></div>
+        <button class="btn" id="spinBtn" onclick="spin()" style="width:100%;cursor:pointer;border:none">
+          Крутить
+        </button>
+      </div>
 
     </div>
   </div>
@@ -383,14 +408,10 @@
   <script>
 
     /* =========================
-       РУЛЕТКА
-       Промокоды и рандом — только на сервере.
-       Браузер получает лишь % скидки и код после спина.
+       КОНФИГ
     ========================= */
-
     const API = 'https://mez-production.up.railway.app';
 
-    // Визуальные данные секторов — без промокодов
     const VISUAL = {
       10:  { pct: '10%',  cls: 'si-10'  },
       25:  { pct: '25%',  cls: 'si-25'  },
@@ -406,6 +427,104 @@
 
     const stripEl = document.getElementById('strip');
 
+    /* =========================
+       СЕССИЯ DISCORD
+       Сохраняем session_token из URL (после редиректа от бэкенда)
+       в localStorage, чтобы не терять при перезагрузке страницы.
+    ========================= */
+    function getSessionFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('session');
+    }
+
+    function getStoredSession() {
+      return localStorage.getItem('mezets_session') || null;
+    }
+
+    function storeSession(token) {
+      localStorage.setItem('mezets_session', token);
+    }
+
+    // при загрузке страницы: если в URL есть ?session=, сохраняем и чистим URL
+    (function initSession() {
+      const urlSession = getSessionFromUrl();
+      if (urlSession) {
+        storeSession(urlSession);
+        // убираем session из адресной строки, чтобы не светился и не путал
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    })();
+
+    function currentSession() {
+      return getStoredSession();
+    }
+
+    /* =========================
+       ЛОГИН ЧЕРЕЗ DISCORD
+    ========================= */
+    async function setupLoginButton() {
+      try {
+        const res  = await fetch(`${API}/discord-login-url`, { mode: 'cors' });
+        const data = await res.json();
+        document.getElementById('discordLoginBtn').href = data.url;
+      } catch(e) {
+        console.error('Не удалось получить ссылку логина', e);
+      }
+    }
+
+    /* =========================
+       ПРОВЕРКА СТАТУСА (логин / можно крутить)
+    ========================= */
+    async function checkCanSpin() {
+      const session = currentSession();
+      const loginBlock = document.getElementById('loginBlock');
+      const spinBlock   = document.getElementById('spinBlock');
+      const btn = document.getElementById('spinBtn');
+
+      if (!session) {
+        loginBlock.style.display = 'block';
+        spinBlock.style.display  = 'none';
+        setupLoginButton();
+        return;
+      }
+
+      try {
+        const res  = await fetch(`${API}/can-spin?session=${encodeURIComponent(session)}`, { mode: 'cors' });
+        const data = await res.json();
+
+        if (!data.logged_in) {
+          // сессия невалидна/протухла — просим войти снова
+          localStorage.removeItem('mezets_session');
+          loginBlock.style.display = 'block';
+          spinBlock.style.display  = 'none';
+          setupLoginButton();
+          return;
+        }
+
+        loginBlock.style.display = 'none';
+        spinBlock.style.display  = 'block';
+        document.getElementById('loggedAs').textContent = 'Вы вошли через Discord';
+
+        if (!data.can_spin) {
+          btn.textContent = 'Уже крутил';
+          btn.style.opacity = '0.4';
+          btn.style.cursor  = 'not-allowed';
+          btn.onclick = null;
+        } else {
+          btn.textContent = 'Крутить';
+          btn.style.opacity = '1';
+          btn.style.cursor  = 'pointer';
+          btn.onclick = spin;
+        }
+      } catch(e) {
+        console.error('Ошибка проверки статуса', e);
+      }
+    }
+
+    /* =========================
+       АНИМАЦИЯ ПОЛОСЫ
+    ========================= */
     function buildStrip(winnerDiscount) {
       stripEl.innerHTML = '';
       for (let i = 0; i < TOTAL; i++) {
@@ -445,6 +564,7 @@
           btn.textContent = 'Уже крутил';
           btn.style.opacity = '0.4';
           btn.style.cursor  = 'not-allowed';
+          btn.onclick = null;
         }, 3500);
       }));
     }
@@ -454,6 +574,9 @@
 
     async function spin() {
       if (spinning) return;
+      const session = currentSession();
+      if (!session) { checkCanSpin(); return; }
+
       spinning = true;
 
       const btn = document.getElementById('spinBtn');
@@ -465,11 +588,10 @@
       document.getElementById('copiedMsg').classList.remove('show');
 
       try {
-        const res  = await fetch(`${API}/spin`, { mode: 'cors' });
+        const res  = await fetch(`${API}/spin?session=${encodeURIComponent(session)}`, { mode: 'cors' });
         const data = await res.json();
 
         if (data.error === 'already_spun') {
-          // уже крутил
           spinning = false;
           btn.textContent = 'Уже крутил';
           btn.style.opacity = '0.4';
@@ -479,7 +601,13 @@
           return;
         }
 
-        // запускаем анимацию с результатом от сервера
+        if (data.error === 'not_logged_in') {
+          spinning = false;
+          localStorage.removeItem('mezets_session');
+          checkCanSpin();
+          return;
+        }
+
         runAnimation(data.discount, data.code);
 
       } catch(e) {
@@ -487,21 +615,6 @@
         btn.textContent = 'Ошибка, попробуй ещё';
         btn.style.opacity = '1';
       }
-    }
-
-    // При открытии рулетки — проверяем можно ли крутить
-    async function checkCanSpin() {
-      try {
-        const res  = await fetch(`${API}/can-spin`, { mode: 'cors' });
-        const data = await res.json();
-        if (!data.can_spin) {
-          const btn = document.getElementById('spinBtn');
-          btn.textContent = 'Уже крутил';
-          btn.style.opacity = '0.4';
-          btn.style.cursor  = 'not-allowed';
-          btn.onclick = null;
-        }
-      } catch(e) { /* тихо игнорируем */ }
     }
 
     function copyCode() {
@@ -525,6 +638,19 @@
     function closeOnBg(e) {
       if (e.target === document.getElementById('rouletteOverlay')) closeRoulette();
     }
+
+    // если пользователь вернулся от Discord с ?session= в URL — сразу открываем рулетку
+    (function autoOpenIfReturned() {
+      if (getSessionFromUrl()) {
+        // initSession() уже сохранил и почистил URL к этому моменту (выполняется раньше по порядку)
+      }
+    })();
+    window.addEventListener('DOMContentLoaded', () => {
+      // если только что вернулись с логина — откроем окно рулетки автоматически
+      if (currentSession() && window.location.search === '') {
+        // не обязательно автооткрывать, оставим по клику пользователя
+      }
+    });
 
     /* =========================
        СТАТИСТИКА
@@ -556,7 +682,7 @@
 
     async function loadStats() {
       try {
-        const res = await fetch('https://mez-production.up.railway.app/stats', { mode: 'cors' });
+        const res = await fetch(`${API}/stats`, { mode: 'cors' });
         if (!res.ok) throw new Error();
         const d = await res.json();
         const orders = extractNumber(d.total_orders);
