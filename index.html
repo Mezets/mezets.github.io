@@ -6,7 +6,7 @@
 <title>Mezets</title>
 
 <link rel="icon" href="favicon.png">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://googleapis.com" rel="stylesheet">
 
 <style>
 *{
@@ -55,34 +55,40 @@ canvas{
     75%{transform:translate(10px,20px) scale(1.03);}
 }
 
+/* 📦 КОНТЕЙНЕР ДЛЯ ДВУХ КАРТОЧЕК */
+.main-container {
+    display: flex;
+    gap: 40px;
+    z-index: 2;
+    transform-style: preserve-3d;
+}
+
 /* 💠 CARD (POWERED 3D) */
 .card{
     position:relative;
-    z-index:2;
-
     width:340px;
     padding:28px;
-
     text-align:center;
-
     border-radius:20px;
-
     background:rgba(255,0,0,0.05);
     border:1px solid rgba(255,0,0,0.3);
     backdrop-filter:blur(25px);
-
     transform-style:preserve-3d;
-
     transition:transform 0.08s linear;
-
     animation:cardBreath 6s ease-in-out infinite;
-
     box-shadow:
         0 0 25px rgba(255,0,0,0.2),
         0 0 60px rgba(255,0,0,0.08);
 }
 
-/* 🌬️ breathing card */
+/* Вторая карточка со статистикой */
+.stats-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+}
+
 @keyframes cardBreath{
     0%,100%{
         box-shadow:
@@ -102,11 +108,10 @@ canvas{
     height:115px;
     border-radius:50%;
     object-fit:cover;
-
     border:2px solid rgba(255,0,0,0.4);
-    margin-bottom:12px;
-
+    margin: 0 auto 12px auto;
     box-shadow:0 0 18px rgba(255,0,0,0.25);
+    display: block;
 }
 
 /* ✨ NAME (NEON CORE BREATH) */
@@ -114,16 +119,14 @@ canvas{
     font-size:30px;
     font-weight:700;
     margin-bottom:18px;
-
     color:#ff2a2a;
     letter-spacing:2px;
-
     text-shadow:
         0 0 8px rgba(255,0,0,0.6),
         0 0 20px rgba(255,0,0,0.3),
         0 0 2px rgba(255,255,255,0.4);
-
     animation:breath 4s ease-in-out infinite;
+    text-align: center;
 }
 
 @keyframes breath{
@@ -146,23 +149,18 @@ canvas{
 .btn{
     display:block;
     text-decoration:none;
-
     color:#ff3b3b;
     padding:12px;
     margin:8px 0;
-
     border-radius:12px;
-
     background:rgba(255,0,0,0.06);
     border:1px solid rgba(255,0,0,0.25);
-
     position:relative;
     overflow:hidden;
-
     transition:0.2s ease;
+    text-align: center;
 }
 
-/* light sweep */
 .btn::before{
     content:"";
     position:absolute;
@@ -170,9 +168,7 @@ canvas{
     left:-120%;
     width:120%;
     height:100%;
-
     background:linear-gradient(120deg, transparent, rgba(255,0,0,0.35), transparent);
-
     transition:0.5s;
 }
 
@@ -182,11 +178,9 @@ canvas{
 
 .btn:hover{
     transform:scale(1.06) translateY(-2px);
-
     box-shadow:
         0 0 20px rgba(255,0,0,0.35),
         0 0 45px rgba(255,0,0,0.15);
-
     background:rgba(255,0,0,0.14);
 }
 
@@ -194,11 +188,25 @@ canvas{
     transform:scale(0.98);
 }
 
-/* 🌌 stars */
-canvas{
-    position:fixed;
-    inset:0;
-    z-index:0;
+/* 📊 СТИЛИ ДЛЯ ДИСКОРД СТАТИСТИКИ */
+.stat-block {
+    margin-bottom: 20px;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: rgba(255, 40, 40, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 14px;
+    color: #ffffff;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
 }
 </style>
 </head>
@@ -208,21 +216,42 @@ canvas{
 <canvas id="stars"></canvas>
 <div class="nebula" id="nebula"></div>
 
-<div class="card" id="card">
+<!-- Карта-контейнер объединяет обе панели -->
+<div class="main-container" id="mainContainer">
 
-    <img src="avatar.png" class="avatar">
+    <!-- Левая карточка (Профиль) -->
+    <div class="card" id="card1">
+        <img src="avatar.png" class="avatar">
+        <div class="name">Mezets</div>
+        <a class="btn" href="https://steamcommunity.com" target="_blank">Steam</a>
+        <a class="btn" href="https://faceit.com" target="_blank">FACEIT</a>
+        <a class="btn" href="https://epicgames.com" target="_blank">Epic Games</a>
+        <a class="btn" href="https://roblox.com" target="_blank">Roblox</a>
+    </div>
 
-    <div class="name">Mezets</div>
+    <!-- Правая карточка (Сервер Discord) -->
+    <div class="card stats-card" id="card2">
+        <div class="name" style="font-size: 22px; margin-bottom: 28px;">Discord Bot</div>
+        
+        <div class="stat-block">
+            <div class="stat-label">📦 Всего выполнено заказов</div>
+            <div class="stat-value" id="totalOrders">Загрузка...</div>
+        </div>
 
-    <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank">Steam</a>
-    <a class="btn" href="https://www.faceit.com/ru/players/Mezets1337" target="_blank">FACEIT</a>
-    <a class="btn" href="https://store.epicgames.com/u/dfdc88256ae04f67959802a29365926f" target="_blank">Epic Games</a>
-    <a class="btn" href="https://www.roblox.com/users/817592228/profile" target="_blank">Roblox</a>
+        <div class="stat-block">
+            <div class="stat-label">⭐ Средний рейтинг</div>
+            <div class="stat-value" id="avgRating">Загрузка...</div>
+        </div>
+
+        <div class="stat-block">
+            <div class="stat-label">📅 Период выполнения заказов</div>
+            <div class="stat-value" id="period">Загрузка...</div>
+        </div>
+    </div>
 
 </div>
 
 <script>
-
 /* 🌌 STARS */
 const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
@@ -246,7 +275,7 @@ for(let i=0;i<120;i++){
 let mx = 0, my = 0;
 let cx = 0, cy = 0;
 
-const card = document.getElementById("card");
+const mainContainer = document.getElementById("mainContainer");
 const nebula = document.getElementById("nebula");
 
 document.addEventListener("mousemove",(e)=>{
@@ -276,16 +305,13 @@ function animate(){
     }
 
     /* 🌫️ nebula drift */
-    nebula.style.transform = `
-        translate(${cx*0.5}px, ${cy*0.5}px) scale(1.05)
-    `;
+    nebula.style.transform = `translate(${cx*0.5}px, ${cy*0.5}px) scale(1.05)`;
 
-    /* 🎮 3D CARD POWER TILT */
-    card.style.transform = `
+    /* 🎮 3D CONTAINER POWER TILT */
+    mainContainer.style.transform = `
         perspective(900px)
-        rotateY(${cx * 0.6}deg)
-        rotateX(${-cy * 0.6}deg)
-        translateZ(20px)
+        rotateY(${cx * 0.5}deg)
+        rotateX(${-cy * 0.5}deg)
     `;
 
     requestAnimationFrame(animate);
@@ -293,11 +319,38 @@ function animate(){
 
 animate();
 
-window.addEventListener("resize", ()=>{
+window.addEventListener("resize", () => {
     canvas.width = innerWidth;
     canvas.height = innerHeight;
 });
 
+/* 📡 АВТОМАТИЧЕСКАЯ ЗАГРУЗКА ДАННЫХ ИЗ RAILWAY */
+function fetchStats() {
+    fetch("https://railway.app")
+        .then(response => response.json())
+        .then(data => {
+            if (!data.error) {
+                document.getElementById("totalOrders").textContent = data.total_orders;
+                document.getElementById("avgRating").textContent = data.average_rating;
+                document.getElementById("period").textContent = data.period;
+            } else {
+                showError();
+            }
+        })
+        .catch(err => {
+            console.error("Ошибка сети:", err);
+            showError();
+        });
+}
+
+function showError() {
+    document.getElementById("totalOrders").textContent = "Ошибка загрузки";
+    document.getElementById("avgRating").textContent = "Ошибка загрузки";
+    document.getElementById("period").textContent = "Ошибка загрузки";
+}
+
+// Запускаем получение данных при старте страницы
+fetchStats();
 </script>
 
 </body>
