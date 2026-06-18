@@ -7,18 +7,21 @@
 
 <link rel="icon" href="favicon.png">
 
-<!-- 🔤 fonts -->
+<!-- 🔤 FONT (global fix) -->
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
+/* 💣 FORCE FONT ON EVERYTHING */
+html, body, div, span, a, p {
+    font-family: 'Rajdhani', sans-serif !important;
+}
+
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
 }
 
-/* default font */
 body{
     height:100vh;
     overflow:hidden;
@@ -26,22 +29,15 @@ body{
     justify-content:center;
     align-items:center;
     background:#050000;
-    font-family:'Rajdhani',sans-serif;
 }
 
-/* pixel font helper */
-.pixel{
-    font-family:'Press Start 2P', monospace;
-}
-
-/* canvas */
+/* 🌌 background */
 canvas{
     position:fixed;
     inset:0;
     z-index:0;
 }
 
-/* nebula */
 .nebula{
     position:fixed;
     inset:0;
@@ -53,15 +49,14 @@ canvas{
     filter:blur(90px);
 }
 
-/* layout */
+/* layout FIX */
 .main-container{
     display:flex;
     gap:40px;
     z-index:2;
-    transition:transform 0.1s linear;
 }
 
-/* card */
+/* cards */
 .card{
     width:340px;
     padding:28px;
@@ -69,10 +64,9 @@ canvas{
     background:rgba(255,0,0,0.05);
     border:1px solid rgba(255,0,0,0.3);
     backdrop-filter:blur(25px);
-    box-shadow:0 0 35px rgba(255,0,0,0.2);
 }
 
-/* avatar */
+/* avatar FIX */
 .avatar{
     width:115px;
     height:115px;
@@ -92,7 +86,7 @@ canvas{
     margin-bottom:18px;
 }
 
-/* buttons (glow restored) */
+/* buttons */
 .btn{
     display:block;
     padding:12px;
@@ -103,48 +97,16 @@ canvas{
     border-radius:12px;
     background:rgba(255,0,0,0.06);
     border:1px solid rgba(255,0,0,0.25);
-    position:relative;
-    overflow:hidden;
-    transition:0.2s;
 }
 
-.btn::before{
-    content:"";
-    position:absolute;
-    top:0;
-    left:-120%;
-    width:120%;
-    height:100%;
-    background:linear-gradient(120deg,transparent,rgba(255,0,0,0.35),transparent);
-    transition:0.5s;
-}
-
-.btn:hover::before{
-    left:120%;
-}
-
-.btn:hover{
-    transform:scale(1.06);
-    box-shadow:0 0 25px rgba(255,0,0,0.4);
-}
-
-/* stats */
-.stats-card{
+/* stats CENTER FIX */
+.stats{
     text-align:center;
 }
 
-/* discord icon */
-.discord-icon{
-    width:60px;
-    height:60px;
-    margin:0 auto 10px;
-    display:block;
-    filter:drop-shadow(0 0 10px rgba(255,0,0,0.4));
-}
-
-/* big text */
+/* BIG VALUES */
 .big{
-    font-size:26px;
+    font-size:28px;
     font-weight:700;
     color:white;
 }
@@ -153,19 +115,19 @@ canvas{
 .label{
     font-size:12px;
     color:rgba(255,150,150,0.9);
-    margin:6px 0;
+    margin-bottom:10px;
 }
 
-/* stars */
+/* ⭐ stars FIX */
 .stars{
     display:flex;
     justify-content:center;
-    gap:5px;
+    gap:6px;
     margin:10px 0;
 }
 
 .star{
-    font-size:22px;
+    font-size:24px;
     color:rgba(255,255,255,0.2);
 }
 
@@ -173,15 +135,23 @@ canvas{
     color:#ff2a2a;
     text-shadow:0 0 10px rgba(255,0,0,0.6);
 }
+
+/* discord icon FIX */
+.discord-icon{
+    width:60px;
+    height:60px;
+    display:block;
+    margin:0 auto 10px;
+}
 </style>
 </head>
 
 <body>
 
-<canvas id="stars"></canvas>
-<div class="nebula" id="nebula"></div>
+<canvas id="bg"></canvas>
+<div class="nebula"></div>
 
-<div class="main-container" id="container">
+<div class="main-container">
 
 <!-- PROFILE -->
 <div class="card">
@@ -195,25 +165,23 @@ canvas{
 </div>
 
 <!-- STATS -->
-<div class="card stats-card">
+<div class="card stats">
 
+    <!-- FIXED ICON -->
     <img src="avatar_server.png" class="discord-icon">
 
-    <!-- TITLE (pixel) -->
-    <div class="name pixel" style="font-size:18px;">
-        DISCORD SERVER
-    </div>
+    <div class="name" style="font-size:20px;">Discord Server</div>
 
     <!-- ORDERS -->
-    <div class="big pixel">71</div>
+    <div class="big">71 шт.</div>
     <div class="label">📦 Заказы</div>
 
-    <!-- RATING -->
+    <!-- STARS -->
     <div class="label">⭐ Рейтинг</div>
     <div class="stars" id="stars"></div>
 
     <!-- PERIOD -->
-    <div class="big pixel">2023 → 2026</div>
+    <div class="big">С 2023 по 2026-05-24</div>
     <div class="label">📅 Период</div>
 
 </div>
@@ -221,46 +189,55 @@ canvas{
 </div>
 
 <script>
-/* background stars */
-const canvas=document.getElementById("stars");
-const ctx=canvas.getContext("2d");
+/* ⭐ STARS FIX (guaranteed) */
+window.onload = function(){
 
-canvas.width=innerWidth;
-canvas.height=innerHeight;
+    const container = document.getElementById("stars");
+    const rating = 5;
 
-let stars=[];
+    for(let i=1;i<=5;i++){
+        const star = document.createElement("div");
+        star.className = "star";
+        star.textContent = "★";
 
-for(let i=0;i<140;i++){
+        if(i <= rating){
+            star.classList.add("full");
+        }
+
+        container.appendChild(star);
+    }
+};
+
+/* 🌌 background FIX */
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let stars = [];
+
+for(let i=0;i<120;i++){
     stars.push({
         x:Math.random()*canvas.width,
         y:Math.random()*canvas.height,
-        r:Math.random()*1.4,
-        dx:(Math.random()-0.5)*0.2,
-        dy:(Math.random()-0.5)*0.2
+        r:Math.random()*1.3,
+        dx:(Math.random()-0.5)*0.15,
+        dy:(Math.random()-0.5)*0.15
     });
 }
-
-let mx=0,my=0,cx=0,cy=0;
-
-document.addEventListener("mousemove",(e)=>{
-    mx=(e.clientX/innerWidth-0.5)*40;
-    my=(e.clientY/innerHeight-0.5)*30;
-});
 
 function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    cx+=(mx-cx)*0.05;
-    cy+=(my-cy)*0.05;
-
     for(let s of stars){
         ctx.beginPath();
         ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-        ctx.fillStyle="rgba(255,0,0,0.7)";
+        ctx.fillStyle="rgba(255,0,0,0.6)";
         ctx.fill();
 
-        s.x+=s.dx+cx*0.02;
-        s.y+=s.dy+cy*0.02;
+        s.x+=s.dx;
+        s.y+=s.dy;
 
         if(s.x<0) s.x=canvas.width;
         if(s.x>canvas.width) s.x=0;
@@ -268,28 +245,10 @@ function animate(){
         if(s.y>canvas.height) s.y=0;
     }
 
-    document.getElementById("container").style.transform=
-        `perspective(900px) rotateY(${cx*0.4}deg) rotateX(${-cy*0.3}deg)`;
-
-    document.getElementById("nebula").style.transform=
-        `translate(${cx*0.3}px,${cy*0.3}px)`;
-
     requestAnimationFrame(animate);
 }
 
 animate();
-
-/* rating stars */
-const rating = 5;
-const container = document.getElementById("stars");
-
-for(let i=1;i<=5;i++){
-    const star=document.createElement("div");
-    star.classList.add("star");
-    if(i<=rating) star.classList.add("full");
-    star.textContent="★";
-    container.appendChild(star);
-}
 </script>
 
 </body>
