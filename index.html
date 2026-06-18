@@ -6,7 +6,6 @@
 <title>Mezets</title>
 
 <link rel="icon" href="favicon.png">
-
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
@@ -19,6 +18,7 @@ html, body{
     overflow:hidden;
 }
 
+/* ===== BACKGROUND ===== */
 canvas{
     position:fixed;
     inset:0;
@@ -42,6 +42,7 @@ canvas{
     50%{transform:translate(20px,-15px) scale(1.05);}
 }
 
+/* ===== LAYOUT ===== */
 .main{
     display:flex;
     gap:40px;
@@ -52,21 +53,30 @@ canvas{
     z-index:2;
 }
 
+/* ===== CARD ===== */
 .card{
-    width:340px;
+    width:360px;
+    height:520px;
+
     padding:26px;
     border-radius:18px;
+
     background:rgba(255,0,0,0.05);
     border:1px solid rgba(255,0,0,0.25);
     backdrop-filter:blur(20px);
-    box-shadow:0 0 40px rgba(255,0,0,0.15);
+
+    box-shadow:
+        0 0 25px rgba(255,0,0,0.2),
+        inset 0 0 15px rgba(255,0,0,0.1);
+
     transform-style:preserve-3d;
-    transition:transform 0.15s ease;
+    transition:transform 0.08s linear, box-shadow 0.3s;
 }
 
+/* ===== AVATAR ===== */
 .avatar, .server-avatar{
-    width:115px;
-    height:115px;
+    width:120px;
+    height:120px;
     border-radius:50%;
     display:block;
     margin:0 auto 12px;
@@ -74,76 +84,90 @@ canvas{
     object-fit:cover;
 }
 
+/* ===== NAME ===== */
 .name{
     text-align:center;
-    font-size:18px;
+    font-size:16px;
     color:#ff2a2a;
-    margin-bottom:16px;
+    margin-bottom:18px;
 }
 
+/* ===== BUTTONS ===== */
 .btn{
     display:block;
     padding:10px;
     margin:8px 0;
     text-align:center;
     text-decoration:none;
+
     color:#ff3b3b;
     border-radius:10px;
+
     background:rgba(255,0,0,0.05);
     border:1px solid rgba(255,0,0,0.25);
+
     transition:0.2s;
+    position:relative;
+    overflow:hidden;
+}
+
+.btn::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(120deg,transparent,rgba(255,0,0,0.4),transparent);
+    transform:translateX(-120%);
+    transition:0.5s;
+}
+
+.btn:hover::after{
+    transform:translateX(120%);
 }
 
 .btn:hover{
-    transform:scale(1.05);
-    box-shadow:0 0 20px rgba(255,0,0,0.3);
+    transform:scale(1.08);
+    box-shadow:0 0 22px rgba(255,0,0,0.4);
 }
 
-.stats{
+/* ===== BLOCKS ===== */
+.block{
+    margin:14px 0;
     text-align:center;
 }
 
-.block{
-    margin:14px 0;
-}
-
 .label{
-    font-size:10px;
+    font-size:9px;
     color:rgba(255,180,180,0.85);
 }
 
 .value{
-    font-size:18px;
+    font-size:16px;
     color:#fff;
-    margin-top:8px;
-    display:block;
+    margin-top:6px;
 }
 
+/* ===== STARS ===== */
 .stars{
     display:flex;
     justify-content:center;
-    gap:4px;
+    gap:6px;
     margin-top:10px;
 }
 
 .star{
+    font-size:20px;
     color:rgba(255,255,255,0.2);
-    font-size:16px;
+    transition:0.3s;
 }
 
 .star.full{
     color:#ff2a2a;
-    animation:pop 0.4s ease forwards;
+    animation:starPop 0.4s ease forwards;
 }
 
-@keyframes pop{
-    0%{transform:scale(0.5) rotate(0deg);}
-    100%{transform:scale(1) rotate(360deg);}
-}
-
-@keyframes countUp{
-    from{filter:blur(6px); transform:translateY(6px);}
-    to{filter:blur(0); transform:translateY(0);}
+@keyframes starPop{
+    0%{transform:scale(0.4) rotate(0deg);}
+    100%{transform:scale(1.2) rotate(360deg);}
 }
 
 </style>
@@ -160,20 +184,20 @@ canvas{
     <img src="avatar.png" class="avatar">
     <div class="name">Mezets</div>
 
-    <a class="btn" href="#">Steam</a>
-    <a class="btn" href="#">FACEIT</a>
-    <a class="btn" href="#">Epic Games</a>
-    <a class="btn" href="#">Roblox</a>
+    <a class="btn">Steam</a>
+    <a class="btn">FACEIT</a>
+    <a class="btn">Epic Games</a>
+    <a class="btn">Roblox</a>
 </div>
 
-<div class="card stats" id="rightCard">
+<div class="card" id="rightCard">
 
     <img src="avatar_server.png" class="server-avatar">
     <div class="name">Discord Server</div>
 
     <div class="block">
         <div class="label">Заказы</div>
-        <span class="value" id="orders">0</span>
+        <div class="value" id="orders">0</div>
     </div>
 
     <div class="block">
@@ -182,8 +206,8 @@ canvas{
     </div>
 
     <div class="block">
-        <div class="label">Период</div>
-        <span class="value" id="period">2023 → 2026-05-24</span>
+        <div class="label">Период ➜</div>
+        <div class="value">2023 → 2026-05-24</div>
     </div>
 
 </div>
@@ -192,58 +216,60 @@ canvas{
 
 <script>
 
-const leftCard = document.getElementById("leftCard");
-const rightCard = document.getElementById("rightCard");
+/* ===== 3D TILT (stronger) ===== */
+const cards = document.querySelectorAll(".card");
 
-function tilt(card, e){
-    const r = card.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width;
-    const y = (e.clientY - r.top) / r.height;
+cards.forEach(card=>{
+    card.addEventListener("mousemove",(e)=>{
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left)/r.width;
+        const y = (e.clientY - r.top)/r.height;
 
-    const rotX = (y - 0.5) * -12;
-    const rotY = (x - 0.5) * 12;
+        const rotY = (x - 0.5) * 25;
+        const rotX = (y - 0.5) * -25;
 
-    card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-}
+        card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(10px)`;
+    });
 
-[leftCard, rightCard].forEach(card=>{
-    card.addEventListener("mousemove", e=>tilt(card,e));
-    card.addEventListener("mouseleave", ()=>card.style.transform="rotateX(0) rotateY(0)");
+    card.addEventListener("mouseleave",()=>{
+        card.style.transform = "rotateX(0) rotateY(0)";
+    });
 });
 
+/* ===== STARS ===== */
 const starsEl = document.getElementById("stars");
 const rating = 5;
 
-for(let i=1;i<=5;i++){
+for(let i=0;i<5;i++){
     const s = document.createElement("div");
     s.className = "star";
     s.textContent = "★";
     starsEl.appendChild(s);
 }
 
-let starIndex = 0;
-function animateStars(){
-    if(starIndex < rating){
-        starsEl.children[starIndex].classList.add("full");
-        starIndex++;
-        setTimeout(animateStars, 200);
+let i = 0;
+(function animStars(){
+    if(i < rating){
+        starsEl.children[i].classList.add("full");
+        i++;
+        setTimeout(animStars,150);
     }
-}
-animateStars();
+})();
 
+/* ===== ORDERS ANIMATION ===== */
 const ordersEl = document.getElementById("orders");
-let orders = 0;
-const targetOrders = 71;
+let count = 0;
+const target = 71;
 
-function countOrders(){
-    if(orders < targetOrders){
-        orders++;
-        ordersEl.textContent = orders;
-        requestAnimationFrame(()=>setTimeout(countOrders, 20));
+(function countUp(){
+    if(count < target){
+        count++;
+        ordersEl.textContent = count;
+        requestAnimationFrame(()=>setTimeout(countUp,15));
     }
-}
-countOrders();
+})();
 
+/* ===== BACKGROUND ===== */
 const canvas = document.getElementById("bg");
 const ctx = canvas.getContext("2d");
 
@@ -256,13 +282,13 @@ window.addEventListener("resize", resize);
 
 let dots = [];
 
-for(let i=0;i<120;i++){
+for(let i=0;i<130;i++){
     dots.push({
         x:Math.random()*innerWidth,
         y:Math.random()*innerHeight,
-        r:Math.random()*1.4,
-        dx:(Math.random()-0.5)*0.2,
-        dy:(Math.random()-0.5)*0.2
+        r:Math.random()*1.6,
+        dx:(Math.random()-0.5)*0.25,
+        dy:(Math.random()-0.5)*0.25
     });
 }
 
@@ -272,16 +298,16 @@ function draw(){
     for(let d of dots){
         ctx.beginPath();
         ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
-        ctx.fillStyle="rgba(255,0,0,0.7)";
+        ctx.fillStyle="rgba(255,0,0,0.75)";
         ctx.fill();
 
         d.x += d.dx;
         d.y += d.dy;
 
-        if(d.x < -5) d.x = canvas.width + 5;
-        if(d.x > canvas.width + 5) d.x = -5;
-        if(d.y < -5) d.y = canvas.height + 5;
-        if(d.y > canvas.height + 5) d.y = -5;
+        if(d.x < -10) d.x = canvas.width + 10;
+        if(d.x > canvas.width + 10) d.x = -10;
+        if(d.y < -10) d.y = canvas.height + 10;
+        if(d.y > canvas.height + 10) d.y = -10;
     }
 
     requestAnimationFrame(draw);
