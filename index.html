@@ -595,6 +595,10 @@
           document.getElementById('resultCode').textContent = code;
           document.getElementById('resultCode').classList.add('show');
 
+          const winSound = new Audio('win.mp3');
+          winSound.volume = 0.8;
+          winSound.play();
+          
           spinning = false;
           const btn = document.getElementById('spinBtn');
 
