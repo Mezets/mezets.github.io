@@ -182,7 +182,7 @@ async function loadStats(){
             { mode: "cors" }
         );
 
-        if(!res.ok) throw new Error();
+        if(!res.ok) throw new Error("HTTP " + res.status);
 
         const data = await res.json();
 
@@ -198,7 +198,10 @@ async function loadStats(){
         renderStars(extractRating(data.average_rating));
 
     } catch(err){
-        // ❌ больше никаких "API error"
+        // Логируем причину в консоль, чтобы можно было понять, что именно сломалось
+        // (например CORS, недоступность сервера, неверный формат ответа и т.д.)
+        console.error("Stats fetch failed:", err);
+
         document.getElementById("orders").textContent = "—";
         document.getElementById("period").textContent = "—";
         document.getElementById("online").textContent = "—";
