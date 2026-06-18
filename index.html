@@ -3,97 +3,284 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Mezets</title>
 
 <link rel="icon" href="favicon.png">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 
-html,body{
-    margin:0;
-    padding:0;
-    background:#050000;
-    font-family:'Press Start 2P', monospace;
-    overflow:hidden;
+/* =========================
+   GLOBAL
+========================= */
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Rajdhani', sans-serif;
+    background: #050000;
 }
 
-.main{
+body{
     display:flex;
     justify-content:center;
     align-items:center;
+    min-height:100vh;
+    overflow-x:hidden;
+}
+
+/* background */
+canvas{
+    position:fixed;
+    inset:0;
+    z-index:0;
+}
+
+.nebula{
+    position:fixed;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    background:
+        radial-gradient(circle at 30% 40%, rgba(255,0,0,0.2), transparent 60%),
+        radial-gradient(circle at 70% 60%, rgba(255,0,0,0.1), transparent 65%);
+    filter:blur(90px);
+    animation:breathe 8s ease-in-out infinite;
+}
+
+@keyframes breathe{
+    0%,100%{ opacity:0.85; }
+    50%{     opacity:1;    }
+}
+
+/* MAIN */
+.main{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
     gap:40px;
-    height:100vh;
+    z-index:2;
+    padding:60px 20px;
 }
 
+/* CARD GLASS */
 .card{
-    width:360px;
-    height:520px;
-    padding:26px;
-    border-radius:0;
-    background:#0a0000;
-    border:1px solid #ff0000;
+    width:340px;
+    padding:28px;
+    border-radius:22px;
+
+    background:rgba(255,0,0,0.05);
+    border:1px solid rgba(255,0,0,0.2);
+
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    box-shadow:0 0 40px rgba(255,0,0,0.12);
+
+    transition:border-color .25s, box-shadow .25s;
 }
 
-.avatar,
-.server-avatar{
-    width:120px;
-    height:120px;
-    display:block;
+.card:hover{
+    border-color:rgba(255,0,0,0.4);
+    box-shadow:0 0 56px rgba(255,0,0,0.2);
+}
+
+/* AVATARS */
+.avatar-wrap{
+    position:relative;
+    width:115px;
     margin:0 auto 12px;
-    object-fit:cover;
-    border:1px solid #ff0000;
 }
 
+.avatar{
+    width:115px;
+    height:115px;
+    border-radius:50%;
+    object-fit:cover;
+    display:block;
+    border:2px solid rgba(255,0,0,0.35);
+}
+
+/* SERVER AVATAR */
+.server-avatar-wrap{
+    position:relative;
+    width:70px;
+    margin:0 auto 10px;
+}
+
+.server-avatar{
+    width:70px;
+    height:70px;
+    border-radius:16px;
+    object-fit:cover;
+    display:block;
+    border:1px solid rgba(255,0,0,0.4);
+    box-shadow:0 0 18px rgba(255,0,0,0.2);
+}
+
+.status-dot{
+    position:absolute;
+    bottom:-2px;
+    right:-2px;
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:#ff2a2a;
+    border:3px solid #1a0202;
+    box-shadow:0 0 10px rgba(255,0,0,0.8);
+    animation:pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse{
+    0%,100%{ opacity:1;    transform:scale(1);   }
+    50%{     opacity:0.45; transform:scale(0.85);}
+}
+
+/* NAME */
 .name{
     text-align:center;
-    font-size:16px;
-    color:#ff0000;
+    font-size:28px;
+    font-weight:700;
+    color:#ff2a2a;
     margin-bottom:18px;
+    letter-spacing:0.5px;
 }
 
+/* BUTTONS */
 .btn{
-    display:block;
-    padding:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:12px;
     margin:8px 0;
     text-align:center;
     text-decoration:none;
-    color:#ff0000;
-    border:1px solid #ff0000;
-    background:transparent;
+    font-weight:600;
+    font-size:16px;
+
+    color:#ff3b3b;
+    border-radius:12px;
+
+    background:rgba(255,0,0,0.05);
+    border:1px solid rgba(255,0,0,0.25);
+
+    transition:0.2s;
+    position:relative;
+    overflow:hidden;
 }
 
-.block{
-    margin:16px 0;
+.btn svg{
+    width:18px;
+    height:18px;
+    flex-shrink:0;
+}
+
+.btn::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-120%;
+    width:120%;
+    height:100%;
+    background:linear-gradient(120deg,transparent,rgba(255,0,0,0.35),transparent);
+    transition:0.5s;
+}
+
+.btn:hover::before{
+    left:120%;
+}
+
+.btn:hover{
+    transform:scale(1.04);
+    border-color:rgba(255,0,0,0.5);
+}
+
+/* STATS */
+.stats{
     text-align:center;
 }
 
+.stat-block{
+    margin:18px 0;
+}
+
+/* BIG VALUE */
+.big{
+    font-size:30px;
+    font-weight:700;
+    color:white;
+    font-variant-numeric:tabular-nums;
+}
+
+.big.online-value{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    color:#ff3b3b;
+}
+
+.live-dot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#ff2a2a;
+    box-shadow:0 0 8px rgba(255,0,0,0.9);
+    animation:pulse 1.8s ease-in-out infinite;
+}
+
+/* LABEL */
 .label{
-    font-size:9px;
-    color:#aaa;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    font-size:12px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:rgba(255,200,200,0.75);
+    margin:6px 0;
 }
 
-.value{
-    margin-top:8px;
-    font-size:14px;
-    color:#fff;
+.label svg{
+    width:13px;
+    height:13px;
+    opacity:0.8;
 }
 
+/* STARS */
 .stars{
     display:flex;
     justify-content:center;
-    gap:5px;
-    margin-top:8px;
+    gap:6px;
+    margin:10px 0;
 }
 
 .star{
-    color:#444;
-    font-size:20px;
+    font-size:22px;
+    color:rgba(255,255,255,0.2);
 }
 
 .star.full{
-    color:#ff0000;
+    color:#ff2a2a;
+    text-shadow:0 0 10px rgba(255,0,0,0.6);
+}
+
+@media (prefers-reduced-motion: reduce){
+    .nebula, .status-dot, .live-dot{
+        animation:none;
+    }
+}
+
+@media (max-width:760px){
+    .main{
+        gap:24px;
+        padding:40px 16px;
+    }
+    .card{
+        width:100%;
+        max-width:340px;
+    }
 }
 
 </style>
@@ -101,43 +288,80 @@ html,body{
 
 <body>
 
+<canvas id="bg"></canvas>
+<div class="nebula"></div>
+
 <div class="main">
 
+<!-- PROFILE -->
 <div class="card">
-    <img src="avatar.png" class="avatar">
-
+    <div class="avatar-wrap">
+        <img src="avatar.png" class="avatar">
+    </div>
     <div class="name">Mezets</div>
 
-    <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank">Steam</a>
-    <a class="btn" href="https://www.faceit.com/ru/players/Mezets1337" target="_blank">FACEIT</a>
-    <a class="btn" href="https://store.epicgames.com/u/dfdc88256ae04f67959802a29365926f" target="_blank">Epic Games</a>
-    <a class="btn" href="https://www.roblox.com/users/817592228/profile" target="_blank">Roblox</a>
+    <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M3 12h6M15 12h6"/></svg>
+        Steam
+    </a>
+    <a class="btn" href="https://www.faceit.com/ru/players/Mezets1337" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+        Faceit
+    </a>
+    <a class="btn" href="https://store.epicgames.com/u/dfdc88256ae04f67959802a29365926f" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8v8H8z"/></svg>
+        Epic Games
+    </a>
+    <a class="btn" href="https://www.roblox.com/users/817592228/profile" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="8" height="8" rx="1" transform="rotate(0 7 7)"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+        Roblox
+    </a>
 </div>
 
-<div class="card">
+<!-- STATS -->
+<div class="card stats">
 
-    <img src="avatar_server.png" class="server-avatar">
-
-    <div class="name">Discord Server</div>
-
-    <div class="block">
-        <div class="label">Заказы</div>
-        <div class="value" id="orders">—</div>
+    <div class="server-avatar-wrap">
+        <img src="avatar_server.png" class="server-avatar">
+        <div class="status-dot"></div>
     </div>
 
-    <div class="block">
-        <div class="label">Рейтинг</div>
+    <div class="name" style="font-size:20px;">Discord Server</div>
+
+    <!-- ORDERS -->
+    <div class="stat-block">
+        <div class="big" id="orders">—</div>
+        <div class="label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+            Заказы
+        </div>
+    </div>
+
+    <!-- STARS -->
+    <div class="stat-block">
+        <div class="label">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.8L6 21l1.6-7L2.2 9.2l7.1-.6z"/></svg>
+            Рейтинг
+        </div>
         <div class="stars" id="stars"></div>
     </div>
 
-    <div class="block">
-        <div class="label">Период</div>
-        <div class="value" id="period">—</div>
+    <!-- PERIOD -->
+    <div class="stat-block">
+        <div class="big" id="period" style="font-size:18px;">—</div>
+        <div class="label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+            Период
+        </div>
     </div>
 
-    <div class="block">
-        <div class="label">Онлайн</div>
-        <div class="value" id="online">—</div>
+    <!-- ONLINE -->
+    <div class="stat-block">
+        <div class="big online-value">
+            <span class="live-dot"></span>
+            <span id="online">—</span>
+        </div>
+        <div class="label">Онлайн сейчас</div>
     </div>
 
 </div>
@@ -146,6 +370,7 @@ html,body{
 
 <script>
 
+/* ⭐ STARS */
 function extractRating(value){
     if(!value) return 0;
     const match = String(value).match(/([\d.]+)/);
@@ -153,8 +378,8 @@ function extractRating(value){
 }
 
 function renderStars(rating){
-    const stars = document.getElementById("stars");
-    stars.innerHTML = "";
+    const el = document.getElementById("stars");
+    el.innerHTML = "";
 
     const rounded = Math.round(rating);
 
@@ -162,12 +387,8 @@ function renderStars(rating){
         const s = document.createElement("div");
         s.className = "star";
         s.textContent = "★";
-
-        if(i <= rounded){
-            s.classList.add("full");
-        }
-
-        stars.appendChild(s);
+        if(i <= rounded) s.classList.add("full");
+        el.appendChild(s);
     }
 }
 
@@ -175,6 +396,7 @@ function safe(value){
     return value ?? "—";
 }
 
+/* 📡 STATS API */
 async function loadStats(){
     try{
         const res = await fetch(
@@ -186,22 +408,14 @@ async function loadStats(){
 
         const data = await res.json();
 
-        document.getElementById("orders").textContent =
-            safe(data.total_orders);
-
-        document.getElementById("period").textContent =
-            safe(data.period);
-
-        document.getElementById("online").textContent =
-            data.online ?? "—";
+        document.getElementById("orders").textContent = safe(data.total_orders);
+        document.getElementById("period").textContent = safe(data.period);
+        document.getElementById("online").textContent = data.online ?? "—";
 
         renderStars(extractRating(data.average_rating));
 
     } catch(err){
-        // Логируем причину в консоль, чтобы можно было понять, что именно сломалось
-        // (например CORS, недоступность сервера, неверный формат ответа и т.д.)
         console.error("Stats fetch failed:", err);
-
         document.getElementById("orders").textContent = "—";
         document.getElementById("period").textContent = "—";
         document.getElementById("online").textContent = "—";
@@ -212,6 +426,68 @@ async function loadStats(){
 loadStats();
 setInterval(loadStats, 5000);
 
+/* 🌌 BACKGROUND PARTICLES */
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+
+function resize(){
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+}
+resize();
+addEventListener("resize", resize);
+
+let dots = [];
+
+function initDots(){
+    dots = [];
+    const count = Math.round((innerWidth * innerHeight) / 9000);
+    for(let i=0;i<count;i++){
+        dots.push({
+            x:Math.random()*canvas.width,
+            y:Math.random()*canvas.height,
+            r:Math.random()*1.3 + 0.3,
+            dx:(Math.random()-0.5)*0.15,
+            dy:(Math.random()-0.5)*0.15
+        });
+    }
+}
+initDots();
+addEventListener("resize", initDots);
+
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    for(let d of dots){
+        ctx.beginPath();
+        ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+        ctx.fillStyle="rgba(255,0,0,0.6)";
+        ctx.fill();
+
+        d.x += d.dx;
+        d.y += d.dy;
+
+        if(d.x<0) d.x=canvas.width;
+        if(d.x>canvas.width) d.x=0;
+        if(d.y<0) d.y=canvas.height;
+        if(d.y>canvas.height) d.y=0;
+    }
+
+    requestAnimationFrame(animate);
+}
+
+if(!prefersReducedMotion){
+    animate();
+} else {
+    for(let d of dots){
+        ctx.beginPath();
+        ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+        ctx.fillStyle="rgba(255,0,0,0.6)";
+        ctx.fill();
+    }
+}
 </script>
 
 </body>
