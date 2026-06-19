@@ -446,24 +446,6 @@
 <script>
 
   /* =========================
-     MAINTENANCE
-  ========================= */
-  function showMaint(msg) {
-    if (msg) document.getElementById('maintToastMsg').innerHTML = msg;
-    document.getElementById('maintToast').classList.add('show');
-  }
-
-  function hideMaint() {
-    document.getElementById('maintToast').classList.remove('show');
-  }
-
-  // Автовключение через URL ?maintenance=1
-  (function() {
-    if (new URLSearchParams(window.location.search).get('maintenance') === '1') showMaint();
-  })();
-
-
-  /* =========================
      КОНФИГ
   ========================= */
   const API = 'https://mez-production.up.railway.app';
@@ -491,25 +473,49 @@
 
   const stripEl = document.getElementById('strip');
 
+  /* =========================
+     MAINTENANCE
+  ========================= */
+  function showMaint(msg) {
+    if (msg) document.getElementById('maintToastMsg').innerHTML = msg;
+    document.getElementById('maintToast').classList.add('show');
+  }
+  function hideMaint() {
+    document.getElementById('maintToast').classList.remove('show');
+  }
+  async function checkMaintenance() {
+    try {
+      const res  = await fetch(`${API}/maintenance-status`, { mode: 'cors' });
+      const data = await res.json();
+      if (data.on) showMaint(data.msg);
+      else hideMaint();
+    } catch(e) {}
+  }
+  checkMaintenance();
+  setInterval(checkMaintenance, 5000);
+
+  /* =========================
+     ТЕСТОВЫЙ РЕЖИМ
+  ========================= */
   function getTestKeyFromUrl() {
     const params = new URLSearchParams(window.location.search);
     return params.get('test_key');
   }
   const TEST_KEY = getTestKeyFromUrl();
 
+  /* =========================
+     СЕССИЯ DISCORD
+  ========================= */
   function getSessionFromUrl() {
     const params = new URLSearchParams(window.location.search);
     return params.get('session');
   }
-
   function getStoredSession() {
     return localStorage.getItem('mezets_session') || null;
   }
-
   function storeSession(token) {
     localStorage.setItem('mezets_session', token);
   }
-
   (function initSession() {
     const urlSession = getSessionFromUrl();
     if (urlSession) {
@@ -518,11 +524,13 @@
       window.history.replaceState({}, document.title, cleanUrl);
     }
   })();
-
   function currentSession() {
     return getStoredSession();
   }
 
+  /* =========================
+     ЛОГИН ЧЕРЕЗ DISCORD
+  ========================= */
   async function setupLoginButton() {
     try {
       const res  = await fetch(`${API}/discord-login-url`, { mode: 'cors' });
@@ -533,24 +541,26 @@
     }
   }
 
+  /* =========================
+     ПРОВЕРКА СТАТУСА
+  ========================= */
   async function checkCanSpin() {
     const loginBlock = document.getElementById('loginBlock');
-    const spinBlock   = document.getElementById('spinBlock');
-    const btn = document.getElementById('spinBtn');
+    const spinBlock  = document.getElementById('spinBlock');
+    const btn        = document.getElementById('spinBtn');
 
     if (TEST_KEY) {
       loginBlock.style.display = 'none';
       spinBlock.style.display  = 'block';
       document.getElementById('loggedAs').textContent = 'Тестовый режим';
-      btn.textContent = 'Крутить';
+      btn.textContent   = 'Крутить';
       btn.style.opacity = '1';
       btn.style.cursor  = 'pointer';
-      btn.onclick = spin;
+      btn.onclick       = spin;
       return;
     }
 
     const session = currentSession();
-
     if (!session) {
       loginBlock.style.display = 'block';
       spinBlock.style.display  = 'none';
@@ -575,21 +585,24 @@
       document.getElementById('loggedAs').textContent = 'Вы вошли через Discord';
 
       if (!data.can_spin) {
-        btn.textContent = 'Уже крутил';
+        btn.textContent   = 'Уже крутил';
         btn.style.opacity = '0.4';
         btn.style.cursor  = 'not-allowed';
-        btn.onclick = null;
+        btn.onclick       = null;
       } else {
-        btn.textContent = 'Крутить';
+        btn.textContent   = 'Крутить';
         btn.style.opacity = '1';
         btn.style.cursor  = 'pointer';
-        btn.onclick = spin;
+        btn.onclick       = spin;
       }
     } catch(e) {
       console.error('Ошибка проверки статуса', e);
     }
   }
 
+  /* =========================
+     АНИМАЦИЯ ПОЛОСЫ
+  ========================= */
   function buildStrip(winnerDiscount) {
     stripEl.innerHTML = '';
     for (let i = 0; i < TOTAL; i++) {
@@ -606,17 +619,13 @@
 
   function runAnimation(winnerDiscount, code) {
     buildStrip(winnerDiscount);
-
     const wrapW   = stripEl.parentElement.offsetWidth;
     const targetX = WIN_IDX * ITEM_W + ITEM_W / 2 - wrapW / 2;
-
     stripEl.style.transition = 'none';
     stripEl.style.transform  = 'translateX(0)';
-
     requestAnimationFrame(() => requestAnimationFrame(() => {
       stripEl.style.transition = 'transform 3.4s cubic-bezier(0.17,0.67,0.10,1.0)';
       stripEl.style.transform  = `translateX(-${targetX}px)`;
-
       setTimeout(() => {
         document.getElementById('spinSound').pause();
         document.getElementById('stopSound').currentTime = 0;
@@ -627,20 +636,18 @@
         document.getElementById('resultPct').classList.add('show');
         document.getElementById('resultCode').textContent = code;
         document.getElementById('resultCode').classList.add('show');
-
         spinning = false;
         const btn = document.getElementById('spinBtn');
-
         if (TEST_KEY) {
-          btn.textContent = 'Крутить ещё';
+          btn.textContent   = 'Крутить ещё';
           btn.style.opacity = '1';
           btn.style.cursor  = 'pointer';
-          btn.onclick = spin;
+          btn.onclick       = spin;
         } else {
-          btn.textContent = 'Уже крутил';
+          btn.textContent   = 'Уже крутил';
           btn.style.opacity = '0.4';
           btn.style.cursor  = 'not-allowed';
-          btn.onclick = null;
+          btn.onclick       = null;
         }
       }, 3500);
     }));
@@ -651,12 +658,9 @@
 
   async function spin() {
     if (spinning) return;
-
     spinning = true;
     const snd = document.getElementById('spinSound');
-    snd.pause();
-    snd.currentTime = 0;
-    snd.play();
+    snd.pause(); snd.currentTime = 0; snd.play();
 
     let url;
     if (TEST_KEY) {
@@ -667,12 +671,9 @@
       url = `${API}/spin?session=${encodeURIComponent(session)}`;
     }
 
-    spinning = true;
-
     const btn = document.getElementById('spinBtn');
-    btn.textContent = '...';
+    btn.textContent   = '...';
     btn.style.opacity = '0.5';
-
     document.getElementById('resultPct').classList.remove('show');
     document.getElementById('resultCode').classList.remove('show');
     document.getElementById('copiedMsg').classList.remove('show');
@@ -680,29 +681,25 @@
     try {
       const res  = await fetch(url, { mode: 'cors' });
       const data = await res.json();
-
       if (data.error === 'already_spun') {
         spinning = false;
-        btn.textContent = 'Уже крутил';
+        btn.textContent   = 'Уже крутил';
         btn.style.opacity = '0.4';
         btn.style.cursor  = 'not-allowed';
         document.getElementById('resultPct').textContent = 'Вы уже крутили!';
         document.getElementById('resultPct').classList.add('show');
         return;
       }
-
       if (data.error === 'not_logged_in') {
         spinning = false;
         localStorage.removeItem('mezets_session');
         checkCanSpin();
         return;
       }
-
       runAnimation(data.discount, data.code);
-
     } catch(e) {
       spinning = false;
-      btn.textContent = 'Ошибка, попробуй ещё';
+      btn.textContent   = 'Ошибка, попробуй ещё';
       btn.style.opacity = '1';
     }
   }
@@ -720,11 +717,9 @@
     document.getElementById('rouletteOverlay').classList.add('open');
     checkCanSpin();
   }
-
   function closeRoulette() {
     document.getElementById('rouletteOverlay').classList.remove('open');
   }
-
   function closeOnBg(e) {
     if (e.target === document.getElementById('rouletteOverlay')) closeRoulette();
   }
@@ -735,7 +730,7 @@
   function animateCount(el, target, duration) {
     const start = performance.now();
     function step(now) {
-      const p = Math.min((now - start) / duration, 1);
+      const p    = Math.min((now - start) / duration, 1);
       const ease = p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
       el.textContent = Math.round(target * ease);
       if (p < 1) requestAnimationFrame(step);
@@ -761,7 +756,7 @@
     try {
       const res = await fetch(`${API}/stats`, { mode: 'cors' });
       if (!res.ok) throw new Error();
-      const d = await res.json();
+      const d      = await res.json();
       const orders = extractNumber(d.total_orders);
       const online = typeof d.online === 'number' ? d.online : extractNumber(d.online);
       const rating = Math.round(extractRating(d.average_rating));
@@ -798,7 +793,7 @@
      ЧАСТИЦЫ
   ========================= */
   const canvas = document.getElementById('bg');
-  const ctx = canvas.getContext('2d');
+  const ctx    = canvas.getContext('2d');
   function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
   resize(); addEventListener('resize', resize);
   let dots = [];
