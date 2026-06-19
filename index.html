@@ -290,8 +290,8 @@
 </head>
 <body>
 
-<audio id="spinSound" src="roulette-spin.mp3" preload="auto" loop></audio>
-<audio id="stopSound" src="roulette-stop.mp3" preload="auto"></audio>
+<audio id="spinSound" src="roulette-spin.mp3" preload="auto"></audio>
+<audio id="stopSound" src="win.mp3" preload="auto"></audio>
   
   <canvas id="bg"></canvas>
   <div class="fluff-wrap">
@@ -622,8 +622,10 @@
       if (spinning) return;
 
       spinning = true;
-      document.getElementById('spinSound').currentTime = 0;
-      document.getElementById('spinSound').play();
+      const snd = document.getElementById('spinSound');
+      snd.pause();
+      snd.currentTime = 0;
+      snd.play();
 
       let url;
       if (TEST_KEY) {
