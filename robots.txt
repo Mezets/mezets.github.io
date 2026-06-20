@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mezets.github.io/mezets.design/sitemap.xml
