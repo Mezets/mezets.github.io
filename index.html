@@ -80,7 +80,8 @@
     }
     .card:hover { border-color: rgba(255,0,0,0.4); box-shadow: 0 0 56px rgba(255,0,0,0.2); }
 
-    #statsCard { width: 420px; }
+    #statsCard { width: 460px; }
+    .stats-panel { min-height: 560px; }
 
     .avatar-wrap { position: relative; width: 115px; margin: 0 auto 12px; }
     .avatar { width: 115px; height: 115px; border-radius: 50%; object-fit: cover; display: block; border: 2px solid rgba(255,0,0,0.35); }
@@ -214,7 +215,7 @@
       <div class="avatar-wrap" id="faceitAvatarWrap" style="visibility:hidden;">
         <img class="avatar" id="faceitAvatarImg" src="" alt="Faceit avatar">
       </div>
-      <div class="name">FACEIT</div>
+      <div class="name" id="faceitNickname">FACEIT</div>
       <div id="faceitContent">
         <div class="stats-loading">Загрузка статистики...</div>
       </div>
@@ -226,7 +227,7 @@
         <img class="avatar" id="steamAvatarImg" src="" alt="Steam avatar">
         <span class="status-dot" id="steamStatusDot"></span>
       </div>
-      <div class="name">STEAM</div>
+      <div class="name" id="steamNickname">STEAM</div>
       <div id="steamContent">
         <div class="stats-loading">Загрузка статистики...</div>
       </div>
@@ -413,6 +414,9 @@
         document.getElementById('faceitAvatarImg').src = d.avatar;
         document.getElementById('faceitAvatarWrap').style.visibility = 'visible';
       }
+      if (d.nickname) {
+        document.getElementById('faceitNickname').textContent = d.nickname;
+      }
 
       let formHtml = '';
       if (d.recentForm) {
@@ -458,6 +462,9 @@
         document.getElementById('steamAvatarImg').src = d.avatar;
         document.getElementById('steamAvatarWrap').style.visibility = 'visible';
       }
+      if (d.personaName) {
+        document.getElementById('steamNickname').textContent = d.personaName;
+      }
 
       const dot = document.getElementById('steamStatusDot');
       dot.className = 'status-dot ' + (
@@ -475,12 +482,12 @@
         <div class="recent-games-label">ЧАСЫ В ИГРАХ</div>
         <div class="recent-games">
           <div class="recent-game-row">
-            <img class="recent-game-icon" src="https://cdn.cloudflare.steamstatic.com/steam/apps/730/capsule_184x69.jpg" alt="CS2">
+            ${d.cs2Icon ? `<img class="recent-game-icon" src="${d.cs2Icon}" alt="CS2">` : ''}
             <div class="recent-game-name">Counter-Strike 2</div>
             <div class="recent-game-hours">${d.cs2HoursTotal ?? '—'} ч</div>
           </div>
           <div class="recent-game-row">
-            <img class="recent-game-icon" src="https://cdn.cloudflare.steamstatic.com/steam/apps/570/capsule_184x69.jpg" alt="Dota 2">
+            ${d.dotaIcon ? `<img class="recent-game-icon" src="${d.dotaIcon}" alt="Dota 2">` : ''}
             <div class="recent-game-name">Dota 2</div>
             <div class="recent-game-hours">${d.dotaHoursTotal ?? '—'} ч</div>
           </div>
@@ -493,14 +500,13 @@
           <div class="recent-game-row">
             ${g.icon ? `<img class="recent-game-icon" src="${g.icon}" alt="">` : ''}
             <div class="recent-game-name">${g.name ?? '—'}</div>
-            <div class="recent-game-hours">${g.hoursTotal ?? '—'} ч</div>
+            <div class="recent-game-hours">${g.hours2Weeks ?? '—'} ч/2нед</div>
           </div>
         `).join('');
         recentGamesHtml = `<div class="recent-games-label">ПОСЛЕДНИЕ ИГРЫ</div><div class="recent-games">${rows}</div>`;
       }
 
       el.innerHTML = `
-        <div class="elo-sub" style="margin-top:-4px;">${d.personaName ?? ''}</div>
         ${currentGameHtml}
         <div class="stat-grid">
           <div class="stat-box"><div class="stat-value">${d.level ?? '—'}</div><div class="stat-label">STEAM LEVEL</div></div>
