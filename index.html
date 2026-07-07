@@ -121,6 +121,39 @@
     .elo-sub { text-align: center; font-size: 9px; color: #ff8080; margin-bottom: 4px; letter-spacing: .5px; }
     .stats-loading, .stats-error { text-align: center; font-size: 10px; color: #ff8080; padding: 24px 0; line-height: 1.8; }
 
+    .status-dot {
+      position: absolute; bottom: 3px; right: 3px;
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 3px solid #0a0000; box-shadow: 0 0 6px rgba(0,0,0,0.5);
+    }
+    .status-online   { background: #3ddc71; }
+    .status-ingame   { background: #4aa3ff; }
+    .status-away     { background: #f5a623; }
+    .status-offline  { background: #555; }
+
+    .current-game { text-align: center; font-size: 9px; color: #4aa3ff; margin: -6px 0 14px; line-height: 1.6; }
+
+    .form-row { display: flex; justify-content: center; gap: 6px; margin: 12px 0 4px; }
+    .form-dot {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: bold;
+    }
+    .form-dot.win  { background: rgba(61,220,113,0.15); color: #3ddc71; border: 1px solid rgba(61,220,113,0.4); }
+    .form-dot.loss { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.4); }
+    .form-label { text-align: center; font-size: 7px; color: #ff8080; opacity: .8; margin-bottom: 14px; letter-spacing: .5px; }
+
+    .recent-games { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .recent-game-row {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,0,0,0.05); border: 1px solid rgba(255,0,0,0.15);
+      border-radius: 8px; padding: 8px 10px;
+    }
+    .recent-game-icon { width: 24px; height: 24px; border-radius: 4px; flex-shrink: 0; }
+    .recent-game-name { font-size: 8px; color: #ff8080; flex: 1; line-height: 1.5; }
+    .recent-game-hours { font-size: 8px; color: #ff3b3b; white-space: nowrap; }
+    .recent-games-label { font-size: 7px; color: #ff8080; opacity: .8; letter-spacing: .5px; margin: 16px 0 8px; text-align: center; }
+
     @media (prefers-reduced-motion: reduce) { .fluff-1, .fluff-2 { animation: none; } }
     @media (max-width: 760px) {
       .main { gap: 24px; padding: 40px 16px; }
@@ -175,8 +208,8 @@
     </div>
 
     <div class="stats-panel active" id="statsPanelFaceit">
-      <div class="avatar-wrap" style="visibility:hidden;">
-        <img class="avatar" src="" alt="">
+      <div class="avatar-wrap" id="faceitAvatarWrap" style="visibility:hidden;">
+        <img class="avatar" id="faceitAvatarImg" src="" alt="Faceit avatar">
       </div>
       <div class="name">FACEIT</div>
       <div id="faceitContent">
@@ -187,6 +220,7 @@
     <div class="stats-panel" id="statsPanelSteam">
       <div class="avatar-wrap" id="steamAvatarWrap" style="visibility:hidden;">
         <img class="avatar" id="steamAvatarImg" src="" alt="Steam avatar">
+        <span class="status-dot" id="steamStatusDot"></span>
       </div>
       <div class="name">STEAM</div>
       <div id="steamContent">
@@ -370,9 +404,24 @@
       const losses = (matches !== null && wins !== null) ? (matches - wins) : null;
       const winRate = d.winRate ?? (matches && wins != null ? Math.round((wins / matches) * 1000) / 10 : null);
 
+      if (d.avatar) {
+        document.getElementById('faceitAvatarImg').src = d.avatar;
+        document.getElementById('faceitAvatarWrap').style.visibility = 'visible';
+      }
+
+      let formHtml = '';
+      if (d.recentForm) {
+        const dots = d.recentForm.split('').map(ch => {
+          const cls = ch === 'W' ? 'win' : 'loss';
+          return `<div class="form-dot ${cls}">${ch}</div>`;
+        }).join('');
+        formHtml = `<div class="form-row">${dots}</div><div class="form-label">ПОСЛЕДНИЕ МАТЧИ</div>`;
+      }
+
       el.innerHTML = `
         <div class="elo-big">${d.elo ?? '—'}</div>
         <div class="elo-sub">ELO${d.level ? ' • Уровень ' + d.level : ''}</div>
+        ${formHtml}
         <div class="stat-grid">
           <div class="stat-box"><div class="stat-value">${winRate ?? '—'}%</div><div class="stat-label">WIN RATE</div></div>
           <div class="stat-box"><div class="stat-value">${matches ?? '—'}</div><div class="stat-label">МАТЧЕЙ</div></div>
@@ -405,13 +454,40 @@
         document.getElementById('steamAvatarWrap').style.visibility = 'visible';
       }
 
+      const dot = document.getElementById('steamStatusDot');
+      dot.className = 'status-dot ' + (
+        d.currentGame ? 'status-ingame' :
+        d.statusCode === 1 ? 'status-online' :
+        (d.statusCode >= 2 && d.statusCode <= 6) ? 'status-away' :
+        'status-offline'
+      );
+
+      const currentGameHtml = d.currentGame
+        ? `<div class="current-game">Играет в: ${d.currentGame}</div>`
+        : '';
+
+      let recentGamesHtml = '';
+      if (d.recentGames && d.recentGames.length) {
+        const rows = d.recentGames.map(g => `
+          <div class="recent-game-row">
+            ${g.icon ? `<img class="recent-game-icon" src="${g.icon}" alt="">` : ''}
+            <div class="recent-game-name">${g.name ?? '—'}</div>
+            <div class="recent-game-hours">${g.hoursTotal ?? '—'} ч</div>
+          </div>
+        `).join('');
+        recentGamesHtml = `<div class="recent-games-label">ПОСЛЕДНИЕ ИГРЫ</div><div class="recent-games">${rows}</div>`;
+      }
+
       el.innerHTML = `
         <div class="elo-sub" style="margin-top:-4px;">${d.personaName ?? ''}</div>
+        ${currentGameHtml}
         <div class="stat-grid">
-          <div class="stat-box"><div class="stat-value">${d.status ?? '—'}</div><div class="stat-label">СТАТУС</div></div>
           <div class="stat-box"><div class="stat-value">${d.level ?? '—'}</div><div class="stat-label">STEAM LEVEL</div></div>
-          <div class="stat-box" style="grid-column: span 2;"><div class="stat-value">${d.cs2HoursTotal ?? '—'}</div><div class="stat-label">ЧАСОВ В CS2</div></div>
+          <div class="stat-box"><div class="stat-value">${d.cs2HoursTotal ?? '—'}</div><div class="stat-label">ЧАСОВ В CS2</div></div>
+          <div class="stat-box"><div class="stat-value">${d.games2WeeksCount ?? '—'}</div><div class="stat-label">ИГР ЗА 2 НЕД</div></div>
+          <div class="stat-box"><div class="stat-value">${d.hours2WeeksTotal ?? '—'}</div><div class="stat-label">ЧАСОВ ЗА 2 НЕД</div></div>
         </div>
+        ${recentGamesHtml}
       `;
     } catch (e) {
       el.innerHTML = '<div class="stats-error">Не удалось загрузить статистику Steam</div>';
