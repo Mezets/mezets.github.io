@@ -80,6 +80,8 @@
     }
     .card:hover { border-color: rgba(255,0,0,0.4); box-shadow: 0 0 56px rgba(255,0,0,0.2); }
 
+    #statsCard { width: 420px; }
+
     .avatar-wrap { position: relative; width: 115px; margin: 0 auto 12px; }
     .avatar { width: 115px; height: 115px; border-radius: 50%; object-fit: cover; display: block; border: 2px solid rgba(255,0,0,0.35); }
 
@@ -149,9 +151,12 @@
       background: rgba(255,0,0,0.05); border: 1px solid rgba(255,0,0,0.15);
       border-radius: 8px; padding: 8px 10px;
     }
-    .recent-game-icon { width: 24px; height: 24px; border-radius: 4px; flex-shrink: 0; }
-    .recent-game-name { font-size: 8px; color: #ff8080; flex: 1; line-height: 1.5; }
-    .recent-game-hours { font-size: 8px; color: #ff3b3b; white-space: nowrap; }
+    .recent-game-icon { width: 28px; height: 28px; border-radius: 4px; flex-shrink: 0; object-fit: cover; }
+    .recent-game-name {
+      font-size: 8px; color: #ff8080; flex: 1; line-height: 1.5; min-width: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .recent-game-hours { font-size: 8px; color: #ff3b3b; white-space: nowrap; flex-shrink: 0; }
     .recent-games-label { font-size: 7px; color: #ff8080; opacity: .8; letter-spacing: .5px; margin: 16px 0 8px; text-align: center; }
 
     @media (prefers-reduced-motion: reduce) { .fluff-1, .fluff-2 { animation: none; } }
@@ -192,8 +197,6 @@
       <img src="avatar.png" class="avatar" alt="Mezets">
     </div>
     <div class="name">Mezets</div>
-    <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank">Steam</a>
-    <a class="btn" href="https://www.faceit.com/ru/players/Mezets1337" target="_blank">Faceit</a>
     <a class="btn" href="https://store.epicgames.com/u/dfdc88256ae04f67959802a29365926f" target="_blank">Epic Games</a>
     <a class="btn" href="https://www.roblox.com/users/817592228/profile" target="_blank">Roblox</a>
     <a class="btn" href="https://t.me/+lCBBELOA7U4wMTdi" target="_blank">Telegram</a>
@@ -215,6 +218,7 @@
       <div id="faceitContent">
         <div class="stats-loading">Загрузка статистики...</div>
       </div>
+      <a class="btn" href="https://www.faceit.com/ru/players/Mezets1337" target="_blank" style="margin-top:16px;">Открыть профиль Faceit</a>
     </div>
 
     <div class="stats-panel" id="statsPanelSteam">
@@ -226,6 +230,7 @@
       <div id="steamContent">
         <div class="stats-loading">Загрузка статистики...</div>
       </div>
+      <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank" style="margin-top:16px;">Открыть профиль Steam</a>
     </div>
   </div>
 
@@ -466,6 +471,22 @@
         ? `<div class="current-game">Играет в: ${d.currentGame}</div>`
         : '';
 
+      const gameHoursHtml = `
+        <div class="recent-games-label">ЧАСЫ В ИГРАХ</div>
+        <div class="recent-games">
+          <div class="recent-game-row">
+            <img class="recent-game-icon" src="https://cdn.cloudflare.steamstatic.com/steam/apps/730/capsule_184x69.jpg" alt="CS2">
+            <div class="recent-game-name">Counter-Strike 2</div>
+            <div class="recent-game-hours">${d.cs2HoursTotal ?? '—'} ч</div>
+          </div>
+          <div class="recent-game-row">
+            <img class="recent-game-icon" src="https://cdn.cloudflare.steamstatic.com/steam/apps/570/capsule_184x69.jpg" alt="Dota 2">
+            <div class="recent-game-name">Dota 2</div>
+            <div class="recent-game-hours">${d.dotaHoursTotal ?? '—'} ч</div>
+          </div>
+        </div>
+      `;
+
       let recentGamesHtml = '';
       if (d.recentGames && d.recentGames.length) {
         const rows = d.recentGames.map(g => `
@@ -483,10 +504,11 @@
         ${currentGameHtml}
         <div class="stat-grid">
           <div class="stat-box"><div class="stat-value">${d.level ?? '—'}</div><div class="stat-label">STEAM LEVEL</div></div>
-          <div class="stat-box"><div class="stat-value">${d.cs2HoursTotal ?? '—'}</div><div class="stat-label">ЧАСОВ В CS2</div></div>
-          <div class="stat-box"><div class="stat-value">${d.games2WeeksCount ?? '—'}</div><div class="stat-label">ИГР ЗА 2 НЕД</div></div>
           <div class="stat-box"><div class="stat-value">${d.hours2WeeksTotal ?? '—'}</div><div class="stat-label">ЧАСОВ ЗА 2 НЕД</div></div>
+          <div class="stat-box"><div class="stat-value">${d.totalHoursAll ?? '—'}</div><div class="stat-label">ВСЕГО ЧАСОВ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.libraryCount ?? '—'}</div><div class="stat-label">ИГР В БИБЛИОТЕКЕ</div></div>
         </div>
+        ${gameHoursHtml}
         ${recentGamesHtml}
       `;
     } catch (e) {
