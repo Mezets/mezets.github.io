@@ -101,6 +101,18 @@
     .btn:hover::before { left: 120%; }
     .btn:hover { transform: scale(1.04); border-color: rgba(255,0,0,0.5); }
 
+    .stats-tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+    .stats-tab {
+      flex: 1; padding: 12px 6px; text-align: center;
+      font-family: 'Press Start 2P', monospace; font-size: 9px; letter-spacing: .5px;
+      color: #ff8080; background: rgba(255,0,0,0.05); border: 1px solid rgba(255,0,0,0.2);
+      border-radius: 10px; cursor: pointer; transition: .2s;
+    }
+    .stats-tab:hover { border-color: rgba(255,0,0,0.4); color: #ff3b3b; }
+    .stats-tab.active { color: #ff3b3b; background: rgba(255,0,0,0.16); border-color: rgba(255,0,0,0.55); }
+    .stats-panel { display: none; }
+    .stats-panel.active { display: block; }
+
     .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
     .stat-box { background: rgba(255,0,0,0.05); border: 1px solid rgba(255,0,0,0.15); border-radius: 10px; padding: 12px 8px; text-align: center; }
     .stat-value { font-size: 18px; color: #ff3b3b; margin-bottom: 6px; }
@@ -155,11 +167,31 @@
     <a class="btn" href="https://www.tiktok.com/@mezets1337" target="_blank">TikTok</a>
   </div>
 
-  <!-- КАРТОЧКА СО СТАТИСТИКОЙ FACEIT -->
-  <div class="card" id="faceitCard">
-    <div class="name">FACEIT STATS</div>
-    <div id="faceitContent">
-      <div class="stats-loading">Загрузка статистики...</div>
+  <!-- КАРТОЧКА СО СТАТИСТИКОЙ (FACEIT / STEAM ПЕРЕКЛЮЧАЮТСЯ ТАБАМИ) -->
+  <div class="card" id="statsCard">
+    <div class="stats-tabs">
+      <button class="stats-tab active" data-tab="faceit" type="button">FACEIT</button>
+      <button class="stats-tab" data-tab="steam" type="button">STEAM</button>
+    </div>
+
+    <div class="stats-panel active" id="statsPanelFaceit">
+      <div class="avatar-wrap" style="visibility:hidden;">
+        <img class="avatar" src="" alt="">
+      </div>
+      <div class="name">FACEIT</div>
+      <div id="faceitContent">
+        <div class="stats-loading">Загрузка статистики...</div>
+      </div>
+    </div>
+
+    <div class="stats-panel" id="statsPanelSteam">
+      <div class="avatar-wrap" id="steamAvatarWrap" style="visibility:hidden;">
+        <img class="avatar" id="steamAvatarImg" src="" alt="Steam avatar">
+      </div>
+      <div class="name">STEAM</div>
+      <div id="steamContent">
+        <div class="stats-loading">Загрузка статистики...</div>
+      </div>
     </div>
   </div>
 
@@ -307,7 +339,19 @@
     card.addEventListener('mouseleave', () => { card.style.transform = 'rotateY(0) rotateX(0) scale(1)'; });
   }
   tilt(document.getElementById('card1'));
-  tilt(document.getElementById('faceitCard'));
+  tilt(document.getElementById('statsCard'));
+
+  /* =========================
+     ПЕРЕКЛЮЧЕНИЕ ТАБОВ FACEIT / STEAM
+  ========================= */
+  document.querySelectorAll('.stats-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.stats-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.stats-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab === 'faceit' ? 'statsPanelFaceit' : 'statsPanelSteam').classList.add('active');
+    });
+  });
 
   /* =========================
      СТАТИСТИКА FACEIT (через бэкенд)
@@ -342,6 +386,39 @@
   }
   loadFaceitStats();
   setInterval(loadFaceitStats, 5 * 60 * 1000);
+
+  /* =========================
+     СТАТИСТИКА STEAM (через бэкенд)
+  ========================= */
+  const STEAM_STATS_API = 'https://mez-api.up.railway.app/steam-stats';
+
+  async function loadSteamStats() {
+    const el = document.getElementById('steamContent');
+    try {
+      const res = await fetch(STEAM_STATS_API, { mode: 'cors' });
+      if (!res.ok) throw new Error('bad status ' + res.status);
+      const d = await res.json();
+      if (d.error) throw new Error(d.error);
+
+      if (d.avatar) {
+        document.getElementById('steamAvatarImg').src = d.avatar;
+        document.getElementById('steamAvatarWrap').style.visibility = 'visible';
+      }
+
+      el.innerHTML = `
+        <div class="elo-sub" style="margin-top:-4px;">${d.personaName ?? ''}</div>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="stat-value">${d.status ?? '—'}</div><div class="stat-label">СТАТУС</div></div>
+          <div class="stat-box"><div class="stat-value">${d.level ?? '—'}</div><div class="stat-label">STEAM LEVEL</div></div>
+          <div class="stat-box" style="grid-column: span 2;"><div class="stat-value">${d.cs2HoursTotal ?? '—'}</div><div class="stat-label">ЧАСОВ В CS2</div></div>
+        </div>
+      `;
+    } catch (e) {
+      el.innerHTML = '<div class="stats-error">Не удалось загрузить статистику Steam</div>';
+    }
+  }
+  loadSteamStats();
+  setInterval(loadSteamStats, 5 * 60 * 1000);
 
   /* =========================
      ЧАСТИЦЫ
