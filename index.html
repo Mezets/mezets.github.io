@@ -101,6 +101,14 @@
     .btn:hover::before { left: 120%; }
     .btn:hover { transform: scale(1.04); border-color: rgba(255,0,0,0.5); }
 
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .stat-box { background: rgba(255,0,0,0.05); border: 1px solid rgba(255,0,0,0.15); border-radius: 10px; padding: 12px 8px; text-align: center; }
+    .stat-value { font-size: 18px; color: #ff3b3b; margin-bottom: 6px; }
+    .stat-label { font-size: 7px; color: #ff8080; opacity: .85; line-height: 1.5; letter-spacing: .5px; }
+    .elo-big { text-align: center; font-size: 32px; color: #ff3b3b; margin: 4px 0 4px; }
+    .elo-sub { text-align: center; font-size: 9px; color: #ff8080; margin-bottom: 4px; letter-spacing: .5px; }
+    .stats-loading, .stats-error { text-align: center; font-size: 10px; color: #ff8080; padding: 24px 0; line-height: 1.8; }
+
     @media (prefers-reduced-motion: reduce) { .fluff-1, .fluff-2 { animation: none; } }
     @media (max-width: 760px) {
       .main { gap: 24px; padding: 40px 16px; }
@@ -145,6 +153,14 @@
     <a class="btn" href="https://www.roblox.com/users/817592228/profile" target="_blank">Roblox</a>
     <a class="btn" href="https://t.me/+lCBBELOA7U4wMTdi" target="_blank">Telegram</a>
     <a class="btn" href="https://www.tiktok.com/@mezets1337" target="_blank">TikTok</a>
+  </div>
+
+  <!-- КАРТОЧКА СО СТАТИСТИКОЙ FACEIT -->
+  <div class="card" id="faceitCard">
+    <div class="name">FACEIT STATS</div>
+    <div id="faceitContent">
+      <div class="stats-loading">Загрузка статистики...</div>
+    </div>
   </div>
 
 </div>
@@ -291,6 +307,41 @@
     card.addEventListener('mouseleave', () => { card.style.transform = 'rotateY(0) rotateX(0) scale(1)'; });
   }
   tilt(document.getElementById('card1'));
+  tilt(document.getElementById('faceitCard'));
+
+  /* =========================
+     СТАТИСТИКА FACEIT (через бэкенд)
+  ========================= */
+  const FACEIT_STATS_API = 'https://mez-api.up.railway.app/faceit-stats';
+
+  async function loadFaceitStats() {
+    const el = document.getElementById('faceitContent');
+    try {
+      const res = await fetch(FACEIT_STATS_API, { mode: 'cors' });
+      if (!res.ok) throw new Error('bad status ' + res.status);
+      const d = await res.json();
+
+      const matches = d.matches ?? null;
+      const wins = d.wins ?? null;
+      const losses = (matches !== null && wins !== null) ? (matches - wins) : null;
+      const winRate = d.winRate ?? (matches && wins != null ? Math.round((wins / matches) * 1000) / 10 : null);
+
+      el.innerHTML = `
+        <div class="elo-big">${d.elo ?? '—'}</div>
+        <div class="elo-sub">ELO${d.level ? ' • Уровень ' + d.level : ''}</div>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="stat-value">${winRate ?? '—'}%</div><div class="stat-label">WIN RATE</div></div>
+          <div class="stat-box"><div class="stat-value">${matches ?? '—'}</div><div class="stat-label">МАТЧЕЙ</div></div>
+          <div class="stat-box"><div class="stat-value">${wins ?? '—'}</div><div class="stat-label">ПОБЕД</div></div>
+          <div class="stat-box"><div class="stat-value">${losses ?? '—'}</div><div class="stat-label">ПОРАЖЕНИЙ</div></div>
+        </div>
+      `;
+    } catch (e) {
+      el.innerHTML = '<div class="stats-error">Не удалось загрузить статистику Faceit</div>';
+    }
+  }
+  loadFaceitStats();
+  setInterval(loadFaceitStats, 5 * 60 * 1000);
 
   /* =========================
      ЧАСТИЦЫ
