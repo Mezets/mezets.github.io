@@ -58,6 +58,7 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
+      align-items: flex-start;
       gap: 40px;
       z-index: 2;
       padding: 60px 20px;
@@ -80,8 +81,10 @@
     }
     .card:hover { border-color: rgba(255,0,0,0.4); box-shadow: 0 0 56px rgba(255,0,0,0.2); }
 
-    #statsCard { width: 460px; }
-    .stats-panel { min-height: 560px; }
+    #statsCard { width: 500px; }
+    .stats-panel { min-height: 640px; }
+    .stat-box.wide { grid-column: span 2; }
+    .stat-divider { color: #ff8080; opacity: .5; margin: 0 6px; font-size: 14px; }
 
     .avatar-wrap { position: relative; width: 115px; margin: 0 auto 12px; }
     .avatar { width: 115px; height: 115px; border-radius: 50%; object-fit: cover; display: block; border: 2px solid rgba(255,0,0,0.35); }
@@ -164,6 +167,8 @@
     @media (max-width: 760px) {
       .main { gap: 24px; padding: 40px 16px; }
       .card { width: 100%; max-width: 360px; }
+      #statsCard { max-width: 360px; }
+      .stats-panel { min-height: 0; }
     }
 
   </style>
@@ -436,6 +441,10 @@
           <div class="stat-box"><div class="stat-value">${matches ?? '—'}</div><div class="stat-label">МАТЧЕЙ</div></div>
           <div class="stat-box"><div class="stat-value">${wins ?? '—'}</div><div class="stat-label">ПОБЕД</div></div>
           <div class="stat-box"><div class="stat-value">${losses ?? '—'}</div><div class="stat-label">ПОРАЖЕНИЙ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.avgKD ?? '—'}</div><div class="stat-label">СРЕДНИЙ K/D</div></div>
+          <div class="stat-box"><div class="stat-value">${d.avgHS ?? '—'}%</div><div class="stat-label">СРЕДНИЙ HS%</div></div>
+          <div class="stat-box"><div class="stat-value">${d.currentWinStreak ?? '—'}</div><div class="stat-label">ТЕКУЩАЯ СЕРИЯ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.longestWinStreak ?? '—'}</div><div class="stat-label">ЛУЧШАЯ СЕРИЯ</div></div>
         </div>
       `;
     } catch (e) {
@@ -503,16 +512,20 @@
             <div class="recent-game-hours">${g.hours2Weeks ?? '—'} ч/2нед</div>
           </div>
         `).join('');
-        recentGamesHtml = `<div class="recent-games-label">ПОСЛЕДНИЕ ИГРЫ</div><div class="recent-games">${rows}</div>`;
+        recentGamesHtml = `<div class="recent-games-label">ИГРЫ ЗА 2 НЕДЕЛИ</div><div class="recent-games">${rows}</div>`;
       }
 
       el.innerHTML = `
         ${currentGameHtml}
         <div class="stat-grid">
-          <div class="stat-box"><div class="stat-value">${d.level ?? '—'}</div><div class="stat-label">STEAM LEVEL</div></div>
-          <div class="stat-box"><div class="stat-value">${d.hours2WeeksTotal ?? '—'}</div><div class="stat-label">ЧАСОВ ЗА 2 НЕД</div></div>
-          <div class="stat-box"><div class="stat-value">${d.totalHoursAll ?? '—'}</div><div class="stat-label">ВСЕГО ЧАСОВ</div></div>
-          <div class="stat-box"><div class="stat-value">${d.libraryCount ?? '—'}</div><div class="stat-label">ИГР В БИБЛИОТЕКЕ</div></div>
+          <div class="stat-box wide">
+            <div class="stat-value">${d.level ?? '—'}<span class="stat-divider">/</span>${d.libraryCount ?? '—'}</div>
+            <div class="stat-label">УРОВЕНЬ / ИГР В БИБЛИОТЕКЕ</div>
+          </div>
+          <div class="stat-box wide">
+            <div class="stat-value">${d.totalHoursAll ?? '—'}<span class="stat-divider">/</span>${d.hours2WeeksTotal ?? '—'}</div>
+            <div class="stat-label">ВСЕГО ЧАСОВ / ЗА 2 НЕД</div>
+          </div>
         </div>
         ${gameHoursHtml}
         ${recentGamesHtml}
