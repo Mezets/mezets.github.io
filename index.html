@@ -509,10 +509,10 @@
           <div class="recent-game-row">
             ${g.icon ? `<img class="recent-game-icon" src="${g.icon}" alt="">` : ''}
             <div class="recent-game-name">${g.name ?? '—'}</div>
-            <div class="recent-game-hours">${g.hours2Weeks ?? '—'} ч/2нед</div>
+            <div class="recent-game-hours">${g.hoursTotal ?? '—'} ч<br><span style="opacity:.6">${g.lastPlayed ?? ''}</span></div>
           </div>
         `).join('');
-        recentGamesHtml = `<div class="recent-games-label">ИГРЫ ЗА 2 НЕДЕЛИ</div><div class="recent-games">${rows}</div>`;
+        recentGamesHtml = `<div class="recent-games-label">ПОСЛЕДНИЙ ЗАПУСК</div><div class="recent-games">${rows}</div>`;
       }
 
       el.innerHTML = `
@@ -523,8 +523,8 @@
             <div class="stat-label">УРОВЕНЬ / ИГР В БИБЛИОТЕКЕ</div>
           </div>
           <div class="stat-box wide">
-            <div class="stat-value">${d.totalHoursAll ?? '—'}<span class="stat-divider">/</span>${d.hours2WeeksTotal ?? '—'}</div>
-            <div class="stat-label">ВСЕГО ЧАСОВ / ЗА 2 НЕД</div>
+            <div class="stat-value">${d.totalHoursAll ?? '—'}</div>
+            <div class="stat-label">ВСЕГО ЧАСОВ В STEAM</div>
           </div>
         </div>
         ${gameHoursHtml}
