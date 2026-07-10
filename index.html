@@ -169,6 +169,12 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .recent-game-hours { font-size: 8px; color: #ff3b3b; white-space: nowrap; flex-shrink: 0; }
+    .recent-game-meta {
+      display: flex; flex-direction: column; align-items: flex-end;
+      flex-shrink: 0; line-height: 1.5;
+    }
+    .recent-game-date { font-size: 7px; color: #ff8080; opacity: .6; }
+    .elo-tag { font-size: 13px; color: #ff8080; margin-left: 8px; letter-spacing: 1px; vertical-align: middle; }
     .recent-games-label { font-size: 7px; color: #ff8080; opacity: .8; letter-spacing: .5px; margin: 16px 0 8px; text-align: center; }
 
     @media (prefers-reduced-motion: reduce) { .fluff-1, .fluff-2 { animation: none; } }
@@ -442,8 +448,8 @@
       }
 
       el.innerHTML = `
-        <div class="elo-big">${d.elo ?? '—'}</div>
-        <div class="elo-sub">ELO${d.level ? ' • Уровень ' + d.level : ''}</div>
+        <div class="elo-big">${d.elo ?? '—'}<span class="elo-tag">ELO</span></div>
+        <div class="elo-sub">${d.level ? 'Уровень ' + d.level : ''}</div>
         ${formHtml}
         <div class="stat-grid">
           <div class="stat-box"><div class="stat-value">${winRate ?? '—'}%</div><div class="stat-label">WIN RATE</div></div>
@@ -461,6 +467,8 @@
           <div class="stat-box"><div class="stat-value">${d.winRate30d ?? '—'}%</div><div class="stat-label">WIN RATE</div></div>
           <div class="stat-box"><div class="stat-value">${d.wins30d ?? '—'}</div><div class="stat-label">ПОБЕД</div></div>
           <div class="stat-box"><div class="stat-value">${d.losses30d ?? '—'}</div><div class="stat-label">ПОРАЖЕНИЙ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.avgKD30d ?? '—'}</div><div class="stat-label">СРЕДНИЙ K/D</div></div>
+          <div class="stat-box"><div class="stat-value">${d.avgHS30d ?? '—'}%</div><div class="stat-label">СРЕДНИЙ HS%</div></div>
         </div>
       `;
     } catch (e) {
@@ -525,7 +533,10 @@
           <div class="recent-game-row">
             ${g.icon ? `<img class="recent-game-icon" src="${g.icon}" alt="">` : ''}
             <div class="recent-game-name">${g.name ?? '—'}</div>
-            <div class="recent-game-hours">${g.hoursTotal ?? '—'} ч<br><span style="opacity:.6">${g.lastPlayed ?? ''}</span></div>
+            <div class="recent-game-meta">
+              <div class="recent-game-hours">${g.hoursTotal ?? '—'} ч</div>
+              <div class="recent-game-date">${g.lastPlayed ?? ''}</div>
+            </div>
           </div>
         `).join('');
         recentGamesHtml = `<div class="recent-games-label">ПОСЛЕДНИЙ ЗАПУСК</div><div class="recent-games">${rows}</div>`;
@@ -534,14 +545,10 @@
       el.innerHTML = `
         ${currentGameHtml}
         <div class="stat-grid">
-          <div class="stat-box wide">
-            <div class="stat-value">${d.level ?? '—'}<span class="stat-divider">/</span>${d.libraryCount ?? '—'}</div>
-            <div class="stat-label">УРОВЕНЬ / ИГР В БИБЛИОТЕКЕ</div>
-          </div>
-          <div class="stat-box wide">
-            <div class="stat-value">${d.totalHoursAll ?? '—'}<span class="stat-divider">/</span>${d.hours2WeeksTotal ?? '—'}</div>
-            <div class="stat-label">ВСЕГО ЧАСОВ / ЗА 2 НЕДЕЛИ</div>
-          </div>
+          <div class="stat-box"><div class="stat-value">${d.level ?? '—'}</div><div class="stat-label">УРОВЕНЬ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.libraryCount ?? '—'}</div><div class="stat-label">ИГР В БИБЛИОТЕКЕ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.totalHoursAll ?? '—'}</div><div class="stat-label">ВСЕГО ЧАСОВ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.hours2WeeksTotal ?? '—'}</div><div class="stat-label">ЗА 2 НЕДЕЛИ</div></div>
         </div>
         ${gameHoursHtml}
         ${recentGamesHtml}
