@@ -1,465 +1,660 @@
-import os
-import time
-import asyncio
-from datetime import datetime, timezone
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-import httpx
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mezets</title>
+  <link rel="icon" href="favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
-app = FastAPI()
+  <style>
 
-# Разреши запросы с сайта. Если хочешь строже — замени "*" на конкретный домен,
-# например ["https://mezets.github.io"]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["GET"],
-    allow_headers=["*"],
-)
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-MEZ_URL = "https://mez.up.railway.app/api/ratings"
-
-FACEIT_API_KEY = os.environ.get("FACEIT_API_KEY")
-FACEIT_NICKNAME = "Mezets1337"
-FACEIT_GAME = "cs2"  # поменяй на "csgo", если нужна статистика по CS:GO, а не CS2
-
-STEAM_API_KEY = os.environ.get("STEAM_API_KEY")
-STEAM_VANITY = "mezets"  # из steamcommunity.com/id/mezets/
-CS2_APPID = 730
-DOTA_APPID = 570
-
-CACHE_TTL = 300  # 5 минут, чтобы не долбить Faceit API на каждый визит
-_faceit_cache = {"data": None, "ts": 0.0}
-
-STEAM_CACHE_TTL = 300
-_steam_cache = {"data": None, "ts": 0.0, "steamid": None}
-
-
-@app.get("/api/ratings")
-async def ratings():
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        try:
-            resp = await client.get(MEZ_URL)
-            resp.raise_for_status()
-            return resp.json()
-        except Exception as e:
-            return {
-                "status": "error",
-                "message": str(e),
-                "ratings": []
-            }
-
-
-async def _get_faceit_match_details(client, match_id, player_id, headers, started_at):
-    result = {
-        "map": None, "score": None,
-        "kills": None, "deaths": None, "assists": None, "kd": None,
-        "date": datetime.fromtimestamp(started_at, tz=timezone.utc).strftime("%d.%m.%Y") if started_at else None,
+    html, body {
+      font-family: 'Press Start 2P', monospace;
+      background: #050000;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
-    try:
-        resp = await client.get(
-            f"https://open.faceit.com/data/v4/matches/{match_id}/stats",
-            headers=headers,
-        )
-        resp.raise_for_status()
-        for rnd in resp.json().get("rounds", []):
-            round_stats = rnd.get("round_stats", {})
-            result["map"] = round_stats.get("Map")
-            result["score"] = round_stats.get("Score")
-            for team in rnd.get("teams", []):
-                for p in team.get("players", []):
-                    if p.get("player_id") == player_id:
-                        pstats = p.get("player_stats", {})
-                        result["kills"] = pstats.get("Kills")
-                        result["deaths"] = pstats.get("Deaths")
-                        result["assists"] = pstats.get("Assists")
-                        result["kd"] = pstats.get("K/D Ratio")
-            break  # для cs2 обычно один "раунд" (одна карта) в стат-ответе
-    except Exception:
-        pass
-    return result
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    canvas { position: fixed; inset: 0; z-index: 0; }
+
+    .fluff-wrap { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+    .fluff { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.25; }
+    .fluff-1 {
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(255,0,0,0.9), rgba(180,0,0,0.3), transparent 70%);
+      animation: moveFluff1 18s ease-in-out infinite;
+    }
+    .fluff-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(255,60,0,0.8), rgba(200,0,0,0.2), transparent 70%);
+      animation: moveFluff2 12s ease-in-out infinite;
+      opacity: 0.18;
+    }
+    @keyframes moveFluff1 {
+      0%   { transform: translate(5vw,  10vh); }
+      25%  { transform: translate(55vw, 20vh); }
+      50%  { transform: translate(60vw, 60vh); }
+      75%  { transform: translate(15vw, 65vh); }
+      100% { transform: translate(5vw,  10vh); }
+    }
+    @keyframes moveFluff2 {
+      0%   { transform: translate(70vw, 70vh); }
+      33%  { transform: translate(10vw, 50vh); }
+      66%  { transform: translate(50vw, 5vh);  }
+      100% { transform: translate(70vw, 70vh); }
+    }
+
+    .main {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      z-index: 2;
+      padding: 60px 20px;
+      perspective: 1200px;
+    }
+
+    .card {
+      width: 400px;
+      padding: 30px 26px;
+      border-radius: 22px;
+      background: rgba(255,0,0,0.05);
+      border: 1px solid rgba(255,0,0,0.2);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 0 40px rgba(255,0,0,0.12);
+      transition: border-color .25s, box-shadow .25s, transform .1s ease-out;
+      transform-style: preserve-3d;
+      will-change: transform;
+      cursor: default;
+    }
+    .card:hover { border-color: rgba(255,0,0,0.4); box-shadow: 0 0 56px rgba(255,0,0,0.2); }
+
+    #statsCard { width: 500px; }
+    .stats-body { display: grid; }
+    .stat-box.wide { grid-column: span 2; }
+    .stat-divider { color: #ff8080; opacity: .5; margin: 0 6px; font-size: 14px; }
+
+    .avatar-wrap { position: relative; width: 115px; margin: 0 auto 12px; }
+    .avatar { width: 115px; height: 115px; border-radius: 50%; object-fit: cover; display: block; border: 2px solid rgba(255,0,0,0.35); }
+
+    .name { text-align: center; font-size: 15px; line-height: 1.6; color: #ff2a2a; margin-bottom: 22px; letter-spacing: 1px; }
+
+    .btn {
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px 12px; margin: 10px 0; text-align: center; text-decoration: none;
+      font-family: 'Press Start 2P', monospace; font-size: 11px; line-height: 1.6;
+      color: #ff3b3b; border-radius: 12px;
+      background: rgba(255,0,0,0.05); border: 1px solid rgba(255,0,0,0.25);
+      transition: .2s; position: relative; overflow: hidden;
+    }
+    .btn::before {
+      content: ""; position: absolute; top: 0; left: -120%; width: 120%; height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(255,0,0,0.35), transparent);
+      transition: .5s;
+    }
+    .btn:hover::before { left: 120%; }
+    .btn:hover { transform: scale(1.04); border-color: rgba(255,0,0,0.5); }
+
+    .stats-tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+    .stats-tab {
+      flex: 1; padding: 12px 6px; text-align: center;
+      font-family: 'Press Start 2P', monospace; font-size: 9px; letter-spacing: .5px;
+      color: #ff8080; background: rgba(255,0,0,0.05); border: 1px solid rgba(255,0,0,0.2);
+      border-radius: 10px; cursor: pointer; transition: .2s;
+    }
+    .stats-tab:hover { border-color: rgba(255,0,0,0.4); color: #ff3b3b; }
+    .stats-tab.active { color: #ff3b3b; background: rgba(255,0,0,0.16); border-color: rgba(255,0,0,0.55); }
+    .stats-panel {
+      grid-area: 1 / 1;
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity .15s;
+    }
+    .stats-panel.active { opacity: 1; visibility: visible; pointer-events: auto; }
+
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .stat-box { background: rgba(255,0,0,0.05); border: 1px solid rgba(255,0,0,0.15); border-radius: 10px; padding: 12px 8px; text-align: center; }
+    .stat-value { font-size: 18px; color: #ff3b3b; margin-bottom: 6px; }
+    .stat-label { font-size: 7px; color: #ff8080; opacity: .85; line-height: 1.5; letter-spacing: .5px; }
+    .elo-big { text-align: center; font-size: 32px; color: #ff3b3b; margin: 4px 0 4px; }
+    .elo-sub { text-align: center; font-size: 9px; color: #ff8080; margin-bottom: 4px; letter-spacing: .5px; }
+    .stats-loading, .stats-error { text-align: center; font-size: 10px; color: #ff8080; padding: 24px 0; line-height: 1.8; }
+
+    .status-dot {
+      position: absolute; bottom: 3px; right: 3px;
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 3px solid #0a0000; box-shadow: 0 0 6px rgba(0,0,0,0.5);
+    }
+    .status-online   { background: #4aa3ff; }
+    .status-ingame   { background: #3ddc71; }
+    .status-away     { background: #f5a623; }
+    .status-offline  { background: #555; }
+
+    .current-game {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      text-align: center; font-size: 9px; color: #3ddc71; margin: -6px 0 14px; line-height: 1.6;
+    }
+    .current-game-icon { width: 16px; height: 16px; border-radius: 3px; }
+
+    .form-row { display: flex; justify-content: center; gap: 6px; margin: 12px 0 4px; }
+    .form-dot {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: bold;
+    }
+    .form-dot.win  { background: rgba(61,220,113,0.15); color: #3ddc71; border: 1px solid rgba(61,220,113,0.4); }
+    .form-dot.loss { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.4); }
+    .form-dot { cursor: pointer; transition: transform .15s; }
+    .form-dot:hover { transform: scale(1.15); }
+    .match-detail {
+      display: none; margin: 4px 0 14px; padding: 10px 12px;
+      background: rgba(255,0,0,0.07); border: 1px solid rgba(255,0,0,0.25);
+      border-radius: 10px; font-size: 8px; color: #ff8080; line-height: 1.9; text-align: center;
+    }
+    .match-detail.show { display: block; }
+    .match-detail b { color: #ff3b3b; }
+
+    .period-toggle { display: flex; gap: 8px; margin: 4px 0 14px; }
+    .period-btn {
+      flex: 1; padding: 9px 6px; text-align: center;
+      font-family: 'Press Start 2P', monospace; font-size: 7px; letter-spacing: .3px;
+      color: #ff8080; background: rgba(255,0,0,0.05); border: 1px solid rgba(255,0,0,0.2);
+      border-radius: 8px; cursor: pointer; transition: .2s;
+    }
+    .period-btn:hover { border-color: rgba(255,0,0,0.4); color: #ff3b3b; }
+    .period-btn.active { color: #ff3b3b; background: rgba(255,0,0,0.16); border-color: rgba(255,0,0,0.55); }
+    .form-label { text-align: center; font-size: 7px; color: #ff8080; opacity: .8; margin-bottom: 14px; letter-spacing: .5px; }
+
+    .recent-games { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .recent-game-row {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,0,0,0.05); border: 1px solid rgba(255,0,0,0.15);
+      border-radius: 8px; padding: 8px 10px;
+    }
+    .recent-game-icon { width: 28px; height: 28px; border-radius: 4px; flex-shrink: 0; object-fit: cover; }
+    .recent-game-name {
+      font-size: 8px; color: #ff8080; flex: 1; line-height: 1.5; min-width: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .recent-game-hours { font-size: 8px; color: #ff3b3b; white-space: nowrap; flex-shrink: 0; }
+    .recent-game-meta {
+      display: flex; flex-direction: column; align-items: flex-end;
+      flex-shrink: 0; line-height: 1.5;
+    }
+    .recent-game-date { font-size: 7px; color: #ff8080; opacity: .6; }
+    .elo-tag { font-size: 13px; color: #ff8080; margin-left: 8px; letter-spacing: 1px; vertical-align: middle; }
+    .recent-games-label { font-size: 7px; color: #ff8080; opacity: .8; letter-spacing: .5px; margin: 16px 0 8px; text-align: center; }
+
+    @media (prefers-reduced-motion: reduce) { .fluff-1, .fluff-2 { animation: none; } }
+    @media (max-width: 760px) {
+      .main { gap: 24px; padding: 40px 16px; }
+      .card { width: 100%; max-width: 360px; }
+      #statsCard { max-width: 360px; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="banOverlay" style="display:none; position:fixed; inset:0; z-index:999999; background:radial-gradient(ellipse at center, #2a0000 0%, #050000 75%); color:#fff; align-items:center; justify-content:center; text-align:center; flex-direction:column; padding:24px;">
+  <div style="font-size:64px; line-height:1; margin-bottom:18px;">🚫</div>
+  <div style="font-size:28px; font-weight:800; margin-bottom:10px; letter-spacing:0.3px;">Вы забанены</div>
+  <div style="font-size:16px; color:#c99; max-width:420px;">Вам тут не рады. Доступ к сайту закрыт администратором.</div>
+  <div id="banReasonLine" style="font-size:13px; color:#e88; max-width:420px; margin-top:14px; display:none;"></div>
+</div>
+<audio id="banSound" src="/mezets.design/ban.mp3" preload="auto"></audio>
+
+<div id="loadingGate" style="position:fixed; inset:0; z-index:999995; background:#050000; display:flex; align-items:center; justify-content:center;">
+  <div style="width:38px;height:38px;border:3px solid rgba(255,40,40,0.2);border-top-color:#ff3b3b;border-radius:50%;animation:lgSpin .8s linear infinite;"></div>
+</div>
+<style>@keyframes lgSpin { to { transform: rotate(360deg); } }</style>
 
 
-async def _get_faceit_recent_matches(client, player_id, headers):
-    try:
-        hist_resp = await client.get(
-            f"https://open.faceit.com/data/v4/players/{player_id}/history",
-            params={"game": FACEIT_GAME, "offset": 0, "limit": 5},
-            headers=headers,
-        )
-        hist_resp.raise_for_status()
-        items = hist_resp.json().get("items", [])
+<canvas id="bg"></canvas>
+<div class="fluff-wrap">
+  <div class="fluff fluff-1"></div>
+  <div class="fluff fluff-2"></div>
+</div>
 
-        parsed = []
-        for item in items:
-            teams = item.get("teams", {})
-            winner = item.get("results", {}).get("winner")
-            player_faction = None
-            for faction_key, faction_data in teams.items():
-                players_in_faction = faction_data.get("players", [])
-                if any(p.get("player_id") == player_id for p in players_in_faction):
-                    player_faction = faction_key
-                    break
-            if player_faction and winner:
-                parsed.append({
-                    "match_id": item.get("match_id"),
-                    "result": "W" if player_faction == winner else "L",
-                    "started_at": item.get("started_at"),
-                })
+<div class="main">
 
-        parsed.reverse()  # от старых к новым, чтобы читалось слева направо как таймлайн
+  <!-- КАРТОЧКА СО ССЫЛКАМИ -->
+  <div class="card" id="card1">
+    <div class="avatar-wrap">
+      <img src="avatar.png" class="avatar" alt="Mezets">
+    </div>
+    <div class="name">Mezets</div>
+    <a class="btn" href="https://store.epicgames.com/u/dfdc88256ae04f67959802a29365926f" target="_blank">Epic Games</a>
+    <a class="btn" href="https://www.roblox.com/users/817592228/profile" target="_blank">Roblox</a>
+    <a class="btn" href="https://t.me/+lCBBELOA7U4wMTdi" target="_blank">Telegram</a>
+    <a class="btn" href="https://www.tiktok.com/@mezets1337" target="_blank">TikTok</a>
+  </div>
 
-        details = await asyncio.gather(*[
-            _get_faceit_match_details(client, m["match_id"], player_id, headers, m["started_at"])
-            for m in parsed
-        ])
-        matches = []
-        for m, d in zip(parsed, details):
-            matches.append({"result": m["result"], **d})
-        return matches
-    except Exception:
-        return []
+  <!-- КАРТОЧКА СО СТАТИСТИКОЙ (FACEIT / STEAM ПЕРЕКЛЮЧАЮТСЯ ТАБАМИ) -->
+  <div class="card" id="statsCard">
+    <div class="stats-tabs">
+      <button class="stats-tab active" data-tab="faceit" type="button">FACEIT</button>
+      <button class="stats-tab" data-tab="steam" type="button">STEAM</button>
+    </div>
 
+    <div class="stats-body">
+      <div class="stats-panel active" id="statsPanelFaceit">
+        <div class="avatar-wrap" id="faceitAvatarWrap" style="visibility:hidden;">
+          <img class="avatar" id="faceitAvatarImg" src="" alt="Faceit avatar">
+        </div>
+        <div class="name" id="faceitNickname">FACEIT</div>
+        <div id="faceitContent">
+          <div class="stats-loading">Загрузка статистики...</div>
+        </div>
+        <a class="btn" href="https://www.faceit.com/ru/players/Mezets1337" target="_blank" style="margin-top:16px;">Открыть профиль Faceit</a>
+      </div>
 
-async def _get_faceit_match_player_stats(client, match_id, player_id, headers):
-    try:
-        resp = await client.get(
-            f"https://open.faceit.com/data/v4/matches/{match_id}/stats",
-            headers=headers,
-        )
-        resp.raise_for_status()
-        for rnd in resp.json().get("rounds", []):
-            for team in rnd.get("teams", []):
-                for p in team.get("players", []):
-                    if p.get("player_id") == player_id:
-                        pstats = p.get("player_stats", {})
-                        kd = pstats.get("K/D Ratio")
-                        hs = pstats.get("Headshots %")
-                        return (
-                            float(kd) if kd is not None else None,
-                            float(hs) if hs is not None else None,
-                        )
-        return (None, None)
-    except Exception:
-        return (None, None)
+      <div class="stats-panel" id="statsPanelSteam">
+        <div class="avatar-wrap" id="steamAvatarWrap" style="visibility:hidden;">
+          <img class="avatar" id="steamAvatarImg" src="" alt="Steam avatar">
+          <span class="status-dot" id="steamStatusDot"></span>
+        </div>
+        <div class="name" id="steamNickname">STEAM</div>
+        <div id="steamContent">
+          <div class="stats-loading">Загрузка статистики...</div>
+        </div>
+        <a class="btn" href="https://steamcommunity.com/id/mezets/" target="_blank" style="margin-top:16px;">Открыть профиль Steam</a>
+      </div>
+    </div>
+  </div>
 
+</div>
 
-async def _get_faceit_30d_stats(client, player_id, headers):
-    try:
-        now_ts = int(time.time())
-        from_ts = now_ts - 30 * 24 * 60 * 60
-        hist_resp = await client.get(
-            f"https://open.faceit.com/data/v4/players/{player_id}/history",
-            params={"game": FACEIT_GAME, "from": from_ts, "to": now_ts, "offset": 0, "limit": 100},
-            headers=headers,
-        )
-        hist_resp.raise_for_status()
-        items = hist_resp.json().get("items", [])
-        wins = 0
-        losses = 0
-        match_ids = []
-        for item in items:
-            teams = item.get("teams", {})
-            winner = item.get("results", {}).get("winner")
-            player_faction = None
-            for faction_key, faction_data in teams.items():
-                players_in_faction = faction_data.get("players", [])
-                if any(p.get("player_id") == player_id for p in players_in_faction):
-                    player_faction = faction_key
-                    break
-            if player_faction and winner:
-                if player_faction == winner:
-                    wins += 1
-                else:
-                    losses += 1
-                match_ids.append(item.get("match_id"))
+<script>
 
-        matches = wins + losses
-        win_rate = round(wins / matches * 100, 1) if matches else None
+  /* =========================
+     ПРОВЕРКА БАНА
+  ========================= */
+  const BAN_API = 'https://mez.up.railway.app';
 
-        avg_kd_30d = None
-        avg_hs_30d = None
-        if match_ids:
-            sample_ids = match_ids[:50]  # ограничим число запросов на всякий случай
-            per_match = await asyncio.gather(*[
-                _get_faceit_match_player_stats(client, mid, player_id, headers)
-                for mid in sample_ids
-            ])
-            kds = [kd for kd, _ in per_match if kd is not None]
-            hss = [hs for _, hs in per_match if hs is not None]
-            if kds:
-                avg_kd_30d = round(sum(kds) / len(kds), 2)
-            if hss:
-                avg_hs_30d = round(sum(hss) / len(hss), 1)
+  async function getBrowserFingerprintForBan() {
+    try {
+      const cached = localStorage.getItem('mezets_fp');
+      if (cached) return cached;
+      let canvasHash = '';
+      try {
+        const c = document.createElement('canvas');
+        const cx = c.getContext('2d');
+        cx.textBaseline = 'top';
+        cx.font = "14px 'Arial'";
+        cx.fillText('mezets-fp-🔥', 2, 2);
+        canvasHash = c.toDataURL();
+      } catch(e) {}
+      const raw = [
+        navigator.userAgent, navigator.language, navigator.hardwareConcurrency || '',
+        navigator.deviceMemory || '', screen.width + 'x' + screen.height + 'x' + screen.colorDepth,
+        Intl.DateTimeFormat().resolvedOptions().timeZone, canvasHash
+      ].join('###');
+      const enc = new TextEncoder().encode(raw);
+      const digest = await crypto.subtle.digest('SHA-256', enc);
+      const hash = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
+      localStorage.setItem('mezets_fp', hash);
+      return hash;
+    } catch(e) { return ''; }
+  }
 
-        return {
-            "matches30d": matches, "wins30d": wins, "losses30d": losses,
-            "winRate30d": win_rate, "avgKD30d": avg_kd_30d, "avgHS30d": avg_hs_30d,
+  let banEnforced = false;
+  function enforceBanOverlay(reason) {
+    const overlay = document.getElementById('banOverlay');
+    const reasonLine = document.getElementById('banReasonLine');
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    if (reason) {
+      reasonLine.textContent = 'Причина: ' + reason;
+      reasonLine.style.display = 'block';
+    }
+    if (!banEnforced) {
+      banEnforced = true;
+
+      // Полностью стираем страницу — остаётся только окно бана.
+      // Даже если кто-то уберёт оверлей через консоль, восстанавливать уже нечего.
+      Array.from(document.body.children).forEach(el => {
+        if (el.id !== 'banOverlay' && el.id !== 'banSound') el.remove();
+      });
+
+      const snd = document.getElementById('banSound');
+      if (snd) {
+        snd.currentTime = 0;
+        const playPromise = snd.play();
+        if (playPromise && playPromise.catch) {
+          playPromise.catch(() => {
+            // Браузер заблокировал автовоспроизведение без клика — играем при первом взаимодействии
+            const retry = () => { snd.currentTime = 0; snd.play().catch(()=>{}); };
+            document.addEventListener('click', retry, { once: true });
+            document.addEventListener('keydown', retry, { once: true });
+            document.addEventListener('touchstart', retry, { once: true });
+          });
         }
-    except Exception:
-        return {
-            "matches30d": None, "wins30d": None, "losses30d": None,
-            "winRate30d": None, "avgKD30d": None, "avgHS30d": None,
+      }
+
+      document.addEventListener('keydown', e => {
+        if (e.key === 'F12') e.preventDefault();
+        if (e.ctrlKey && e.shiftKey && ['I','J','C','K'].includes(e.key.toUpperCase())) e.preventDefault();
+        if (e.ctrlKey && e.key.toUpperCase() === 'U') e.preventDefault();
+      }, true);
+      document.addEventListener('contextmenu', e => e.preventDefault(), true);
+
+      const mo = new MutationObserver(() => {
+        const ov = document.getElementById('banOverlay');
+        if (!ov || ov.style.display !== 'flex') {
+          location.reload();
         }
+      });
+      mo.observe(overlay, { attributes: true, attributeFilter: ['style','class'] });
+      mo.observe(document.body, { childList: true });
 
+      setInterval(() => {
+        const ov = document.getElementById('banOverlay');
+        if (ov) { ov.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+      }, 800);
 
-@app.get("/faceit-stats")
-async def faceit_stats(request: Request):
-    now = time.time()
-    debug = request.query_params.get("debug") == "1"
-    if _faceit_cache["data"] and now - _faceit_cache["ts"] < CACHE_TTL and not debug:
-        return _faceit_cache["data"]
-
-    if not FACEIT_API_KEY:
-        return {
-            "elo": None, "level": None, "matches": None,
-            "wins": None, "winRate": None,
-            "error": "FACEIT_API_KEY не задан в Variables на Railway",
+      // Грубая эвристика "открыты ли devtools" (по разнице размеров окна).
+      // Не панацея (можно обойти отстыкованным окном/другим браузером),
+      // но мешает спокойно пользоваться консолью пока активен бан.
+      let ddtWarned = false;
+      setInterval(() => {
+        const wDiff = window.outerWidth  - window.innerWidth;
+        const hDiff = window.outerHeight - window.innerHeight;
+        if (wDiff > 160 || hDiff > 160) {
+          if (!ddtWarned) { ddtWarned = true; }
+          location.reload();
+        } else {
+          ddtWarned = false;
         }
+      }, 1000);
+    }
+  }
 
-    headers = {"Authorization": f"Bearer {FACEIT_API_KEY}"}
+  function hideLoadingGate() {
+    const gate = document.getElementById('loadingGate');
+    if (gate) gate.style.display = 'none';
+  }
 
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        try:
-            player_resp = await client.get(
-                "https://open.faceit.com/data/v4/players",
-                params={"nickname": FACEIT_NICKNAME},
-                headers=headers,
-            )
-            player_resp.raise_for_status()
-            player = player_resp.json()
-            player_id = player.get("player_id")
+  async function checkSiteBanOnLoad() {
+    try {
+      const session = localStorage.getItem('mezets_session') || '';
+      const fp = await getBrowserFingerprintForBan();
+      const params = new URLSearchParams();
+      if (session) params.set('session', session);
+      if (fp) params.set('fp', fp);
+      const res  = await fetch(`${BAN_API}/check-ban?${params.toString()}`, { mode: 'cors' });
+      const data = await res.json();
+      if (data.banned) enforceBanOverlay(data.reason);
+      else hideLoadingGate();
+    } catch(e) {
+      hideLoadingGate(); // бэкенд недоступен — не блокируем сайт всем подряд
+    }
+  }
+  checkSiteBanOnLoad();
+  setInterval(checkSiteBanOnLoad, 60000);
+  setTimeout(hideLoadingGate, 6000);
 
-            game_info = player.get("games", {}).get(FACEIT_GAME, {})
-            elo = game_info.get("faceit_elo")
-            level = game_info.get("skill_level")
+  /* =========================
+     3D НАКЛОН
+  ========================= */
+  function tilt(card) {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width  - 0.5;
+      const y = (e.clientY - r.top)  / r.height - 0.5;
+      card.style.transform = `rotateY(${x*16}deg) rotateX(${-y*16}deg) scale(1.02)`;
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = 'rotateY(0) rotateX(0) scale(1)'; });
+  }
+  tilt(document.getElementById('card1'));
+  tilt(document.getElementById('statsCard'));
 
-            stats_resp = await client.get(
-                f"https://open.faceit.com/data/v4/players/{player_id}/stats/{FACEIT_GAME}",
-                headers=headers,
-            )
-            stats_resp.raise_for_status()
-            lifetime = stats_resp.json().get("lifetime", {})
+  /* =========================
+     ПЕРЕКЛЮЧЕНИЕ ТАБОВ FACEIT / STEAM
+  ========================= */
+  document.querySelectorAll('.stats-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.stats-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.stats-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab === 'faceit' ? 'statsPanelFaceit' : 'statsPanelSteam').classList.add('active');
+    });
+  });
 
-            matches = lifetime.get("Matches")
-            wins = lifetime.get("Wins")
-            win_rate = lifetime.get("Win Rate %")
-            avg_kd = lifetime.get("Average K/D Ratio")
-            avg_hs = lifetime.get("Average Headshots %")
-            longest_streak = lifetime.get("Longest Win Streak")
-            current_streak = lifetime.get("Current Win Streak")
+  /* =========================
+     СТАТИСТИКА FACEIT (через бэкенд)
+  ========================= */
+  const FACEIT_STATS_API = 'https://mez-api.up.railway.app/faceit-stats';
 
-            recent_matches = await _get_faceit_recent_matches(client, player_id, headers)
-            stats_30d = await _get_faceit_30d_stats(client, player_id, headers)
+  let faceitPeriod = 'all';
+  let faceitRecentMatches = [];
 
-            result = {
-                "elo": elo,
-                "level": level,
-                "matches": int(matches) if matches is not None else None,
-                "wins": int(wins) if wins is not None else None,
-                "winRate": float(win_rate) if win_rate is not None else None,
-                "avgKD": float(avg_kd) if avg_kd is not None else None,
-                "avgHS": float(avg_hs) if avg_hs is not None else None,
-                "longestWinStreak": int(longest_streak) if longest_streak is not None else None,
-                "currentWinStreak": int(current_streak) if current_streak is not None else None,
-                "avatar": player.get("avatar") or None,
-                "recentMatches": recent_matches,
-                "nickname": player.get("nickname") or FACEIT_NICKNAME,
-                "profileUrl": f"https://www.faceit.com/ru/players/{FACEIT_NICKNAME}",
-                **stats_30d,
-            }
+  function toggleFaceitPeriod(mode) {
+    faceitPeriod = mode;
+    const allBox = document.getElementById('faceitAllTimeGrid');
+    const monthBox = document.getElementById('faceit30dGrid');
+    const btnAll = document.getElementById('faceitPeriodAllBtn');
+    const btnMonth = document.getElementById('faceitPeriodMonthBtn');
+    if (!allBox || !monthBox) return;
+    allBox.style.display = mode === 'all' ? '' : 'none';
+    monthBox.style.display = mode === '30d' ? '' : 'none';
+    btnAll.classList.toggle('active', mode === 'all');
+    btnMonth.classList.toggle('active', mode === '30d');
+  }
 
-            if debug:
-                result["lifetimeRaw"] = lifetime
-                return result
+  function toggleFaceitMatchDetail(idx) {
+    const panel = document.getElementById('matchDetailPanel');
+    const m = faceitRecentMatches[idx];
+    if (!panel || !m) return;
+    if (panel.dataset.idx === String(idx) && panel.classList.contains('show')) {
+      panel.classList.remove('show');
+      panel.dataset.idx = '';
+      return;
+    }
+    panel.innerHTML = `
+      Карта: <b>${m.map ?? '—'}</b> &nbsp;·&nbsp; Счёт: <b>${m.score ?? '—'}</b><br>
+      K/D/A: <b>${m.kills ?? '—'} / ${m.deaths ?? '—'} / ${m.assists ?? '—'}</b> &nbsp;(K/D ${m.kd ?? '—'})<br>
+      Дата: <b>${m.date ?? '—'}</b>
+    `;
+    panel.classList.add('show');
+    panel.dataset.idx = String(idx);
+  }
 
-            _faceit_cache["data"] = result
-            _faceit_cache["ts"] = now
-            return result
+  async function loadFaceitStats() {
+    const el = document.getElementById('faceitContent');
+    try {
+      const res = await fetch(FACEIT_STATS_API, { mode: 'cors' });
+      if (!res.ok) throw new Error('bad status ' + res.status);
+      const d = await res.json();
 
-        except Exception as e:
-            return {
-                "elo": None, "level": None, "matches": None,
-                "wins": None, "winRate": None,
-                "error": str(e),
-            }
+      const matches = d.matches ?? null;
+      const wins = d.wins ?? null;
+      const losses = (matches !== null && wins !== null) ? (matches - wins) : null;
+      const winRate = d.winRate ?? (matches && wins != null ? Math.round((wins / matches) * 1000) / 10 : null);
 
+      if (d.avatar) {
+        document.getElementById('faceitAvatarImg').src = d.avatar;
+        document.getElementById('faceitAvatarWrap').style.visibility = 'visible';
+      }
+      if (d.nickname) {
+        document.getElementById('faceitNickname').textContent = d.nickname;
+      }
 
-async def _resolve_steamid(client: httpx.AsyncClient):
-    if _steam_cache["steamid"]:
-        return _steam_cache["steamid"]
-    resp = await client.get(
-        "https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/",
-        params={"key": STEAM_API_KEY, "vanityurl": STEAM_VANITY},
-    )
-    resp.raise_for_status()
-    data = resp.json().get("response", {})
-    if data.get("success") == 1:
-        _steam_cache["steamid"] = data["steamid"]
-        return data["steamid"]
-    return None
+      faceitRecentMatches = d.recentMatches || [];
 
+      let formHtml = '';
+      if (faceitRecentMatches.length) {
+        const dots = faceitRecentMatches.map((m, idx) => {
+          const cls = m.result === 'W' ? 'win' : 'loss';
+          return `<div class="form-dot ${cls}" onclick="toggleFaceitMatchDetail(${idx})">${m.result}</div>`;
+        }).join('');
+        formHtml = `
+          <div class="form-row">${dots}</div>
+          <div class="form-label">ПОСЛЕДНИЕ МАТЧИ · нажми на матч</div>
+          <div class="match-detail" id="matchDetailPanel"></div>
+        `;
+      }
 
-@app.get("/steam-stats")
-async def steam_stats(request: Request):
-    now = time.time()
-    debug = request.query_params.get("debug") == "1"
-    if _steam_cache["data"] and now - _steam_cache["ts"] < STEAM_CACHE_TTL and not debug:
-        return _steam_cache["data"]
+      el.innerHTML = `
+        <div class="elo-big">${d.elo ?? '—'}<span class="elo-tag">ELO</span></div>
+        <div class="elo-sub">${d.level ? 'Уровень ' + d.level : ''}</div>
+        ${formHtml}
+        <div class="period-toggle">
+          <button type="button" class="period-btn ${faceitPeriod === 'all' ? 'active' : ''}" id="faceitPeriodAllBtn" onclick="toggleFaceitPeriod('all')">ЗА ВСЁ ВРЕМЯ</button>
+          <button type="button" class="period-btn ${faceitPeriod === '30d' ? 'active' : ''}" id="faceitPeriodMonthBtn" onclick="toggleFaceitPeriod('30d')">ЗА 30 ДНЕЙ</button>
+        </div>
+        <div class="stat-grid" id="faceitAllTimeGrid" style="display:${faceitPeriod === 'all' ? '' : 'none'};">
+          <div class="stat-box"><div class="stat-value">${winRate ?? '—'}%</div><div class="stat-label">WIN RATE</div></div>
+          <div class="stat-box"><div class="stat-value">${matches ?? '—'}</div><div class="stat-label">МАТЧЕЙ</div></div>
+          <div class="stat-box"><div class="stat-value">${wins ?? '—'}</div><div class="stat-label">ПОБЕД</div></div>
+          <div class="stat-box"><div class="stat-value">${losses ?? '—'}</div><div class="stat-label">ПОРАЖЕНИЙ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.avgKD ?? '—'}</div><div class="stat-label">СРЕДНИЙ K/D</div></div>
+          <div class="stat-box"><div class="stat-value">${d.avgHS ?? '—'}%</div><div class="stat-label">СРЕДНИЙ HS%</div></div>
+          <div class="stat-box"><div class="stat-value">${d.currentWinStreak ?? '—'}</div><div class="stat-label">ТЕКУЩАЯ СЕРИЯ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.longestWinStreak ?? '—'}</div><div class="stat-label">ЛУЧШАЯ СЕРИЯ</div></div>
+        </div>
+        <div class="stat-grid" id="faceit30dGrid" style="display:${faceitPeriod === '30d' ? '' : 'none'};">
+          <div class="stat-box"><div class="stat-value">${d.matches30d ?? '—'}</div><div class="stat-label">МАТЧЕЙ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.winRate30d ?? '—'}%</div><div class="stat-label">WIN RATE</div></div>
+          <div class="stat-box"><div class="stat-value">${d.wins30d ?? '—'}</div><div class="stat-label">ПОБЕД</div></div>
+          <div class="stat-box"><div class="stat-value">${d.losses30d ?? '—'}</div><div class="stat-label">ПОРАЖЕНИЙ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.avgKD30d ?? '—'}</div><div class="stat-label">СРЕДНИЙ K/D</div></div>
+          <div class="stat-box"><div class="stat-value">${d.avgHS30d ?? '—'}%</div><div class="stat-label">СРЕДНИЙ HS%</div></div>
+        </div>
+      `;
+    } catch (e) {
+      el.innerHTML = '<div class="stats-error">Не удалось загрузить статистику Faceit</div>';
+    }
+  }
+  loadFaceitStats();
+  setInterval(loadFaceitStats, 5 * 60 * 1000);
 
-    if not STEAM_API_KEY:
-        return {"error": "STEAM_API_KEY не задан в Variables на Railway"}
+  /* =========================
+     СТАТИСТИКА STEAM (через бэкенд)
+  ========================= */
+  const STEAM_STATS_API = 'https://mez-api.up.railway.app/steam-stats';
 
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        try:
-            steamid = await _resolve_steamid(client)
-            if not steamid:
-                return {"error": "не удалось определить SteamID по vanity url"}
+  async function loadSteamStats() {
+    const el = document.getElementById('steamContent');
+    try {
+      const res = await fetch(STEAM_STATS_API, { mode: 'cors' });
+      if (!res.ok) throw new Error('bad status ' + res.status);
+      const d = await res.json();
+      if (d.error) throw new Error(d.error);
 
-            summary_resp = await client.get(
-                "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/",
-                params={"key": STEAM_API_KEY, "steamids": steamid},
-            )
-            summary_resp.raise_for_status()
-            players = summary_resp.json().get("response", {}).get("players", [])
-            player = players[0] if players else {}
+      if (d.avatar) {
+        document.getElementById('steamAvatarImg').src = d.avatar;
+        document.getElementById('steamAvatarWrap').style.visibility = 'visible';
+      }
+      if (d.personaName) {
+        document.getElementById('steamNickname').textContent = d.personaName;
+      }
 
-            cs2_playtime = None
-            dota_playtime = None
-            cs2_icon = None
-            dota_icon = None
-            library_count = None
-            total_hours_all = None
-            hours_2weeks_total = None
-            current_game_icon = None
-            recent_games = []
-            played = []
-            try:
-                games_resp = await client.get(
-                    "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/",
-                    params={
-                        "key": STEAM_API_KEY,
-                        "steamid": steamid,
-                        "include_appinfo": 1,
-                        "include_played_free_games": 1,  # иначе бесплатные Dota 2 / CS2 могут не попасть в список
-                    },
-                )
-                games_resp.raise_for_status()
-                games = games_resp.json().get("response", {}).get("games", [])
-                library_count = len(games)
-                total_hours_all = round(sum(g.get("playtime_forever", 0) for g in games) / 60, 1)
-                hours_2weeks_total = round(sum(g.get("playtime_2weeks", 0) for g in games) / 60, 1)
+      const dot = document.getElementById('steamStatusDot');
+      dot.className = 'status-dot ' + (
+        d.currentGame ? 'status-ingame' :
+        d.statusCode === 1 ? 'status-online' :
+        (d.statusCode >= 2 && d.statusCode <= 6) ? 'status-away' :
+        'status-offline'
+      );
 
-                current_game_id_raw = player.get("gameid")
-                current_game_id = int(current_game_id_raw) if current_game_id_raw else None
+      const currentGameHtml = d.currentGame
+        ? `<div class="current-game">${d.currentGameIcon ? `<img class="current-game-icon" src="${d.currentGameIcon}" alt="">` : ''}Играет в: ${d.currentGame}</div>`
+        : '';
 
-                for g in games:
-                    icon_hash = g.get("img_icon_url")
-                    icon_url = (
-                        f"https://media.steampowered.com/steamcommunity/public/images/apps/{g.get('appid')}/{icon_hash}.jpg"
-                        if icon_hash else None
-                    )
-                    if g.get("appid") == CS2_APPID:
-                        cs2_playtime = g.get("playtime_forever")
-                        cs2_icon = icon_url
-                    if g.get("appid") == DOTA_APPID:
-                        dota_playtime = g.get("playtime_forever")
-                        dota_icon = icon_url
-                    if current_game_id and g.get("appid") == current_game_id:
-                        current_game_icon = icon_url
+      const gameHoursHtml = `
+        <div class="recent-games-label">ЧАСЫ В ИГРАХ</div>
+        <div class="recent-games">
+          <div class="recent-game-row">
+            ${d.cs2Icon ? `<img class="recent-game-icon" src="${d.cs2Icon}" alt="CS2">` : ''}
+            <div class="recent-game-name">Counter-Strike 2</div>
+            <div class="recent-game-hours">${d.cs2HoursTotal ?? '—'} ч</div>
+          </div>
+          <div class="recent-game-row">
+            ${d.dotaIcon ? `<img class="recent-game-icon" src="${d.dotaIcon}" alt="Dota 2">` : ''}
+            <div class="recent-game-name">Dota 2</div>
+            <div class="recent-game-hours">${d.dotaHoursTotal ?? '—'} ч</div>
+          </div>
+        </div>
+      `;
 
-                # "Последний запуск" — как на странице активности Steam: сортировка по rtime_last_played
-                played = [g for g in games if g.get("rtime_last_played")]
-                played.sort(key=lambda g: g.get("rtime_last_played", 0), reverse=True)
-                for g in played[:3]:
-                    icon_hash = g.get("img_icon_url")
-                    icon = (
-                        f"https://media.steampowered.com/steamcommunity/public/images/apps/{g.get('appid')}/{icon_hash}.jpg"
-                        if icon_hash else None
-                    )
-                    last_played_dt = datetime.fromtimestamp(g.get("rtime_last_played"), tz=timezone.utc)
-                    recent_games.append({
-                        "name": g.get("name"),
-                        "icon": icon,
-                        "hoursTotal": round(g.get("playtime_forever", 0) / 60, 1),
-                        "lastPlayed": last_played_dt.strftime("%d.%m.%Y"),
-                    })
-            except Exception:
-                pass  # профиль с играми может быть приватным — просто не покажем часы/список
+      let recentGamesHtml = '';
+      if (d.recentGames && d.recentGames.length) {
+        const rows = d.recentGames.map(g => `
+          <div class="recent-game-row">
+            ${g.icon ? `<img class="recent-game-icon" src="${g.icon}" alt="">` : ''}
+            <div class="recent-game-name">${g.name ?? '—'}</div>
+            <div class="recent-game-meta">
+              <div class="recent-game-hours">${g.hoursTotal ?? '—'} ч</div>
+              <div class="recent-game-date">${g.lastPlayed ? 'запуск: ' + g.lastPlayed : ''}</div>
+            </div>
+          </div>
+        `).join('');
+        recentGamesHtml = `<div class="recent-games-label">ПОСЛЕДНИЙ ЗАПУСК</div><div class="recent-games">${rows}</div>`;
+      }
 
-            # Резервный путь: если Dota 2 не отдалась через GetOwnedGames (бывает с
-            # бесплатными играми без "настоящей" лицензии в аккаунте), пробуем достать
-            # её часы через список недавно запущенных игр.
-            if dota_playtime is None or cs2_playtime is None:
-                try:
-                    fallback_resp = await client.get(
-                        "https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/",
-                        params={"key": STEAM_API_KEY, "steamid": steamid, "count": 0},
-                    )
-                    fallback_resp.raise_for_status()
-                    fallback_games = fallback_resp.json().get("response", {}).get("games", [])
-                    for g in fallback_games:
-                        icon_hash = g.get("img_icon_url")
-                        icon_url = (
-                            f"https://media.steampowered.com/steamcommunity/public/images/apps/{g.get('appid')}/{icon_hash}.jpg"
-                            if icon_hash else None
-                        )
-                        if g.get("appid") == DOTA_APPID and dota_playtime is None:
-                            dota_playtime = g.get("playtime_forever")
-                            dota_icon = dota_icon or icon_url
-                        if g.get("appid") == CS2_APPID and cs2_playtime is None:
-                            cs2_playtime = g.get("playtime_forever")
-                            cs2_icon = cs2_icon or icon_url
-                except Exception:
-                    pass
+      el.innerHTML = `
+        ${currentGameHtml}
+        <div class="stat-grid">
+          <div class="stat-box"><div class="stat-value">${d.level ?? '—'}</div><div class="stat-label">УРОВЕНЬ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.libraryCount ?? '—'}</div><div class="stat-label">ИГР В БИБЛИОТЕКЕ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.totalHoursAll ?? '—'}</div><div class="stat-label">ВСЕГО ЧАСОВ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.hours2WeeksTotal ?? '—'}</div><div class="stat-label">ЗА 2 НЕДЕЛИ</div></div>
+        </div>
+        ${gameHoursHtml}
+        ${recentGamesHtml}
+      `;
+    } catch (e) {
+      el.innerHTML = '<div class="stats-error">Не удалось загрузить статистику Steam</div>';
+    }
+  }
+  loadSteamStats();
+  setInterval(loadSteamStats, 5 * 60 * 1000);
 
-            level = None
-            try:
-                level_resp = await client.get(
-                    "https://api.steampowered.com/IPlayerService/GetSteamLevel/v1/",
-                    params={"key": STEAM_API_KEY, "steamid": steamid},
-                )
-                level_resp.raise_for_status()
-                level = level_resp.json().get("response", {}).get("player_level")
-            except Exception:
-                pass
+  /* =========================
+     ЧАСТИЦЫ
+  ========================= */
+  const canvas = document.getElementById('bg');
+  const ctx    = canvas.getContext('2d');
+  function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+  resize(); addEventListener('resize', resize);
+  let dots = [];
+  function initDots() {
+    dots = [];
+    const n = Math.round((innerWidth * innerHeight) / 9000);
+    for (let i = 0; i < n; i++) dots.push({
+      x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+      r: Math.random()*1.3+0.3, dx:(Math.random()-.5)*.15, dy:(Math.random()-.5)*.15
+    });
+  }
+  initDots(); addEventListener('resize', initDots);
+  const noMotion = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  function animate() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for (let d of dots) {
+      ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,0,0,0.6)'; ctx.fill();
+      d.x+=d.dx; d.y+=d.dy;
+      if(d.x<0)d.x=canvas.width; if(d.x>canvas.width)d.x=0;
+      if(d.y<0)d.y=canvas.height; if(d.y>canvas.height)d.y=0;
+    }
+    requestAnimationFrame(animate);
+  }
+  if (!noMotion) animate();
+  else for (let d of dots) { ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,Math.PI*2); ctx.fillStyle='rgba(255,0,0,0.6)'; ctx.fill(); }
 
-            status_code = player.get("personastate", 0)
-            current_game = player.get("gameextrainfo")  # есть только если сейчас реально в игре
-
-            result = {
-                "personaName": player.get("personaname"),
-                "avatar": player.get("avatarfull"),
-                "statusCode": status_code,
-                "currentGame": current_game,
-                "currentGameIcon": current_game_icon,
-                "level": level,
-                "cs2HoursTotal": round(cs2_playtime / 60, 1) if cs2_playtime is not None else None,
-                "dotaHoursTotal": round(dota_playtime / 60, 1) if dota_playtime is not None else None,
-                "cs2Icon": cs2_icon,
-                "dotaIcon": dota_icon,
-                "libraryCount": library_count,
-                "totalHoursAll": total_hours_all,
-                "hours2WeeksTotal": hours_2weeks_total,
-                "recentGames": recent_games,
-                "profileUrl": player.get("profileurl"),
-            }
-
-            if debug:
-                result["gamesRawTop"] = [
-                    {
-                        "appid": g.get("appid"),
-                        "name": g.get("name"),
-                        "rtime_last_played": g.get("rtime_last_played"),
-                        "playtime_forever": g.get("playtime_forever"),
-                    }
-                    for g in played[:10]
-                ]
-                return result
-
-            _steam_cache["data"] = result
-            _steam_cache["ts"] = now
-            return result
-
-        except Exception as e:
-            return {"error": str(e)}
+</script>
+</body>
+</html>
