@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mezets</title>
   <link rel="icon" href="favicon.png">
@@ -66,7 +67,7 @@
     }
 
     .card {
-      width: 360px;
+      width: 400px;
       padding: 30px 26px;
       border-radius: 22px;
       background: rgba(255,0,0,0.05);
@@ -535,7 +536,7 @@
             <div class="recent-game-name">${g.name ?? '—'}</div>
             <div class="recent-game-meta">
               <div class="recent-game-hours">${g.hoursTotal ?? '—'} ч</div>
-              <div class="recent-game-date">${g.lastPlayed ?? ''}</div>
+              <div class="recent-game-date">${g.lastPlayed ? 'запуск: ' + g.lastPlayed : ''}</div>
             </div>
           </div>
         `).join('');
