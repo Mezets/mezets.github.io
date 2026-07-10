@@ -136,12 +136,16 @@
       width: 18px; height: 18px; border-radius: 50%;
       border: 3px solid #0a0000; box-shadow: 0 0 6px rgba(0,0,0,0.5);
     }
-    .status-online   { background: #3ddc71; }
-    .status-ingame   { background: #4aa3ff; }
+    .status-online   { background: #4aa3ff; }
+    .status-ingame   { background: #3ddc71; }
     .status-away     { background: #f5a623; }
     .status-offline  { background: #555; }
 
-    .current-game { text-align: center; font-size: 9px; color: #4aa3ff; margin: -6px 0 14px; line-height: 1.6; }
+    .current-game {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      text-align: center; font-size: 9px; color: #3ddc71; margin: -6px 0 14px; line-height: 1.6;
+    }
+    .current-game-icon { width: 16px; height: 16px; border-radius: 3px; }
 
     .form-row { display: flex; justify-content: center; gap: 6px; margin: 12px 0 4px; }
     .form-dot {
@@ -451,6 +455,13 @@
           <div class="stat-box"><div class="stat-value">${d.currentWinStreak ?? '—'}</div><div class="stat-label">ТЕКУЩАЯ СЕРИЯ</div></div>
           <div class="stat-box"><div class="stat-value">${d.longestWinStreak ?? '—'}</div><div class="stat-label">ЛУЧШАЯ СЕРИЯ</div></div>
         </div>
+        <div class="recent-games-label">ЗА ПОСЛЕДНИЕ 30 ДНЕЙ</div>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="stat-value">${d.matches30d ?? '—'}</div><div class="stat-label">МАТЧЕЙ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.winRate30d ?? '—'}%</div><div class="stat-label">WIN RATE</div></div>
+          <div class="stat-box"><div class="stat-value">${d.wins30d ?? '—'}</div><div class="stat-label">ПОБЕД</div></div>
+          <div class="stat-box"><div class="stat-value">${d.losses30d ?? '—'}</div><div class="stat-label">ПОРАЖЕНИЙ</div></div>
+        </div>
       `;
     } catch (e) {
       el.innerHTML = '<div class="stats-error">Не удалось загрузить статистику Faceit</div>';
@@ -489,7 +500,7 @@
       );
 
       const currentGameHtml = d.currentGame
-        ? `<div class="current-game">Играет в: ${d.currentGame}</div>`
+        ? `<div class="current-game">${d.currentGameIcon ? `<img class="current-game-icon" src="${d.currentGameIcon}" alt="">` : ''}Играет в: ${d.currentGame}</div>`
         : '';
 
       const gameHoursHtml = `
@@ -528,8 +539,8 @@
             <div class="stat-label">УРОВЕНЬ / ИГР В БИБЛИОТЕКЕ</div>
           </div>
           <div class="stat-box wide">
-            <div class="stat-value">${d.totalHoursAll ?? '—'}</div>
-            <div class="stat-label">ВСЕГО ЧАСОВ В STEAM</div>
+            <div class="stat-value">${d.totalHoursAll ?? '—'}<span class="stat-divider">/</span>${d.hours2WeeksTotal ?? '—'}</div>
+            <div class="stat-label">ВСЕГО ЧАСОВ / ЗА 2 НЕДЕЛИ</div>
           </div>
         </div>
         ${gameHoursHtml}
