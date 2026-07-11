@@ -148,7 +148,7 @@
     }
     .current-game-icon { width: 16px; height: 16px; border-radius: 3px; }
 
-    .form-row { display: flex; justify-content: center; gap: 6px; margin: 8px 0 4px; }
+    .form-row { display: flex; justify-content: center; gap: 6px; margin: 4px 0 4px; }
     .form-dot {
       width: 22px; height: 22px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
@@ -202,7 +202,7 @@
     .recent-game-date { font-size: 7px; color: #ff8080; opacity: .6; }
     .elo-tag { font-size: 13px; color: #ff8080; margin-left: 8px; letter-spacing: 1px; vertical-align: middle; }
 
-    .streak-row { display: flex; justify-content: center; margin: 2px 0 14px; }
+    .streak-row { display: flex; justify-content: center; margin: 2px 0 6px; }
     .streak-badge {
       display: flex; align-items: center; gap: 6px; cursor: pointer;
       font-size: 20px; filter: grayscale(1) opacity(0.35);
@@ -655,7 +655,7 @@
             <div class="recent-game-name">${g.name ?? '—'}</div>
             <div class="recent-game-meta">
               <div class="recent-game-hours">${g.hoursTotal ?? '—'} ч</div>
-              <div class="recent-game-date">${g.lastPlayed ? 'запуск: ' + g.lastPlayed : ''}</div>
+              <div class="recent-game-date" style="${g.lastPlayed === 'сейчас в игре' ? 'color:#3ddc71;opacity:1;' : ''}">${g.lastPlayed === 'сейчас в игре' ? '🟢 сейчас в игре' : (g.lastPlayed ? 'запуск: ' + g.lastPlayed : '')}</div>
             </div>
           </div>
         `).join('');
