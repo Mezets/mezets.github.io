@@ -159,11 +159,14 @@
     .form-dot { cursor: pointer; transition: transform .15s; }
     .form-dot:hover { transform: scale(1.15); }
     .match-detail {
-      display: none; margin: 4px 0 14px; padding: 10px;
-      background: rgba(255,0,0,0.07); border: 1px solid rgba(255,0,0,0.25);
-      border-radius: 10px;
+      max-height: 0; opacity: 0; overflow: hidden; margin: 0; padding: 0 2px;
+      border-radius: 10px; border: 1px solid transparent; background: transparent;
+      transition: max-height .32s ease, opacity .25s ease, margin .32s ease, padding .32s ease, border-color .25s ease, background .25s ease;
     }
-    .match-detail.show { display: block; }
+    .match-detail.show {
+      max-height: 200px; opacity: 1; margin: 4px 0 14px; padding: 10px;
+      background: rgba(255,0,0,0.07); border-color: rgba(255,0,0,0.25);
+    }
     .match-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .match-stat-box { background: rgba(255,0,0,0.06); border: 1px solid rgba(255,0,0,0.18); border-radius: 8px; padding: 8px 6px; text-align: center; }
     .match-stat-value { font-size: 11px; color: #ff3b3b; margin-bottom: 5px; }
@@ -210,11 +213,15 @@
     .streak-count { font-family: 'Press Start 2P', monospace; font-size: 13px; color: #ff8080; }
     .streak-badge.lit .streak-count { color: #ffb347; }
     .streak-detail {
-      display: none; margin: 0 0 14px; padding: 10px 12px; text-align: center;
-      background: rgba(255,0,0,0.07); border: 1px solid rgba(255,0,0,0.25);
-      border-radius: 10px; font-size: 8px; color: #ff8080; line-height: 1.9;
+      max-height: 0; opacity: 0; overflow: hidden; margin: 0; padding: 0 2px; text-align: center;
+      border-radius: 10px; border: 1px solid transparent; background: transparent;
+      font-size: 8px; color: #ff8080; line-height: 1.9;
+      transition: max-height .32s ease, opacity .25s ease, margin .32s ease, padding .32s ease, border-color .25s ease, background .25s ease;
     }
-    .streak-detail.show { display: block; }
+    .streak-detail.show {
+      max-height: 100px; opacity: 1; margin: 0 0 14px; padding: 10px 12px;
+      background: rgba(255,0,0,0.07); border-color: rgba(255,0,0,0.25);
+    }
     .streak-detail b { color: #ff3b3b; }
     .recent-games-label { font-size: 7px; color: #ff8080; opacity: .8; letter-spacing: .5px; margin: 16px 0 8px; text-align: center; }
 
@@ -503,12 +510,16 @@
       panel.dataset.idx = '';
       return;
     }
+    const eloText = m.eloChange != null
+      ? (Number(m.eloChange) > 0 ? '+' + m.eloChange : String(m.eloChange))
+      : (m.result === 'W' ? '—' : '—');
     panel.innerHTML = `
       <div class="match-stat-grid">
         <div class="match-stat-box"><div class="match-stat-value">${formatFaceitMapName(m.map)}</div><div class="match-stat-label">КАРТА</div></div>
         <div class="match-stat-box"><div class="match-stat-value">${m.score ?? '—'}</div><div class="match-stat-label">СЧЁТ</div></div>
         <div class="match-stat-box"><div class="match-stat-value">${m.kills ?? '—'}/${m.deaths ?? '—'}/${m.assists ?? '—'}</div><div class="match-stat-label">K / D / A</div></div>
         <div class="match-stat-box"><div class="match-stat-value">${m.date ?? '—'}</div><div class="match-stat-label">ДАТА</div></div>
+        <div class="match-stat-box" style="grid-column: span 2;"><div class="match-stat-value" style="color:${m.result === 'W' ? '#3ddc71' : '#ff3b3b'}">${eloText}</div><div class="match-stat-label">ИЗМЕНЕНИЕ ELO</div></div>
       </div>
     `;
     panel.classList.add('show');
