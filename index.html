@@ -510,16 +510,12 @@
       panel.dataset.idx = '';
       return;
     }
-    const eloText = m.eloChange != null
-      ? (Number(m.eloChange) > 0 ? '+' + m.eloChange : String(m.eloChange))
-      : (m.result === 'W' ? '—' : '—');
     panel.innerHTML = `
       <div class="match-stat-grid">
         <div class="match-stat-box"><div class="match-stat-value">${formatFaceitMapName(m.map)}</div><div class="match-stat-label">КАРТА</div></div>
         <div class="match-stat-box"><div class="match-stat-value">${m.score ?? '—'}</div><div class="match-stat-label">СЧЁТ</div></div>
         <div class="match-stat-box"><div class="match-stat-value">${m.kills ?? '—'}/${m.deaths ?? '—'}/${m.assists ?? '—'}</div><div class="match-stat-label">K / D / A</div></div>
         <div class="match-stat-box"><div class="match-stat-value">${m.date ?? '—'}</div><div class="match-stat-label">ДАТА</div></div>
-        <div class="match-stat-box" style="grid-column: span 2;"><div class="match-stat-value" style="color:${m.result === 'W' ? '#3ddc71' : '#ff3b3b'}">${eloText}</div><div class="match-stat-label">ИЗМЕНЕНИЕ ELO</div></div>
       </div>
     `;
     panel.classList.add('show');
@@ -556,7 +552,7 @@
         }).join('');
         formHtml = `
           <div class="form-row">${dots}</div>
-          <div class="form-label">ПОСЛЕДНИЕ МАТЧИ · нажми на матч</div>
+          <div class="form-label">ПОСЛЕДНИЕ МАТЧИ</div>
           <div class="match-detail" id="matchDetailPanel"></div>
         `;
       }
