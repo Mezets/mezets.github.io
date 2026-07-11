@@ -79,10 +79,40 @@
       transform-style: preserve-3d;
       will-change: transform;
       cursor: default;
+      position: relative;
     }
     .card:hover { border-color: rgba(255,0,0,0.4); box-shadow: 0 0 56px rgba(255,0,0,0.2); }
 
-    #statsCard { width: 420px; }
+    #statsCard {
+      width: 420px; position: relative;
+      transition: width .4s ease, opacity .35s ease, padding .4s ease, margin .4s ease, border-width .4s ease;
+      overflow: hidden;
+    }
+    #statsCard.collapsed {
+      width: 0 !important; min-width: 0; padding: 0 !important;
+      border-width: 0; opacity: 0; pointer-events: none;
+    }
+
+    .card-collapse-btn {
+      position: absolute; top: 12px; right: 12px;
+      width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: #ff8080; background: rgba(255,0,0,0.08); border: 1px solid rgba(255,0,0,0.25);
+      border-radius: 6px; cursor: pointer; transition: .2s; z-index: 5;
+    }
+    .card-collapse-btn:hover { color: #ff3b3b; border-color: rgba(255,0,0,0.5); }
+
+    #expandStatsBtn {
+      display: none; align-items: center; justify-content: center;
+      position: absolute; top: 12px; right: 12px;
+      width: 28px; height: 28px;
+      font-size: 15px; line-height: 1;
+      color: #ff3b3b; background: rgba(255,0,0,0.08); border: 1px solid rgba(255,0,0,0.3);
+      border-radius: 8px; cursor: pointer;
+      opacity: 0; transform: scale(.85);
+      transition: opacity .3s ease, transform .3s ease, border-color .2s, box-shadow .2s;
+    }
+    #expandStatsBtn.show { display: flex; opacity: 1; transform: scale(1); }
+    #expandStatsBtn:hover { border-color: rgba(255,0,0,0.6); box-shadow: 0 0 14px rgba(255,0,0,0.25); }
     .stats-body { display: grid; }
     .stat-box.wide { grid-column: span 2; }
     .stat-divider { color: #ff8080; opacity: .5; margin: 0 6px; font-size: 14px; }
@@ -108,7 +138,7 @@
     .btn:hover::before { left: 120%; }
     .btn:hover { transform: scale(1.04); border-color: rgba(255,0,0,0.5); }
 
-    .stats-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+    .stats-tabs { display: flex; gap: 8px; margin: 0 32px 12px 0; }
     .stats-tab {
       flex: 1; padding: 12px 6px; text-align: center;
       font-family: 'Press Start 2P', monospace; font-size: 9px; letter-spacing: .5px;
@@ -262,6 +292,7 @@
 
   <!-- КАРТОЧКА СО ССЫЛКАМИ -->
   <div class="card" id="card1">
+    <div id="expandStatsBtn" onclick="expandStatsCard()">⤢</div>
     <div class="avatar-wrap">
       <img src="avatar.png" class="avatar" alt="Mezets">
     </div>
@@ -274,6 +305,7 @@
 
   <!-- КАРТОЧКА СО СТАТИСТИКОЙ (FACEIT / STEAM ПЕРЕКЛЮЧАЮТСЯ ТАБАМИ) -->
   <div class="card" id="statsCard">
+    <div class="card-collapse-btn" onclick="collapseStatsCard()" title="Свернуть">✕</div>
     <div class="stats-tabs">
       <button class="stats-tab active" data-tab="faceit" type="button">FACEIT</button>
       <button class="stats-tab" data-tab="steam" type="button">STEAM</button>
@@ -721,5 +753,51 @@
   else for (let d of dots) { ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,Math.PI*2); ctx.fillStyle='rgba(255,0,0,0.6)'; ctx.fill(); }
 
 </script>
+
+<script>
+  function setStatsCookie(value) {
+    const d = new Date();
+    d.setTime(d.getTime() + 365 * 24 * 60 * 60 * 1000);
+    document.cookie = `statsCollapsed=${value};expires=${d.toUTCString()};path=/`;
+  }
+  function getStatsCookie() {
+    const match = document.cookie.match(/(?:^|; )statsCollapsed=([^;]*)/);
+    return match ? match[1] : null;
+  }
+
+  function collapseStatsCard() {
+    const card = document.getElementById('statsCard');
+    card.classList.add('collapsed');
+    document.getElementById('expandStatsBtn').classList.add('show');
+    setTimeout(() => { card.style.display = 'none'; }, 420);
+    setStatsCookie('1');
+  }
+  function expandStatsCard() {
+    const card = document.getElementById('statsCard');
+    card.style.display = '';
+    void card.offsetWidth; // форсируем reflow, чтобы анимация ширины сработала
+    card.classList.remove('collapsed');
+    document.getElementById('expandStatsBtn').classList.remove('show');
+    setStatsCookie('0');
+  }
+
+  // Восстанавливаем состояние свёрнутости из куки при загрузке — без анимации, чтобы не мигало
+  (function restoreStatsCollapsedState() {
+    if (getStatsCookie() === '1') {
+      const card = document.getElementById('statsCard');
+      const btn = document.getElementById('expandStatsBtn');
+      card.style.transition = 'none';
+      card.classList.add('collapsed');
+      card.style.display = 'none';
+      btn.style.transition = 'none';
+      btn.classList.add('show');
+      requestAnimationFrame(() => {
+        card.style.transition = '';
+        btn.style.transition = '';
+      });
+    }
+  })();
+</script>
+
 </body>
 </html>
