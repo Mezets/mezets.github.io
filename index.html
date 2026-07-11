@@ -156,8 +156,10 @@
     }
     .form-dot.win  { background: rgba(61,220,113,0.15); color: #3ddc71; border: 1px solid rgba(61,220,113,0.4); }
     .form-dot.loss { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.4); }
-    .form-dot { cursor: pointer; transition: transform .15s; }
+    .form-dot { cursor: pointer; transition: transform .15s, box-shadow .2s; }
     .form-dot:hover { transform: scale(1.15); }
+    .form-dot.selected.win  { background: rgba(61,220,113,0.4); box-shadow: 0 0 10px rgba(61,220,113,0.7); transform: scale(1.15); }
+    .form-dot.selected.loss { background: rgba(255,59,59,0.4); box-shadow: 0 0 10px rgba(255,59,59,0.7); transform: scale(1.15); }
     .match-detail {
       max-height: 0; opacity: 0; overflow: hidden; margin: 0; padding: 0 2px;
       border-radius: 10px; border: 1px solid transparent; background: transparent;
@@ -505,11 +507,18 @@
     const panel = document.getElementById('matchDetailPanel');
     const m = faceitRecentMatches[idx];
     if (!panel || !m) return;
+
+    document.querySelectorAll('.form-dot').forEach(dot => dot.classList.remove('selected'));
+
     if (panel.dataset.idx === String(idx) && panel.classList.contains('show')) {
       panel.classList.remove('show');
       panel.dataset.idx = '';
       return;
     }
+
+    const dotEl = document.getElementById('formDot' + idx);
+    if (dotEl) dotEl.classList.add('selected');
+
     panel.innerHTML = `
       <div class="match-stat-grid">
         <div class="match-stat-box"><div class="match-stat-value">${formatFaceitMapName(m.map)}</div><div class="match-stat-label">КАРТА</div></div>
@@ -548,7 +557,7 @@
       if (faceitRecentMatches.length) {
         const dots = faceitRecentMatches.map((m, idx) => {
           const cls = m.result === 'W' ? 'win' : 'loss';
-          return `<div class="form-dot ${cls}" onclick="toggleFaceitMatchDetail(${idx})">${m.result}</div>`;
+          return `<div class="form-dot ${cls}" id="formDot${idx}" onclick="toggleFaceitMatchDetail(${idx})">${m.result}</div>`;
         }).join('');
         formHtml = `
           <div class="form-row">${dots}</div>
@@ -592,7 +601,7 @@
         </div>
       `;
     } catch (e) {
-      el.innerHTML = '<div class="stats-error">Не удалось загрузить статистику Faceit</div>';
+      el.innerHTML = '<div class="stats-error">Не удалось загрузить статистику Faceit.<br>Попробуйте включить VPN или другие средства обхода блокировок.</div>';
     }
   }
   loadFaceitStats();
@@ -673,7 +682,7 @@
         ${recentGamesHtml}
       `;
     } catch (e) {
-      el.innerHTML = '<div class="stats-error">Не удалось загрузить статистику Steam</div>';
+      el.innerHTML = '<div class="stats-error">Не удалось загрузить статистику Steam.<br>Попробуйте включить VPN или другие средства обхода блокировок.</div>';
     }
   }
   loadSteamStats();
