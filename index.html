@@ -159,12 +159,15 @@
     .form-dot { cursor: pointer; transition: transform .15s; }
     .form-dot:hover { transform: scale(1.15); }
     .match-detail {
-      display: none; margin: 4px 0 14px; padding: 10px 12px;
+      display: none; margin: 4px 0 14px; padding: 10px;
       background: rgba(255,0,0,0.07); border: 1px solid rgba(255,0,0,0.25);
-      border-radius: 10px; font-size: 8px; color: #ff8080; line-height: 1.9; text-align: center;
+      border-radius: 10px;
     }
     .match-detail.show { display: block; }
-    .match-detail b { color: #ff3b3b; }
+    .match-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .match-stat-box { background: rgba(255,0,0,0.06); border: 1px solid rgba(255,0,0,0.18); border-radius: 8px; padding: 8px 6px; text-align: center; }
+    .match-stat-value { font-size: 11px; color: #ff3b3b; margin-bottom: 5px; }
+    .match-stat-label { font-size: 6px; color: #ff8080; opacity: .8; letter-spacing: .4px; line-height: 1.4; }
 
     .period-toggle { display: flex; gap: 8px; margin: 4px 0 14px; }
     .period-btn {
@@ -195,6 +198,24 @@
     }
     .recent-game-date { font-size: 7px; color: #ff8080; opacity: .6; }
     .elo-tag { font-size: 13px; color: #ff8080; margin-left: 8px; letter-spacing: 1px; vertical-align: middle; }
+
+    .streak-row { display: flex; justify-content: center; margin: 2px 0 14px; }
+    .streak-badge {
+      display: flex; align-items: center; gap: 6px; cursor: pointer;
+      font-size: 20px; filter: grayscale(1) opacity(0.35);
+      transition: filter .2s, transform .15s; user-select: none;
+    }
+    .streak-badge.lit { filter: none; opacity: 1; text-shadow: 0 0 10px rgba(255,140,0,0.7); }
+    .streak-badge:hover { transform: scale(1.08); }
+    .streak-count { font-family: 'Press Start 2P', monospace; font-size: 13px; color: #ff8080; }
+    .streak-badge.lit .streak-count { color: #ffb347; }
+    .streak-detail {
+      display: none; margin: 0 0 14px; padding: 10px 12px; text-align: center;
+      background: rgba(255,0,0,0.07); border: 1px solid rgba(255,0,0,0.25);
+      border-radius: 10px; font-size: 8px; color: #ff8080; line-height: 1.9;
+    }
+    .streak-detail.show { display: block; }
+    .streak-detail b { color: #ff3b3b; }
     .recent-games-label { font-size: 7px; color: #ff8080; opacity: .8; letter-spacing: .5px; margin: 16px 0 8px; text-align: center; }
 
     @media (prefers-reduced-motion: reduce) { .fluff-1, .fluff-2 { animation: none; } }
@@ -454,6 +475,25 @@
     btnMonth.classList.toggle('active', mode === '30d');
   }
 
+  let faceitStreakData = { current: null, longest: null };
+
+  function toggleFaceitStreakDetail() {
+    const panel = document.getElementById('streakDetailPanel');
+    if (!panel) return;
+    if (panel.classList.contains('show')) {
+      panel.classList.remove('show');
+      return;
+    }
+    panel.innerHTML = `Текущая серия: <b>${faceitStreakData.current ?? '—'}</b> &nbsp;·&nbsp; Максимальная серия: <b>${faceitStreakData.longest ?? '—'}</b>`;
+    panel.classList.add('show');
+  }
+
+  function formatFaceitMapName(rawMap) {
+    if (!rawMap) return '—';
+    const short = rawMap.replace(/^(de|cs|aim|arena)_/i, '');
+    return short.charAt(0).toUpperCase() + short.slice(1);
+  }
+
   function toggleFaceitMatchDetail(idx) {
     const panel = document.getElementById('matchDetailPanel');
     const m = faceitRecentMatches[idx];
@@ -464,9 +504,12 @@
       return;
     }
     panel.innerHTML = `
-      Карта: <b>${m.map ?? '—'}</b> &nbsp;·&nbsp; Счёт: <b>${m.score ?? '—'}</b><br>
-      K/D/A: <b>${m.kills ?? '—'} / ${m.deaths ?? '—'} / ${m.assists ?? '—'}</b> &nbsp;(K/D ${m.kd ?? '—'})<br>
-      Дата: <b>${m.date ?? '—'}</b>
+      <div class="match-stat-grid">
+        <div class="match-stat-box"><div class="match-stat-value">${formatFaceitMapName(m.map)}</div><div class="match-stat-label">КАРТА</div></div>
+        <div class="match-stat-box"><div class="match-stat-value">${m.score ?? '—'}</div><div class="match-stat-label">СЧЁТ (Я / СОПЕРНИК)</div></div>
+        <div class="match-stat-box"><div class="match-stat-value">${m.kills ?? '—'}/${m.deaths ?? '—'}/${m.assists ?? '—'}</div><div class="match-stat-label">K / D / A</div></div>
+        <div class="match-stat-box"><div class="match-stat-value">${m.date ?? '—'}</div><div class="match-stat-label">ДАТА</div></div>
+      </div>
     `;
     panel.classList.add('show');
     panel.dataset.idx = String(idx);
@@ -507,9 +550,18 @@
         `;
       }
 
+      faceitStreakData = { current: d.currentWinStreak, longest: d.longestWinStreak };
+      const streakLit = d.currentWinStreak && d.currentWinStreak > 0;
+
       el.innerHTML = `
         <div class="elo-big">${d.elo ?? '—'}<span class="elo-tag">ELO</span></div>
         <div class="elo-sub">${d.level ? 'Уровень ' + d.level : ''}</div>
+        <div class="streak-row">
+          <div class="streak-badge ${streakLit ? 'lit' : ''}" onclick="toggleFaceitStreakDetail()">
+            🔥${streakLit ? `<span class="streak-count">${d.currentWinStreak}</span>` : ''}
+          </div>
+        </div>
+        <div class="streak-detail" id="streakDetailPanel"></div>
         ${formHtml}
         <div class="period-toggle">
           <button type="button" class="period-btn ${faceitPeriod === 'all' ? 'active' : ''}" id="faceitPeriodAllBtn" onclick="toggleFaceitPeriod('all')">ЗА ВСЁ ВРЕМЯ</button>
@@ -522,8 +574,6 @@
           <div class="stat-box"><div class="stat-value">${losses ?? '—'}</div><div class="stat-label">ПОРАЖЕНИЙ</div></div>
           <div class="stat-box"><div class="stat-value">${d.avgKD ?? '—'}</div><div class="stat-label">СРЕДНИЙ K/D</div></div>
           <div class="stat-box"><div class="stat-value">${d.avgHS ?? '—'}%</div><div class="stat-label">СРЕДНИЙ HS%</div></div>
-          <div class="stat-box"><div class="stat-value">${d.currentWinStreak ?? '—'}</div><div class="stat-label">ТЕКУЩАЯ СЕРИЯ</div></div>
-          <div class="stat-box"><div class="stat-value">${d.longestWinStreak ?? '—'}</div><div class="stat-label">ЛУЧШАЯ СЕРИЯ</div></div>
         </div>
         <div class="stat-grid" id="faceit30dGrid" style="display:${faceitPeriod === '30d' ? '' : 'none'};">
           <div class="stat-box"><div class="stat-value">${d.matches30d ?? '—'}</div><div class="stat-label">МАТЧЕЙ</div></div>
