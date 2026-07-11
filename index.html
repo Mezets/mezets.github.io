@@ -506,7 +506,7 @@
     panel.innerHTML = `
       <div class="match-stat-grid">
         <div class="match-stat-box"><div class="match-stat-value">${formatFaceitMapName(m.map)}</div><div class="match-stat-label">КАРТА</div></div>
-        <div class="match-stat-box"><div class="match-stat-value">${m.score ?? '—'}</div><div class="match-stat-label">СЧЁТ (Я / СОПЕРНИК)</div></div>
+        <div class="match-stat-box"><div class="match-stat-value">${m.score ?? '—'}</div><div class="match-stat-label">СЧЁТ</div></div>
         <div class="match-stat-box"><div class="match-stat-value">${m.kills ?? '—'}/${m.deaths ?? '—'}/${m.assists ?? '—'}</div><div class="match-stat-label">K / D / A</div></div>
         <div class="match-stat-box"><div class="match-stat-value">${m.date ?? '—'}</div><div class="match-stat-label">ДАТА</div></div>
       </div>
@@ -661,7 +661,7 @@
           <div class="stat-box"><div class="stat-value">${d.level ?? '—'}</div><div class="stat-label">УРОВЕНЬ</div></div>
           <div class="stat-box"><div class="stat-value">${d.libraryCount ?? '—'}</div><div class="stat-label">ИГР В БИБЛИОТЕКЕ</div></div>
           <div class="stat-box"><div class="stat-value">${d.totalHoursAll ?? '—'}</div><div class="stat-label">ВСЕГО ЧАСОВ</div></div>
-          <div class="stat-box"><div class="stat-value">${d.hours2WeeksTotal ?? '—'}</div><div class="stat-label">ЗА 2 НЕДЕЛИ</div></div>
+          <div class="stat-box"><div class="stat-value">${d.hours2WeeksTotal ?? '—'}</div><div class="stat-label">ЧАСЫ ЗА 2 НЕДЕЛИ</div></div>
         </div>
         ${gameHoursHtml}
         ${recentGamesHtml}
