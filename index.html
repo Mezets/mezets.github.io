@@ -350,26 +350,46 @@
     try {
       const cached = localStorage.getItem('mezets_fp');
       if (cached) return cached;
-      let canvasHash = '';
-      try {
-        const c = document.createElement('canvas');
-        const cx = c.getContext('2d');
-        cx.textBaseline = 'top';
-        cx.font = "14px 'Arial'";
-        cx.fillText('mezets-fp-🔥', 2, 2);
-        canvasHash = c.toDataURL();
-      } catch(e) {}
-      const raw = [
-        navigator.userAgent, navigator.language, navigator.hardwareConcurrency || '',
-        navigator.deviceMemory || '', screen.width + 'x' + screen.height + 'x' + screen.colorDepth,
-        Intl.DateTimeFormat().resolvedOptions().timeZone, canvasHash
-      ].join('###');
-      const enc = new TextEncoder().encode(raw);
-      const digest = await crypto.subtle.digest('SHA-256', enc);
-      const hash = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
-      localStorage.setItem('mezets_fp', hash);
-      return hash;
-    } catch(e) { return ''; }
+    } catch(e) {}
+
+    let canvasHash = '';
+    try {
+      const c = document.createElement('canvas');
+      const cx = c.getContext('2d');
+      cx.textBaseline = 'top';
+      cx.font = "14px 'Arial'";
+      cx.fillText('mezets-fp-🔥', 2, 2);
+      canvasHash = c.toDataURL();
+    } catch(e) {}
+
+    const raw = [
+      navigator.userAgent, navigator.language, navigator.hardwareConcurrency || '',
+      navigator.deviceMemory || '', screen.width + 'x' + screen.height + 'x' + screen.colorDepth,
+      (Intl.DateTimeFormat().resolvedOptions().timeZone) || '', canvasHash
+    ].join('###');
+
+    let hash = '';
+    try {
+      if (window.crypto && crypto.subtle && crypto.subtle.digest) {
+        const enc = new TextEncoder().encode(raw);
+        const digest = await crypto.subtle.digest('SHA-256', enc);
+        hash = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
+      }
+    } catch(e) {}
+
+    if (!hash) {
+      // Web Crypto недоступен (встроенные браузеры, приватные режимы и т.п.) —
+      // считаем синхронный запасной хэш (FNV-1a), чтобы fingerprint не был пустым
+      let h = 0x811c9dc5;
+      for (let i = 0; i < raw.length; i++) {
+        h ^= raw.charCodeAt(i);
+        h = Math.imul(h, 0x01000193);
+      }
+      hash = 'fnv' + (h >>> 0).toString(16);
+    }
+
+    try { localStorage.setItem('mezets_fp', hash); } catch(e) {}
+    return hash;
   }
 
   let banEnforced = false;
@@ -450,9 +470,9 @@
   }
 
   async function checkSiteBanOnLoad() {
+    const session = localStorage.getItem('mezets_session') || '';
+    const fp = await getBrowserFingerprintForBan();
     try {
-      const session = localStorage.getItem('mezets_session') || '';
-      const fp = await getBrowserFingerprintForBan();
       const params = new URLSearchParams();
       if (session) params.set('session', session);
       if (fp) params.set('fp', fp);
@@ -463,6 +483,11 @@
     } catch(e) {
       hideLoadingGate(); // бэкенд недоступен — не блокируем сайт всем подряд
     }
+    // Трекинг визита для гостей без Discord-логина (IP, fingerprint, браузер/ОС, геолокация).
+    // Бэкенд сам пропустит этот визит, если сессия авторизована.
+    try {
+      await fetch(`${BAN_API}/track-visit?fp=${encodeURIComponent(fp)}&session=${encodeURIComponent(session)}`, { mode: 'cors' });
+    } catch(e) {}
   }
   checkSiteBanOnLoad();
   setInterval(checkSiteBanOnLoad, 60000);
