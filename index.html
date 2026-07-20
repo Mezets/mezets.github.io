@@ -339,13 +339,10 @@
 
 </div>
 
-<script src="/mezets.design/common.js"></script>
+<script src="https://mezets.design/common.js"></script>
 <script>
 
 
-  /* =========================
-     3D НАКЛОН
-  ========================= */
   function tilt(card) {
     card.addEventListener('mousemove', e => {
       const r = card.getBoundingClientRect();
@@ -358,9 +355,6 @@
   tilt(document.getElementById('card1'));
   tilt(document.getElementById('statsCard'));
 
-  /* =========================
-     ПЕРЕКЛЮЧЕНИЕ ТАБОВ FACEIT / STEAM
-  ========================= */
   document.querySelectorAll('.stats-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.stats-tab').forEach(b => b.classList.remove('active'));
@@ -370,9 +364,6 @@
     });
   });
 
-  /* =========================
-     СТАТИСТИКА FACEIT (через бэкенд)
-  ========================= */
   const FACEIT_STATS_API = 'https://mez-api-42.up.railway.app/faceit-stats';
 
   let faceitPeriod = 'all';
@@ -514,9 +505,6 @@
   loadFaceitStats();
   setInterval(loadFaceitStats, 5 * 60 * 1000);
 
-  /* =========================
-     СТАТИСТИКА STEAM (через бэкенд)
-  ========================= */
   const STEAM_STATS_API = 'https://mez-api-42.up.railway.app/steam-stats';
 
   async function loadSteamStats() {
@@ -595,9 +583,6 @@
   loadSteamStats();
   setInterval(loadSteamStats, 5 * 60 * 1000);
 
-  /* =========================
-     ЧАСТИЦЫ
-  ========================= */
   const canvas = document.getElementById('bg');
   const ctx    = canvas.getContext('2d');
   function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
@@ -650,13 +635,12 @@
   function expandStatsCard() {
     const card = document.getElementById('statsCard');
     card.style.display = '';
-    void card.offsetWidth; // форсируем reflow, чтобы анимация ширины сработала
+    void card.offsetWidth; 
     card.classList.remove('collapsed');
     document.getElementById('expandStatsBtn').classList.remove('show');
     setStatsCookie('0');
   }
 
-  // Восстанавливаем состояние свёрнутости из куки при загрузке — без анимации, чтобы не мигало
   (function restoreStatsCollapsedState() {
     if (getStatsCookie() === '1') {
       const card = document.getElementById('statsCard');
