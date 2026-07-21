@@ -339,7 +339,13 @@
 
 </div>
 
-<script src="https://mezets.design/common.js"></script>
+<script>
+  setTimeout(function () {
+    var g = document.getElementById('loadingGate');
+    if (g) g.style.display = 'none';
+  }, 8000);
+</script>
+<script src="/mezets.design/common.js" onerror="var g=document.getElementById('loadingGate'); if(g) g.style.display='none';"></script>
 <script>
 
 
@@ -635,7 +641,7 @@
   function expandStatsCard() {
     const card = document.getElementById('statsCard');
     card.style.display = '';
-    void card.offsetWidth; 
+    void card.offsetWidth; // форсируем reflow, чтобы анимация ширины сработала
     card.classList.remove('collapsed');
     document.getElementById('expandStatsBtn').classList.remove('show');
     setStatsCookie('0');
